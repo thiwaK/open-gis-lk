@@ -13,7 +13,7 @@
     "dev": "hugo server --disableFastRender --gc",
     "dev:fast": "hugo server --gc",
     "dev:preview": "npm run dev -- --buildDrafts --buildFuture",
-    "build": "hugo --minify --cleanDestinationDir --gc -b https://thiwak.github.io/open-gis-lk/",
+    "build": "hugo --minify --cleanDestinationDir --gc --environment production -b https://thiwak.github.io/open-gis-lk/",
     "renderToDisk": "hugo server --disableFastRender --gc --renderToDisk --cleanDestinationDir",
     "renderToDisk:preview": "npm run renderToDisk -- --buildDrafts --buildFuture",
     "rednerToDisk:production": "npm run renderToDisk -- --minify --environment production"
