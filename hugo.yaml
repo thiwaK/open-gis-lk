@@ -20,11 +20,7 @@ defaultContentLanguage: en
 #     - "HTML"
 #     - "RSS"
 
-# services:
-#   googleAnalytics:
-#     id: G-5YETP2LVL4
-#   disqus:
-#     shortname: your-disqus-shortname
+
 
 
 
@@ -59,6 +55,13 @@ languages:
 params:
   description: "An open-source platform for geospatial data in Sri Lanka."
 
+  services:
+    GoogleAnalytics:
+      enable: true
+      id: G-5YETP2LVL4
+  #   disqus:
+  #     shortname: your-disqus-shortname
+  
   bootstrap:
     enable: true
 
