@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="{{ .Site.Language.Lang }}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta http-equiv="Accept-CH" content="DPR, Viewport-Width, Width">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <!-- SEO Meta Tags -->
+    <meta name="author" content="{{ .Site.Params.Author.name | default "Site Author" }}" />
+    <meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}" />
+    <meta name="robots" content="index, follow" />
+
+    <title>{{- if .Title -}}{{ .Title }}{{- end -}}</title>
+    
+    {{- if .IsHome }}
+    <link rel="canonical" href="{{ .Site.BaseURL }}" />
+    {{- else }}
+    <link rel="canonical" href="{{ .Permalink }}" />
+    {{- end -}}
+
+    <!-- Favicon -->
+    <link rel="icon" href="{{ "favicon.ico" | relURL }}" type="image/x-icon" />
+
+    <!-- Multilingual hreflang support -->
+    {{ range .AllTranslations -}}
+    <link rel="alternate" hreflang="{{ .Lang }}" href="{{ .Permalink }}" />
+    {{ end }}
+
+    <!-- bootstrap -->
+    {{- if .Site.Params.bootstrap.enable -}}{{ partial "libsass" "scss/main.scss" }}{{- end -}}
+
+    <!-- fontawsome  -->
+    {{/*  {{- partial "libsass" "scss/fontawesome.scss" -}}  */}}
+
+    <!-- main  -->
+    {{/*  {{ $src := resources.Get "css/all.min.css" }}
+    {{ with $src | fingerprint "sha384" }}
+        <link rel="stylesheet" href="{{ .Permalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous">
+    {{ end }}  */}}
+
+
+    <!-- Internal templates -->
+    {{/*  {{ template "_internal/google_analytics.html" . }}
+    {{ template "_internal/opengraph.html" . }}
+    {{ template "_internal/twitter_cards.html" . }}  */}}
+
+    <!-- Custom head -->
+    {{ block "extra_head" . }}{{ end }}
+  </head>
+
+  <body class="light">
+    <!-- Site header -->
+    {{ partial "header.html" . }}
+
+    <!-- Main content -->
+    <main class="container py-4">
+      {{ block "main" . }}{{ end }}
+    </main>
+
+    <!-- Site footer -->
+    {{ partial "footer.html" . }}
+
+    <!-- Scripts -->
+    {{- if (eq .Site.Params.bootstrap.enable true) }}
+        {{ $bootstrapSrc := "js/bootstrap.bundle.min.js" | relURL }}
+        {{ $integrity := .Site.Data.integrity_hashes.bootstrap_bundle.integrity }}
+        <script src="{{ $bootstrapSrc }}" integrity="{{ $integrity }}" crossorigin="anonymous"></script>
+    {{- end -}}
+
+    <!-- Custom scripts -->
+    {{ block "scripts" . }}{{ end }}
+  </body>
+</html>

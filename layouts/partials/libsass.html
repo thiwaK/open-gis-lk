@@ -1,0 +1,29 @@
+{{- $src := resources.Get . -}}
+
+{{ $targetPath := . }}
+{{ if and (hasPrefix $targetPath (or "scss/" "sass/")) (strings.HasSuffix $targetPath (or ".scss"  ".sass" )) }}
+    {{ $targetPath = substr $targetPath 5 -5 }}
+    {{ $targetPath = printf "css/%s.css" $targetPath}}
+{{ end }}
+
+{{- $cssOpts := (dict "transpiler" "libsass" "targetPath" $targetPath "outputStyle" "compressed" "includePaths" (slice "node_modules")) -}}
+{{- $postOpts := (dict "config" "config/postcss.config.js") -}}
+{{- if eq hugo.Environment "development" -}}
+    {{- $postOpts := (dict "config" "config/postcss.config.js") -}}
+    {{- $cssOpts = (dict "transpiler" "libsass" "targetPath" $targetPath "enableSourceMap" true "includePaths" (slice "node_modules")) -}}
+{{- end -}}
+
+
+
+{{- if eq hugo.Environment "development" -}}
+    {{- $src = $src | toCSS $cssOpts | fingerprint "sha384" -}}
+{{- else -}}
+    {{- $src = $src | toCSS $cssOpts | postCSS $postOpts | minify | fingerprint "sha384" -}}
+{{- end -}}
+
+<link rel="stylesheet" href="{{- $src.Permalink | relURL -}}" integrity="{{- $src.Data.Integrity -}}" crossorigin="anonymous">
+
+
+{{/*  {{ with $src | fingerprint "sha384" }}
+    <link rel="stylesheet" href="{{ .Permalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous">
+{{ end }}  */}}

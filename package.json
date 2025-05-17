@@ -1,0 +1,21 @@
+{
+  "dependencies": {
+    "autoprefixer": "^10.4.21",
+    "bootstrap": "^5.3.3",
+    "postcss": "^8.5.3",
+    "postcss-cli": "^11.0.1",
+    "postcss-import": "^16.1.0"
+  },
+  "name": "open-gis-lk",
+  "version": "1.0b",
+  "description": "An open-source platform for geospatial data in Sri Lanka.",
+  "scripts": {
+    "dev": "hugo server --disableFastRender --gc",
+    "dev:fast": "hugo server --gc",
+    "dev:preview": "npm run dev -- --buildDrafts --buildFuture",
+    "build": "hugo --minify --cleanDestinationDir --gc",
+    "renderToDisk": "hugo server --disableFastRender --gc --renderToDisk --cleanDestinationDir",
+    "renderToDisk:preview": "npm run renderToDisk -- --buildDrafts --buildFuture",
+    "rednerToDisk:production": "npm run renderToDisk -- --minify --environment production"
+  }
+}
