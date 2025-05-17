@@ -53,18 +53,31 @@
     {{ partial "header.html" . }}
 
     <!-- Main content -->
-    <main class="container py-4">
+    <main class="container-fluid">
       {{ block "main" . }}{{ end }}
     </main>
 
     <!-- Site footer -->
     {{ partial "footer.html" . }}
 
-    <!-- Scripts -->
+    <!-- Bootstrap -->
     {{- if (eq .Site.Params.bootstrap.enable true) }}
-        {{ $bootstrapSrc := "js/bootstrap.bundle.min.js" | relURL }}
-        {{ $integrity := .Site.Data.integrity_hashes.bootstrap_bundle.integrity }}
-        <script src="{{ $bootstrapSrc }}" integrity="{{ $integrity }}" crossorigin="anonymous"></script>
+      {{ with resources.Get "js/bs.js" }}
+        {{$opts := dict
+          "minify" (not hugo.IsDevelopment)
+          "sourceMap" (cond hugo.IsDevelopment "external" "")
+          "targetPath" "js/bs.js"
+        }}
+        {{ with . | js.Build $opts }}
+          {{ if hugo.IsDevelopment }}
+            <script src="{{ .RelPermalink }}"></script>
+          {{ else }}
+            {{ with . | fingerprint }}
+              <script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous"></script>
+            {{ end }}
+          {{ end }}
+        {{ end }}
+      {{ end }}
     {{- end -}}
 
     <!-- Custom scripts -->
