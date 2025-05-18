@@ -27,7 +27,7 @@
     {{ end }}
 
     <!-- bootstrap -->
-    {{- if .Site.Params.bootstrap.enable -}}{{ partial "libsass" "scss/main.scss" }}{{- end -}}
+    {{ partial "libsass" "scss/main.scss" }}
 
     <!-- fontawsome  -->
     {{/*  {{- partial "libsass" "scss/fontawesome.scss" -}}  */}}
@@ -38,47 +38,38 @@
         <link rel="stylesheet" href="{{ .Permalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous">
     {{ end }}  */}}
 
-
-    <!-- Internal templates -->
-    {{/*  {{ template "_internal/google_analytics.html" . }}
-    {{ template "_internal/opengraph.html" . }}
-    {{ template "_internal/twitter_cards.html" . }}  */}}
-
     <!-- Custom head -->
     {{ block "extra_head" . }}{{ end }}
   </head>
 
-  <body class="light">
+  <body class="light m-0 p-0">
     <!-- Site header -->
     {{ partial "header.html" . }}
 
     <!-- Main content -->
-    <main class="container-fluid">
-      {{ block "main" . }}{{ end }}
-    </main>
+    {{ block "main" . }}{{ end }}
 
     <!-- Site footer -->
     {{ partial "footer.html" . }}
 
-    <!-- Bootstrap -->
-    {{- if (eq .Site.Params.bootstrap.enable true) }}
-      {{ with resources.Get "js/bs.js" }}
-        {{$opts := dict
-          "minify" (not hugo.IsDevelopment)
-          "sourceMap" (cond hugo.IsDevelopment "external" "")
-          "targetPath" "js/bs.js"
-        }}
-        {{ with . | js.Build $opts }}
-          {{ if hugo.IsDevelopment }}
-            <script src="{{ .RelPermalink }}"></script>
-          {{ else }}
-            {{ with . | fingerprint }}
-              <script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous"></script>
-            {{ end }}
+    <!-- Main JS -->
+    {{ with resources.Get "js/main.js" }}
+      {{$opts := dict
+        "minify" (not hugo.IsDevelopment)
+        "sourceMap" (cond hugo.IsDevelopment "external" "")
+        "targetPath" "js/main.js"
+      }}
+      {{ with . | js.Build $opts }}
+        {{ if hugo.IsDevelopment }}
+          <script src="{{ .RelPermalink }}"></script>
+        {{ else }}
+          {{ with . | fingerprint }}
+            <script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous"></script>
           {{ end }}
         {{ end }}
       {{ end }}
-    {{- end -}}
+    {{ end }}
+
 
     <!-- Custom scripts -->
     {{ block "scripts" . }}{{ end }}
