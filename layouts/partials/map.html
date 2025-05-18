@@ -1,0 +1,38 @@
+<div class="d-flex">
+    <!-- map view -->
+    <div id="map" class="d-none" style="width: 100%; height: 100vh;"></div>
+
+    <!-- webgl warn -->
+    <div id="webgl-warning" class="d-none d-flex justify-content-center py-5">
+        <div class="card text-danger border-danger bg-danger-subtle text-danger-emphasis">
+            <div class="card-header align-content-between justify-content-center fs-5">
+            <i class="fa-solid fa-exclamation-triangle-fill"></i> Error
+            </div>
+            <div class="card-body">
+            <h5 class="card-title">WebGL is not supported or is disabled in your browser</h5>
+            <p class="card-text">Please enable it or switch to a compatible browser.</p>
+            {{/*  <a href="#" class="btn btn-danger bg-danger-emphasis">OK</a>  */}}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- map script -->
+{{ with resources.Get "js/map.js" }}
+    {{$opts := dict
+        "minify" (not hugo.IsDevelopment)
+        "sourceMap" (cond hugo.IsDevelopment "external" "")
+        "targetPath" "js/map.js"
+    }}
+    {{ with . | js.Build $opts }}
+        {{ if hugo.IsDevelopment }}
+            <script src="{{ .RelPermalink }}"></script>
+        {{ else }}
+            {{ with . | fingerprint }}
+                <script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" crossorigin="anonymous"></script>
+            {{ end }}
+        {{ end }}
+    {{ end }}
+{{ end }}

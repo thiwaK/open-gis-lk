@@ -61,9 +61,6 @@ params:
       id: G-5YETP2LVL4
   #   disqus:
   #     shortname: your-disqus-shortname
-  
-  bootstrap:
-    enable: true
 
   author:
     name: "Thiwanka Munasinghe"
