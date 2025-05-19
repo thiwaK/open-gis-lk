@@ -1,0 +1,136 @@
+<style>
+  /* Dropdown menu styling */
+#province-dropdown {
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  max-height: 250px;
+  overflow-y: auto;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-item label input {
+  margin-right: 5px;
+}
+
+/* Dropdown item spacing and alignment */
+#province-dropdown .dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 0.3rem 0.5rem;
+  gap: 0.5rem;
+  border-radius: 0.375rem;
+  transition: background-color 0.2s ease-in-out;
+}
+
+#province-dropdown .dropdown-item:hover {
+  background-color: #f1f1f1;
+}
+
+/* Checkbox style refinement */
+#province-dropdown .form-check-input {
+  margin: 0;
+  cursor: pointer;
+}
+
+#province-dropdown .form-check-label {
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  user-select: none;
+  white-space: normal;
+}
+
+/* Button style */
+#provinceDropdownBtn {
+  background-color: #f8f9fa;
+  border: 1px solid #ced4da;
+  border-radius: 0.375rem;
+  padding: 0.5rem 1rem;
+  text-align: left;
+  width: 100%;
+}
+
+#provinceDropdownBtn:focus {
+  box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.25);
+}
+
+/* Text appearance */
+#provinceDropdownText {
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+</style>
+
+<div id="extent-select" class="collapse card">
+    <div class="card-body">
+      <div class="container py-5">
+        <h2 class="mb-4">Select Geographic Extent - Sri Lanka</h2>
+
+        <!-- Search Bar -->
+        {{/*  <div class="mb-4">
+          <label for="areaSearch" class="form-label">Search Area</label>
+          <input type="text" class="form-control" id="areaSearch" placeholder="Search Province, District, DSD, or GND">
+        </div>  */}}
+
+        <!-- Hierarchical Dropdowns -->
+        <form id="geoForm">
+          <div class="row g-3 mb-3">
+            
+
+            <div class="col-md-3">
+              <label for="province" class="form-label">Province</label>
+              <button type="button" id="provinceDropdownBtn" class="btn btn-outline-secondary dropdown-toggle w-100"
+                data-bs-toggle="dropdown" aria-expanded="false">
+                <span id="provinceDropdownText">None selected</span>
+              </button>
+
+              <ul id="province-dropdown" class="dropdown-menu" style="">
+                <!-- Will be populated by JS -->
+              </ul>
+            </div>
+
+            <div class="col-md-3">
+              <label for="district" class="form-label">District</label>
+              <select class="form-select " id="district">
+                <option selected disabled>Choose...</option>
+                <!-- Populate dynamically -->
+              </select>
+            </div>
+
+            <div class="col-md-3">
+              <label for="dsd" class="form-label">DS Division</label>
+              <select class="form-select" id="dsd">
+                <option selected disabled>Choose...</option>
+                <!-- Populate dynamically -->
+              </select>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-4">
+              <label for="gnd" class="form-label">GN Division</label>
+              <select class="form-select selectpicker" id="gnd">
+                <option selected disabled>Choose...</option>
+                <!-- Populate dynamically -->
+              </select>
+            </div>
+          </div>
+
+          <button class="btn btn-outline-secondary mt-3 float-end"
+            type="submit"
+            data-bs-toggle="collapse"
+            data-bs-target="#extent-select"
+            aria-expanded="true"
+            aria-controls="extent-select">
+          Save
+        </button>
+        </form>
+      </div>
+      
+    </div>
+</div>
+  
+
