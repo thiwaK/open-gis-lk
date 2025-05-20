@@ -26,14 +26,17 @@ module:
       target: "static/css/fonts"
     - source: "node_modules/bootstrap-icons/font/bootstrap-icons.min.css"
       target: "static/css/bootstrap-icons.min.css"
-    - source: "node_modules/pako/dist/pako.min.js"
-      target: "static/js/pako.min.js"
+    # - source: "node_modules/pako/dist/pako.min.js"
+    #   target: "static/js/pako.min.js"
     - source: "node_modules/bootstrap-select/dist/css/bootstrap-select.min.css"
       target: "static/css/bootstrap-select.min.css"
-    - source: "node_modules/bootstrap-select/dist/js/bootstrap-select.min.js"
-      target: "static/js/bootstrap-select.min.js"
-    - source: "node_modules/alasql/dist/alasql.min.js"
-      target: "static/js/alasql.min.js"
+    # - source: "node_modules/bootstrap-select/dist/js/bootstrap-select.min.js"
+    #   target: "static/js/bootstrap-select.min.js"
+    # - source: "node_modules/alasql/dist/alasql.min.js"
+    #   target: "static/js/alasql.min.js"
+    - source: "static"
+      target: "static"
+
 
 
 

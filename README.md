@@ -8,3 +8,4 @@ This open-source web portal brings together geospatial data related to Sri Lanka
 - Relocate "WebGL is not supported" dialog to screen center
 - Add loading placeholders for components
 - Add bottom status bar
+- Hints or help tips for main elements
