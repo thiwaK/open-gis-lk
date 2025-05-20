@@ -1,23 +1,6 @@
 import * as bootstrap from 'bootstrap';
-// import alasql from 'alasql';
-
-
 import './map';
-// import { sql_districts, sql_dsd, sql_gnd } from './data.js';
 
-// alasql("CREATE TABLE province (code INT, name_en STRING, name_si STRING, name_ta STRING)");
-// alasql("INSERT INTO province VALUES (1, 'Western', 'බස්නාහිර', 'மேல்')");
-// alasql("INSERT INTO province VALUES (2, 'Central', 'මධ්‍යම', 'மத்திய')");
-// alasql("INSERT INTO province VALUES (3, 'Southern', 'දකුණු', 'தென்')");
-// alasql("INSERT INTO province VALUES (4, 'North Western', 'වයඹ', 'வட மேல்')");
-// alasql("INSERT INTO province VALUES (5, 'Sabaragamuwa', 'සබරගමුව', 'சபரகமுவ')");
-// alasql("INSERT INTO province VALUES (6, 'Eastern', 'නැගෙනහිර', 'கிழக்கு')");
-// alasql("INSERT INTO province VALUES (7, 'Uva', 'ඌව', 'ஊவா')");
-// alasql("INSERT INTO province VALUES (8, 'North Central', 'උතුරු මැද', 'வட மத்திய')");
-// alasql("INSERT INTO province VALUES (9, 'Northern', 'උතුරු', 'வட')");
-// alasql(sql_districts);
-// alasql(sql_dsd);
-// alasql(sql_gnd);
 
 
 function fetchData(url){
@@ -58,7 +41,8 @@ function populateDropdownsSQL(elementID, tableName, language){
     });
 }
 
-async function loadAndParseCSV(url, elementID, lang, code="code", name="name_en") {
+async function loadAndParseCSV(url, elementID, lang, idKey, idList, code="code", name="name_en") {
+
 
     const select = document.getElementById(elementID);
     let csvText = localStorage.getItem(url);
@@ -72,15 +56,16 @@ async function loadAndParseCSV(url, elementID, lang, code="code", name="name_en"
         header: true,
         complete: function(results) {
             let rows;
-
             if (lang == 'en'){
-                rows = results.data.map(record => ({
-                    code: record[code],
-                    name_en: record[name]
-                }));
+                rows = results.data
+                    .filter(record => record[code] && idList.includes(String(record[idKey])))
+                    .map(record => ({
+                        code: record[code],
+                        name_en: record[name]
+                    }));
             }
-        
 
+            console.log(rows);
             rows.forEach(row => {
                 const li = document.createElement("li");
                 li.className = "dropdown-item";
@@ -104,11 +89,40 @@ async function loadAndParseCSV(url, elementID, lang, code="code", name="name_en"
     });
 }
 
-loadAndParseCSV('data/province.csv', 'province-dropdown', 'en', "prov_code", "prov_name")
-loadAndParseCSV('data/district.csv', 'district-dropdown', 'en', "dist_code", "dist_name")
-loadAndParseCSV('data/dsd.csv', 'dsd-dropdown', 'en', "dsd_code", "dsd_name")
+loadAndParseCSV(
+    'data/province.csv', 
+    'province-dropdown', 
+    'en', 
+    "prov_code", ['1','2','3','4','5','6','7','8','9'],
+    "prov_code", "prov_name"
+)
+document.querySelectorAll('#province-dropdown input[type="checkbox"]').forEach(checkbox => {
+    checkbox.addEventListener('change', function () {
+        const checked = Array.from(
+            document.querySelectorAll('#province-dropdown input[type="checkbox"]:checked')
+        ).map(cb => cb.value);
+        loadAndParseCSV('data/district.csv', 'district-dropdown', 'en', "prov_code", checked, "dist_code", "dist_name")
+        
+        document.querySelectorAll('#district-dropdown input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function () {
+                const checked = Array.from(
+                    document.querySelectorAll('#district-dropdown input[type="checkbox"]:checked')
+                ).map(cb => cb.value);
+                loadAndParseCSV('data/dsd.csv', 'dsd-dropdown', 'en', "dist_code", checked, "dsd_code", "dsd_name")
+            
+            
+                document.querySelectorAll('#dsd-dropdown input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.addEventListener('change', function () {
+                        const checked = Array.from(
+                            document.querySelectorAll('#dsd-dropdown input[type="checkbox"]:checked')
+                        ).map(cb => cb.value);
+                        loadAndParseCSV('data/gnd.csv', 'gnd-dropdown', 'en', "dsd_code", checked, "gnd_code", "gnd_name")
+                    });
+                });
+            
+            });
+        });
+    
+    });
+});
 
-// populateDropdowns('province-dropdown', 'province', 'en')
-// populateDropdowns('district-dropdown', 'district', 'en')
-// populateDropdowns('dsd-dropdown', 'dsd', 'en')
-// populateDropdowns('gnd-dropdown', 'gnd', 'en')

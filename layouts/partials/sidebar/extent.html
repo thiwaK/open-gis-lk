@@ -1,85 +1,87 @@
-
 <!-- Overlay -->
 <div id="overlay" class="overlay" onclick="closePanelExtent()"></div>
 
- <!-- Slide-in Panel -->
-  <div id="sidePanelExtent" class="slide-in p-4">
+<!-- Slide-in Panel -->
+<div id="sidePanelExtent" class="slide-in p-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
-      <h5 class="mb-0">Extent Selector</h5>
-      <button class="close-btn" onclick="closePanelExtent()">&times;</button>
+        <h5 class="mb-0">Extent Selector</h5>
+        <button class="close-btn" onclick="closePanelExtent()">&times;</button>
     </div>
-    
+
     <hr>
     <div class="card-body">
-      <div class="container py-5">
-        <form id="extentForm">
-          <div class="row g-3 mb-3">
+        <div class="container py-5">
+            <form id="extentForm">
+                <div class="row g-3 mb-3">
 
-            <div class="col-md-3">
-              <label for="province" class="form-label">Province</label>
-              <button type="button" id="" class="btn btn-outline-secondary dropdown-toggle w-100"
-                data-bs-toggle="dropdown" aria-expanded="false">
-                <span id="">Choose</span>
-              </button>
-              <ul id="province-dropdown" class="dropdown-menu" style="">
-                <!-- Populate dynamically -->
-              </ul>
-            </div>
+                    <div class="col-md-3">
+                        <label for="province" class="form-label">Province</label>
+                        <button type="button" id="" class="btn btn-outline-secondary dropdown-toggle w-100"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <span id="">Choose</span>
+                        </button>
+                        <ul id="province-dropdown" class="dropdown-menu" style="">
+                            <!-- Populate dynamically -->
+                        </ul>
+                    </div>
 
-            <div class="col-md-3">
-              <label for="district" class="form-label">District</label>
-              <button type="button" id="" class="btn btn-outline-secondary dropdown-toggle w-100"
-                data-bs-toggle="dropdown" aria-expanded="false">
-                <span id="">Choose</span>
-              </button>
+                    <div class="col-md-3">
+                        <label for="district" class="form-label">District</label>
+                        <button type="button" id="" class="btn btn-outline-secondary dropdown-toggle w-100"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <span id="">Choose</span>
+                        </button>
 
-              <ul id="district-dropdown" class="dropdown-menu" style="">
-                <!-- Populate dynamically -->
-              </ul>
-            </div>
+                        <ul id="district-dropdown" class="dropdown-menu" style="">
+                            <!-- Populate dynamically -->
+                        </ul>
+                    </div>
 
-            <div class="col-md-3">
-              <label for="dsd" class="form-label">DS Division</label>
-              <button type="button" id="" class="btn btn-outline-secondary dropdown-toggle w-100"
-                data-bs-toggle="dropdown" aria-expanded="false">
-                <span id="">Choose</span>
-              </button>
+                    <div class="col-md-3">
+                        <label for="dsd" class="form-label">DS Division</label>
+                        <button type="button" id="" class="btn btn-outline-secondary dropdown-toggle w-100"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <span id="">Choose</span>
+                        </button>
 
-              <ul id="dsd-dropdown" class="dropdown-menu" style="">
-                <!-- Populate dynamically -->
-              </ul>
-            </div>
+                        <ul id="dsd-dropdown" class="dropdown-menu" style="">
+                            <!-- Populate dynamically -->
+                        </ul>
+                    </div>
 
-          </div>
+                </div>
 
-          <div class="row g-3 mb-4">
-            <div class="col-md-4">
-              <label for="gnd" class="form-label">GN Division</label>
-              <button type="button" id="" class="btn btn-outline-secondary dropdown-toggle w-100"
-                data-bs-toggle="dropdown" aria-expanded="false">
-                <span id="">Choose</span>
-              </button>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label for="gnd" class="form-label">GN Division</label>
+                        <button type="button" id="" class="btn btn-outline-secondary dropdown-toggle w-100"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <span id="">Choose</span>
+                        </button>
 
-              <ul id="gnd-dropdown" class="dropdown-menu" style="">
-                <!-- Populate dynamically -->
-              </ul>
-            </div>
-          </div>
+                        <ul id="gnd-dropdown" class="dropdown-menu" style="">
+                            <!-- Populate dynamically -->
+                        </ul>
+                    </div>
+                </div>
 
-          <button class="btn btn-outline-secondary mt-3 float-end" type="button" >Save</button>
-        </form>
-      </div>
+                <button class="btn btn-outline-secondary mt-3 float-end" type="button">Save</button>
+            </form>
+        </div>
     </div>
-  </div>
+</div>
 
-  <script>
+<script>
     function openPanelExtent() {
-      document.getElementById('sidePanelExtent').classList.add('show');
-      document.getElementById('overlay').classList.add('show');
+        document.getElementById('sidePanelExtent').classList.add('show');
+        document.getElementById('overlay').classList.add('show');
     }
 
     function closePanelExtent() {
-      document.getElementById('sidePanelExtent').classList.remove('show');
-      document.getElementById('overlay').classList.remove('show');
+        document.getElementById('sidePanelExtent').classList.remove('show');
+        document.getElementById('overlay').classList.remove('show');
     }
-  </script>
+
+    
+
+</script>
