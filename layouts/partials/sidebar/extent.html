@@ -9,79 +9,93 @@
     </div>
 
     <hr>
-    <div class="card-body">
-        <div class="container py-5">
-            <form id="extentForm">
-                <div class="row g-3 mb-3">
 
-                    <div class="col-md-3">
-                        <label for="province" class="form-label">Province</label>
-                        <button type="button" id="" class="btn btn-outline-secondary dropdown-toggle w-100"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <span id="">Choose</span>
-                        </button>
-                        <ul id="province-dropdown" class="dropdown-menu" style="">
-                            <!-- Populate dynamically -->
-                        </ul>
-                    </div>
+    <!-- Option Group -->
+    <div class="btn-group" role="group" aria-label="Selection Options">
+        <input type="radio" class="btn-check" name="inputOption" id="adminOption" autocomplete="off" checked>
+        <label class="btn btn-outline-secondary" for="adminOption">Use Admin Boundary</label>
 
-                    <div class="col-md-3">
-                        <label for="district" class="form-label">District</label>
-                        <button type="button" id="" class="btn btn-outline-secondary dropdown-toggle w-100"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <span id="">Choose</span>
-                        </button>
+        <input type="radio" class="btn-check" name="inputOption" id="tileOption" autocomplete="off">
+        <label class="btn btn-outline-secondary" for="tileOption">Use Tile Number</label>
+    </div>
 
-                        <ul id="district-dropdown" class="dropdown-menu" style="">
-                            <!-- Populate dynamically -->
-                        </ul>
-                    </div>
+    <!-- Dynamic Content -->
+    <div class="mt-4">
 
-                    <div class="col-md-3">
-                        <label for="dsd" class="form-label">DS Division</label>
-                        <button type="button" id="" class="btn btn-outline-secondary dropdown-toggle w-100"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <span id="">Choose</span>
-                        </button>
+        {{/* Tile selector content */}}
+        <div id="tileContent" class="d-none">
+            <label for="tile-sellector" class="form-label">Select tile</label>
+            <button type="button" id="" class="btn btn-outline-secondary dropdown-toggle w-100"
+                data-bs-toggle="dropdown" aria-expanded="false">
+                <span id="">Choose</span>
+            </button>
+            <ul id="tile-sellector-dropdown" class="dropdown-menu">
+                {{ range seq 1 92 }}
+                <li class="dropdown-item">
+                    <label class="checkbox"><input type="checkbox" value="{{ . }}" wfd-id="id{{ . }}">{{ . }}</label>
+                </li>
+                {{ end }}
+            </ul>
+        </div>
 
-                        <ul id="dsd-dropdown" class="dropdown-menu" style="">
-                            <!-- Populate dynamically -->
-                        </ul>
-                    </div>
+        {{/* Admin bound selector */}}
+        <div id="adminContent" class="">
 
-                </div>
+            <select id="admin-level-selector" class="form-select">
+                <option selected disabled>Select level</option>
+                <option value="1">Province</option>
+                <option value="2">District</option>
+                <option value="3">Divisional Secretry Division</option>
+                <option value="4">Grama Niladhari Division</option>
+            </select>
 
-                <div class="row g-3 mb-4">
-                    <div class="col-md-4">
-                        <label for="gnd" class="form-label">GN Division</label>
-                        <button type="button" id="" class="btn btn-outline-secondary dropdown-toggle w-100"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <span id="">Choose</span>
-                        </button>
+            <div class="col-md-6">
+                <label for="admin-selector" class="form-label">Province</label>
+                <button type="button" id="" class="btn btn-outline-secondary dropdown-toggle w-100"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    <span id="admin-selector-btn">Choose</span>
+                </button>
+                <ul id="admin-selector-dropdown" class="dropdown-menu">
+                    <!-- Populate dynamically -->
+                </ul>
+            </div>
 
-                        <ul id="gnd-dropdown" class="dropdown-menu" style="">
-                            <!-- Populate dynamically -->
-                        </ul>
-                    </div>
-                </div>
-
-                <button class="btn btn-outline-secondary mt-3 float-end" type="button">Save</button>
-            </form>
         </div>
     </div>
+
+
 </div>
 
 <script>
+    // show-hide extent panel
     function openPanelExtent() {
         document.getElementById('sidePanelExtent').classList.add('show');
         document.getElementById('overlay').classList.add('show');
     }
-
     function closePanelExtent() {
         document.getElementById('sidePanelExtent').classList.remove('show');
         document.getElementById('overlay').classList.remove('show');
     }
 
-    
+
+
+    // Tile id/ admin bound content switcher
+    const tileOption = document.getElementById('tileOption');
+    const adminOption = document.getElementById('adminOption');
+    const tileContent = document.getElementById('tileContent');
+    const adminContent = document.getElementById('adminContent');
+
+    function toggleContent() {
+        if (tileOption.checked) {
+            tileContent.classList.remove('d-none');
+            adminContent.classList.add('d-none');
+        } else if (adminOption.checked) {
+            adminContent.classList.remove('d-none');
+            tileContent.classList.add('d-none');
+        }
+    }
+
+    tileOption.addEventListener('change', toggleContent);
+    adminOption.addEventListener('change', toggleContent);
 
 </script>
