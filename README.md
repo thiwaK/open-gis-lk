@@ -21,6 +21,29 @@ Whether you're a student, researcher, planner, government officer, or simply cur
 
 
 
+## Technologies used
+
+| Technology | Purpose |
+| ---------- | :------ |
+| HTML       |         |
+| JavaScript |         |
+| SCSS       |         |
+
+
+
+ ## Where the data comes from
+
+| Source Name | Data Type | Description |
+| ----------- | --------- | ----------- |
+|             |           |             |
+
+
+
+## What's coming next
+
+- Support three languages - English, Sinhala and Tamil
+- 
+
 
 
  
