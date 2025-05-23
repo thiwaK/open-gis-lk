@@ -93,21 +93,31 @@ async function loadAndParseCSV(url, elementID, lang, idKey, idList, code = "code
 }
 
 const selector = document.getElementById('admin-level-selector');
+const selectLable = document.getElementById('admin-selector-label');
 selector.addEventListener('change', function () {
     const selectedValue = this.value;
-    console.log('Selected level:', selectedValue);
+
+    if (selectedValue in ['1', '2', '3', '4']){
+        selectLable.classList.remove('d-none');
+        document.getElementById('admin-selector').classList.remove('d-none');
+    }
+    
 
     if (selectedValue == "1") {
-        loadAndParseCSV('data/province.csv', 'admin-selector-dropdown', 'en', "", "", "prov_code", "prov_name")
+        loadAndParseCSV('data/province.csv', 'admin-selector-dropdown', 'en', "", "", "prov_code", "prov_name");
+        selectLable.textContent = "";
     }
     else if (selectedValue == "2") {
-        loadAndParseCSV('data/district.csv', 'admin-selector-dropdown', 'en', "", "", "dist_code", "dist_name")
+        loadAndParseCSV('data/district.csv', 'admin-selector-dropdown', 'en', "", "", "dist_code", "dist_name");
+        selectLable.textContent = "";
     }
     else if (selectedValue == "3") {
-        loadAndParseCSV('data/dsd.csv', 'admin-selector-dropdown', 'en', "", "", "dsd_code", "dsd_name")
+        loadAndParseCSV('data/dsd.csv', 'admin-selector-dropdown', 'en', "", "", "dsd_code", "dsd_name");
+        selectLable.textContent = "";
     }
     else if (selectedValue == "4") {
-        loadAndParseCSV('data/gnd.csv', 'admin-selector-dropdown', 'en', "", "", "gnd_code", "gnd_name")
+        loadAndParseCSV('data/gnd.csv', 'admin-selector-dropdown', 'en', "", "", "gnd_code", "gnd_name");
+        selectLable.textContent = "";
     }
 });
 

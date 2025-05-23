@@ -41,6 +41,7 @@
         {{/* Admin bound selector */}}
         <div id="adminContent" class="">
 
+            <label id="" for="" class="form-label">Administrative Boundary Level</label>
             <select id="admin-level-selector" class="form-select">
                 <option selected disabled>Select level</option>
                 <option value="1">Province</option>
@@ -49,9 +50,9 @@
                 <option value="4">Grama Niladhari Division</option>
             </select>
 
-            <div class="col-md-6">
-                <label for="admin-selector" class="form-label">Province</label>
-                <button type="button" id="" class="btn btn-outline-secondary dropdown-toggle w-100"
+            <div id="admin-selector" class="col-md-6 py-1 d-none">
+                <label id="admin-selector-label" for="admin-selector" class="form-label"></label>
+                <button type="button" id="" class="btn btn-outline-secondary dropdown-toggle w-100 "
                     data-bs-toggle="dropdown" aria-expanded="false">
                     <span id="admin-selector-btn">Choose</span>
                 </button>
