@@ -5,6 +5,16 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function showLoading() {
+  document.getElementById('loading-overlay').classList.remove('d-none');
+}
+
+function hideLoading() {
+  document.getElementById('loading-overlay').classList.add('d-none');
+}
+
+
+
 function fetchData(url) {
     fetch(url)
         .then(response => response.text())
@@ -43,8 +53,8 @@ function populateDropdownsSQL(elementID, tableName, language) {
     });
 }
 
-async function loadAndParseCSV(url, elementID, lang, idKey, idList, code = "code", name = "name_en") {
-
+async function loadAndParseCSV(url, elementID, lang, code, name, idKey=null, idList=null) {
+    showLoading();
     const select = document.getElementById(elementID);
     let csvText = localStorage.getItem(url);
     if (!csvText) {
@@ -57,13 +67,16 @@ async function loadAndParseCSV(url, elementID, lang, idKey, idList, code = "code
         header: true,
         complete: function (results) {
             let rows;
-            if (lang == 'en') {
-                rows = results.data
-                    // .filter(record => record[code] && idList.includes(String(record[idKey])))
-                    .map(record => ({
-                        code: record[code],
-                        name_en: record[name]
-                    }));
+
+            if (idKey != null && idList != null) {
+                results.data = results.data?.filter(record => record[code] && idList.includes(String(record[idKey])));
+            }
+
+            if (lang === 'en' && Array.isArray(results?.data)) {
+                rows = results.data.map(record => ({
+                    code: record[code],
+                    name_en: record[name]
+                }));
             }
 
             select.innerHTML = ''; // Clear existing dropdown items
@@ -90,40 +103,53 @@ async function loadAndParseCSV(url, elementID, lang, idKey, idList, code = "code
             });
         }
     });
+
+    hideLoading();
+    // console.log("CSV loaded");
 }
 
 const selector = document.getElementById('admin-level-selector');
-const selectLable = document.getElementById('admin-selector-label');
-selector.addEventListener('change', function () {
+selector.addEventListener('change', async function () {
     const selectedValue = this.value;
 
-    if (selectedValue in ['1', '2', '3', '4']){
-        selectLable.classList.remove('d-none');
+    if (['1', '2', '3', '4'].includes(selectedValue)){
         document.getElementById('admin-selector').classList.remove('d-none');
+        document.getElementById('admin-selector2').classList.add('d-none');
+        document.getElementById('admin-selector-label').classList.add('d-none');
+        document.getElementById('admin-selector-label2').classList.add('d-none');
     }
-    
 
     if (selectedValue == "1") {
-        loadAndParseCSV('data/province.csv', 'admin-selector-dropdown', 'en', "", "", "prov_code", "prov_name");
-        selectLable.textContent = "";
+        await loadAndParseCSV('data/province.csv', 'admin-selector-dropdown', 'en', "prov_code", "prov_name", null, null);
     }
     else if (selectedValue == "2") {
-        loadAndParseCSV('data/district.csv', 'admin-selector-dropdown', 'en', "", "", "dist_code", "dist_name");
-        selectLable.textContent = "";
+        await loadAndParseCSV('data/district.csv', 'admin-selector-dropdown', 'en', "dist_code", "dist_name", null, null);
     }
-    else if (selectedValue == "3") {
-        loadAndParseCSV('data/dsd.csv', 'admin-selector-dropdown', 'en', "", "", "dsd_code", "dsd_name");
-        selectLable.textContent = "";
+    else if (selectedValue == "3" || selectedValue == "4") {
+        await loadAndParseCSV('data/dsd.csv', 'admin-selector-dropdown', 'en',  "dsd_code", "dsd_name", null, null);
     }
-    else if (selectedValue == "4") {
-        loadAndParseCSV('data/gnd.csv', 'admin-selector-dropdown', 'en', "", "", "gnd_code", "gnd_name");
-        selectLable.textContent = "";
-    }
+
+    document.querySelectorAll('#admin-selector-dropdown input[type="checkbox"]').forEach(checkbox => {
+
+        checkbox.addEventListener('change', async function () {
+            var checked = Array.from(document.querySelectorAll('#admin-selector-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
+            console.log(checked);
+
+            if (selectedValue == "4") {
+                await loadAndParseCSV('data/gnd.csv', 'admin-selector-dropdown2', 'en', "gnd_code", "gnd_name", "dsd_code", checked);
+                document.getElementById('admin-selector-label').classList.remove('d-none');
+                document.getElementById('admin-selector-label').textContent = "DS Division";
+                document.getElementById('admin-selector-label2').classList.remove('d-none')
+                document.getElementById('admin-selector-label2').textContent = "GN Division";
+                document.getElementById('admin-selector2').classList.remove('d-none');
+                document.getElementById('admin-selector').classList.remove('d-none');
+            }
+        })
+    })
+
+    
 });
 
-document.querySelectorAll('#admin-selector-dropdown input[type="checkbox"]').forEach(checkbox => {
-    checkbox.addEventListener('change', function () {
-        var checked = Array.from(document.querySelectorAll('#admin-selector-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
-        console.log(checked);
-    });
+document.addEventListener('DOMContentLoaded', () => {
+  hideLoading();
 });

@@ -5,6 +5,17 @@
 
   <main class="container-fluid m-0 p-0">
 
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-dark bg-opacity-50" style="z-index: 10000; display: none;">
+      <div class="text-center text-white">
+        <div class="spinner-border text-light mb-3" role="status" style="width: 3rem; height: 3rem;">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <div>Loading, please wait...</div>
+      </div>
+    </div>
+
+
     <!-- extent selector -->
     {{ partial "sidebar/extent.html" . }}
 
