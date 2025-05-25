@@ -5,6 +5,8 @@
 
   <main class="container-fluid m-0 p-0">
 
+    <div id="map" class="d-flex" style="width: auto; height: 100vh; z-index: 1;"></div>
+    
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-dark bg-opacity-50" style="z-index: 10000; display: none;">
       <div class="text-center text-white">
@@ -15,13 +17,23 @@
       </div>
     </div>
 
+    <!-- webgl warn -->
+    <div id="webgl-warning" class="d-none d-flex justify-content-center py-5">
+        <div class="card text-danger border-danger bg-danger-subtle text-danger-emphasis">
+            <div class="card-header align-content-between justify-content-center fs-5">
+            <i class="fa-solid fa-exclamation-triangle-fill"></i> Error
+            </div>
+            <div class="card-body">
+            <h5 class="card-title">WebGL is not supported or is disabled in your browser</h5>
+            <p class="card-text">Please enable it or switch to a compatible browser.</p>
+            {{/*  <a href="#" class="btn btn-danger bg-danger-emphasis">OK</a>  */}}
+            </div>
+        </div>
+    </div>
 
     <!-- extent selector -->
     {{ partial "sidebar/extent.html" . }}
 
-    <!-- map -->
-    {{ partial "map.html" . }}
-    
   </main>
 
 {{ end }}

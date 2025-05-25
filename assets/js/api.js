@@ -1,18 +1,52 @@
-import alasql from 'alasql';
-import { sql_districts, sql_dsd, sql_gnd } from './data.js';
 
-alasql("CREATE TABLE province (code INT, name_en STRING, name_si STRING, name_ta STRING)");
-alasql("INSERT INTO province VALUES (1, 'Western', 'බස්නාහිර', 'மேல்')");
-alasql("INSERT INTO province VALUES (2, 'Central', 'මධ්‍යම', 'மத்திய')");
-alasql("INSERT INTO province VALUES (3, 'Southern', 'දකුණු', 'தென்')");
-alasql("INSERT INTO province VALUES (4, 'North Western', 'වයඹ', 'வட மேல்')");
-alasql("INSERT INTO province VALUES (5, 'Sabaragamuwa', 'සබරගමුව', 'சபரகமுவ')");
-alasql("INSERT INTO province VALUES (6, 'Eastern', 'නැගෙනහිර', 'கிழக்கு')");
-alasql("INSERT INTO province VALUES (7, 'Uva', 'ඌව', 'ஊவா')");
-alasql("INSERT INTO province VALUES (8, 'North Central', 'උතුරු මැද', 'வட மத்திய')");
-alasql("INSERT INTO province VALUES (9, 'Northern', 'උතුරු', 'வட')");
+// Survey Department
+function lis_survey(url) {
+    console.log(url);
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", url, true);
+        xhr.setRequestHeader("Accept", "*/*");
+        xhr.setRequestHeader("Accept-Language", "en-US,en;q=0.5");
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-alasql(sql_districts);
-// alasql(sql_dsd);
-// alasql(sql_gnd);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                console.log(`respond: ${xhr.status}`);
+                if (xhr.status === 200) {
+                    resolve(xhr.responseText);
+                } else {
+                    reject(xhr.status);
+                }
+            }
+        };
 
+        xhr.onerror = () => reject(xhr.statusText);
+        xhr.send();
+    });
+}
+
+async function fetchAdmin(where , returnGeometry=true){
+    let url = new URL("https://gisapps.nsdi.gov.lk/server/rest/services/SLNSDI/Boundary/MapServer/5/query");
+
+    const params = {
+        f: 'geojson',
+        returnGeometry: 'true',
+        outSR: '4326',
+        outFields: '*',
+        spatialRel:'esriSpatialRelContains',
+        geometryType: 'esriGeometryEnvelope',
+        where: where,
+        generalize:true,
+        maxAllowableOffset:'',
+        units:'esriSRUnit_Meter',
+    };
+
+    Object.entries(params).forEach(([key, value]) =>
+        url.searchParams.append(key, value)
+    );
+
+    response = await lis_survey(url);
+    return response;
+}
+
+export default fetchAdmin;

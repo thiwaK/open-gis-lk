@@ -6,8 +6,10 @@
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.13.1",
     "bootstrap-select": "^1.13.18",
+    "leaflet": "^1.9.4",
     "maplibre-gl": "^5.5.0",
     "pako": "^2.1.0",
+    "papaparse": "^5.5.3",
     "postcss": "^8.5.3",
     "postcss-cli": "^11.0.1",
     "postcss-import": "^16.1.0"
