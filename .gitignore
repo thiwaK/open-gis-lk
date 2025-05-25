@@ -2,3 +2,5 @@
 node_modules
 resources
 themes
+assets\js\api.js
+changes.txt

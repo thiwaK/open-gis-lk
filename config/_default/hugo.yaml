@@ -36,6 +36,10 @@ module:
     #   target: "static/js/alasql.min.js"
     - source: "static"
       target: "static"
+    - source: "node_modules/papaparse/papaparse.min.js"
+      target: "static/js/papaparse.min.js"
+    - source: "node_modules/leaflet/dist/leaflet.css"
+      target: "static/css/leaflet.css"
 
 
 
