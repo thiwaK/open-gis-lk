@@ -384,9 +384,6 @@ selector.addEventListener('change', async function () {
 
 });
 
-
-
-
 document.addEventListener('DOMContentLoaded', () => {
     hideLoading();
 });

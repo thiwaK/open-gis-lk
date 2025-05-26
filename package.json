@@ -1,13 +1,11 @@
 {
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^6.7.2",
     "alasql": "^4.6.6",
     "autoprefixer": "^10.4.21",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.13.1",
     "bootstrap-select": "^1.13.18",
     "leaflet": "^1.9.4",
-    "maplibre-gl": "^5.5.0",
     "pako": "^2.1.0",
     "papaparse": "^5.5.3",
     "postcss": "^8.5.3",
@@ -16,7 +14,7 @@
   },
   "name": "open-gis-lk",
   "version": "1.0b",
-  "description": "An open-source platform for geospatial data in Sri Lanka.",
+  "description": "🌍 An open-source platform for visualizing and accessing geospatial data of Sri Lanka.",
   "scripts": {
     "dev": "hugo server --disableFastRender --gc",
     "dev:fast": "hugo server --gc",
