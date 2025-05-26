@@ -14892,19 +14892,27 @@
   function populateDropdown(elementID, rows) {
     const select = document.getElementById(elementID);
     select.innerHTML = "";
+    const li = document.createElement("li");
+    const input = document.createElement("input");
+    input.type = "text";
+    input.id = `${elementID}-search`;
+    input.className = "form-control";
+    input.placeholder = "Search...";
+    li.appendChild(input);
+    select.appendChild(li);
     rows.forEach((row) => {
-      const li = document.createElement("li");
-      li.className = "dropdown-item";
+      const li2 = document.createElement("li");
+      li2.className = "dropdown-item";
       const label = document.createElement("label");
       label.className = "checkbox";
-      const input = document.createElement("input");
-      input.type = "checkbox";
-      input.value = row.code;
+      const input2 = document.createElement("input");
+      input2.type = "checkbox";
+      input2.value = row.code;
       const text = document.createTextNode(row.name_en);
-      label.appendChild(input);
+      label.appendChild(input2);
       label.appendChild(text);
-      li.appendChild(label);
-      select.appendChild(li);
+      li2.appendChild(label);
+      select.appendChild(li2);
     });
   }
   async function loadAndParseCSV(url, lang, code, name, idKey = null, idList = null) {
@@ -15012,6 +15020,36 @@
         }
       });
     });
+    if (document.getElementById("admin-selector-dropdown-search")) {
+      document.getElementById("admin-selector-dropdown-search").addEventListener("keyup", function() {
+        const filter = this.value.toLowerCase();
+        const dropdown = document.getElementById("admin-selector-dropdown");
+        const items = dropdown.querySelectorAll("li.dropdown-item");
+        items.forEach((item) => {
+          const label = item.querySelector("label.checkbox");
+          if (label.textContent.toLowerCase().includes(filter)) {
+            item.style.display = "";
+          } else {
+            item.style.display = "none";
+          }
+        });
+      });
+    }
+    if (document.getElementById("admin-selector-dropdown2-search")) {
+      document.getElementById("admin-selector-dropdown2-search").addEventListener("keyup", function() {
+        const filter = this.value.toLowerCase();
+        const dropdown = document.getElementById("admin-selector-dropdown2");
+        const items = dropdown.querySelectorAll("li.dropdown-item");
+        items.forEach((item) => {
+          const label = item.querySelector("label.checkbox");
+          if (label.textContent.toLowerCase().includes(filter)) {
+            item.style.display = "";
+          } else {
+            item.style.display = "none";
+          }
+        });
+      });
+    }
   });
   document.addEventListener("DOMContentLoaded", () => {
     hideLoading();
