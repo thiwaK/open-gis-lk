@@ -46,16 +46,15 @@ async function fetchAdmin(where, admin_lvl, returnGeometry=true){
             break;
     }
 
-    
     const params = {
         f: 'geojson',
         returnGeometry: 'true',
         outSR: '4326',
-        outFields: 'OBJECTID',
+        outFields: '*',
         spatialRel:'esriSpatialRelContains',
         geometryType: 'esriGeometryEnvelope',
         where: where,
-        generalize:true,
+        generalize: 'true',
         units:'esriSRUnit_Meter',
     };
 
@@ -64,7 +63,6 @@ async function fetchAdmin(where, admin_lvl, returnGeometry=true){
     );
 
     response = await fetchNow(url);
-    console.log(response);
     return response;
 }
 
