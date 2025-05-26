@@ -1,6 +1,6 @@
 
-// Survey Department
-function lis_survey(url) {
+
+function fetchNow(url) {
     console.log(url);
     return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
@@ -25,8 +25,26 @@ function lis_survey(url) {
     });
 }
 
-async function fetchAdmin(where , returnGeometry=true){
-    let url = new URL("https://gisapps.nsdi.gov.lk/server/rest/services/SLNSDI/Boundary/MapServer/5/query");
+async function fetchAdmin(where, admin_lvl, returnGeometry=true){
+
+    let url;
+
+    switch (admin_lvl) {
+        case 1:
+            url = new URL("https://gisapps.nsdi.gov.lk/server/rest/services/SLNSDI/Boundary/MapServer/6/query");
+            break;
+        case 2:
+            url = new URL("https://gisapps.nsdi.gov.lk/server/rest/services/SLNSDI/Boundary/MapServer/5/query");
+            break;
+        case 3:
+            url = new URL("https://gisapps.nsdi.gov.lk/server/rest/services/SLNSDI/Boundary/MapServer/4/query");
+            break;
+        case 4:
+            url = new URL("https://gisapps.nsdi.gov.lk/server/rest/services/SLNSDI/Boundary/MapServer/3/query");
+            break;
+        default:
+            break;
+    }
 
     const params = {
         f: 'geojson',
@@ -36,8 +54,7 @@ async function fetchAdmin(where , returnGeometry=true){
         spatialRel:'esriSpatialRelContains',
         geometryType: 'esriGeometryEnvelope',
         where: where,
-        generalize:true,
-        maxAllowableOffset:'',
+        generalize: 'true',
         units:'esriSRUnit_Meter',
     };
 
@@ -45,7 +62,7 @@ async function fetchAdmin(where , returnGeometry=true){
         url.searchParams.append(key, value)
     );
 
-    response = await lis_survey(url);
+    response = await fetchNow(url);
     return response;
 }
 

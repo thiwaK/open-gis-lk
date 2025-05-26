@@ -44,21 +44,102 @@ function populateDropdownsSQL(elementID, tableName, language) {
     });
 }
 
-async function loadMapData(parcelIdList, parcelType) {
+function isValidGeoJSON(geojson) {
+  if (typeof geojson !== 'object' || geojson === null) return false;
 
+  const validTypes = ['Feature', 'FeatureCollection', 'Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString', 'MultiPolygon', 'GeometryCollection'];
+
+  if (!geojson.type || !validTypes.includes(geojson.type)) return false;
+
+  if (geojson.type === 'FeatureCollection') {
+    return Array.isArray(geojson.features) && geojson.features.every(f => isValidGeoJSON(f));
+  }
+
+  if (geojson.type === 'Feature') {
+    return typeof geojson.geometry === 'object' && isValidGeoJSON(geojson.geometry);
+  }
+
+  if (geojson.coordinates === undefined) return false;
+
+  return true;
+}
+
+
+async function updateMap(query, admin_lvl) {
+    showLoading();
+    const resp = JSON.parse(await fetchAdmin(query, admin_lvl, true));
+    if(!isValidGeoJSON(resp)){
+        console.log("INVALID");
+    }
+    if (window.currentGeoLayer) {
+        window.map.removeLayer(window.currentGeoLayer);
+    }
+    window.currentGeoLayer = L.geoJSON(resp, {
+        style: {
+            color: "blue",
+            fillColor: "lightblue",
+            fillOpacity: 0.5,
+            weight: 2
+        }
+    });
+
+    window.map.addLayer(window.currentGeoLayer);
+    // window.map.fitBounds(window.currentGeoLayer.getBounds());
+
+    hideLoading();
+    // const layer = {
+    //     "District Layer": geojsonLayer
+    // };
+    // L.control.layers(layer).addTo(map);
 }
 
 async function fetchData(url) {
-    let csvText = localStorage.getItem(url);
-    if (!csvText) {
+    showLoading();
+
+    const cached = localStorage.getItem(url);
+    const oneDay = 24 * 60 * 60 * 1000; // 1 day in milliseconds
+    let csvText;
+
+    if (cached) {
+        try {
+            const parsed = JSON.parse(cached);
+            const age = Date.now() - parsed.timestamp;
+
+            if (age < oneDay) {
+                csvText = parsed.content;
+            } else {
+                // expired — fetch new
+                const response = await fetch(url);
+                csvText = await response.text();
+                localStorage.setItem(url, JSON.stringify({
+                    content: csvText,
+                    timestamp: Date.now()
+                }));
+            }
+        } catch (e) {
+            // corrupted or non-JSON — fallback to fresh fetch
+            const response = await fetch(url);
+            csvText = await response.text();
+            localStorage.setItem(url, JSON.stringify({
+                content: csvText,
+                timestamp: Date.now()
+            }));
+        }
+    } else {
+        // no cached data — fetch
         const response = await fetch(url);
         csvText = await response.text();
-        localStorage.setItem(url, csvText);
+        localStorage.setItem(url, JSON.stringify({
+            content: csvText,
+            timestamp: Date.now()
+        }));
     }
+
+    hideLoading();
     return csvText;
 }
 
-function populateDropdown(elementID, rows){
+function populateDropdown(elementID, rows) {
     const select = document.getElementById(elementID);
     select.innerHTML = '';
 
@@ -86,13 +167,13 @@ function populateDropdown(elementID, rows){
 }
 
 async function loadAndParseCSV(url, lang, code, name, idKey = null, idList = null) {
-    showLoading();
-    
+
     const csvText = await fetchData(url);
 
     return new Promise((resolve, reject) => {
         Papa.parse(csvText, {
             header: true,
+            quoteChar: "'",
             complete: async function (results) {
                 let rows;
 
@@ -106,11 +187,10 @@ async function loadAndParseCSV(url, lang, code, name, idKey = null, idList = nul
                         name_en: record[name]
                     }));
                 }
-                hideLoading();
                 resolve(rows);
             },
-            error: function(error) {
-                hideLoading();
+            error: function (error) {
+
                 reject(error);
             }
         });
@@ -118,9 +198,87 @@ async function loadAndParseCSV(url, lang, code, name, idKey = null, idList = nul
 }
 
 const selector = document.getElementById('admin-level-selector');
-selector.addEventListener('change', async function () {
-    const selectedValue = this.value;
+const selectorBtn = document.getElementById('extent-selecter-btn');
+let selectedValue;
 
+selectorBtn.addEventListener('click', async function () {
+
+    var checked = Array.from(document.querySelectorAll('#admin-selector-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
+
+    if (selectedValue == "1") {
+        const data = await loadAndParseCSV('data/province.csv', 'en', "prov_code", "prov_name", "prov_code", checked);
+        let code_base = checked
+            .map(element => {
+                const clean = String(element).replace(/^["']+|["']+$/g, '');
+                return `province_code='${clean}'`
+            })
+            .join(" OR ");
+
+        let name_base = data
+            .map(element => {
+                const clean = String(element.name_en).replace(/^["']+|["']+$/g, '');
+                return `province_name='${clean}'`
+            })
+            .join(" OR ");
+
+        let where = `(${name_base})OR(${code_base})`;
+        updateMap(where, Number(selectedValue));
+    }
+
+    else if (selectedValue == "2") {
+        const data = await loadAndParseCSV('data/district.csv', 'en', "dist_code", "dist_name", "dist_code", checked);
+        let code_base = checked
+            .map(element => `district_code='${element}'`)
+            .join(" OR ");
+
+        let name_base = data
+            .map(element => `district_name='${element.name_en}'`)
+            .join(" OR ");
+
+        let where = `(${name_base}) OR (${code_base})`;
+
+        updateMap(where, Number(selectedValue));
+    }
+
+    else if (selectedValue == "3") {
+        const data = await loadAndParseCSV('data/dsd.csv', 'en', "dsd_code", "dsd_name", "dsd_code", checked);
+        let code_base = checked
+            .map(element => `ds_division_code='${element}'`)
+            .join(" OR ");
+
+        let name_base = data
+            .map(element => `ds_division_name='${element.name_en}'`)
+            .join(" OR ");
+
+        let where = `(${name_base}) OR (${code_base})`;
+
+        updateMap(where, Number(selectedValue));
+    }
+
+    else if (selectedValue == "4") {
+
+        const checked = Array.from(document.querySelectorAll('#admin-selector-dropdown2 input[type="checkbox"]:checked')).map(cb => cb.value);
+        const data = await loadAndParseCSV('data/gnd.csv', 'en', "gnd_code", "gndname", "gnd_code", checked);
+        
+        let code_base = checked
+            .map(element => `gnd_code='${element}'`)
+            .join(" OR ");
+
+        let name_base = data
+            .map(element => `gnd_name='${element.name_en}'`)
+            .join(" OR ");
+
+        let where = `(${name_base}) OR (${code_base})`;
+
+        updateMap(where, Number(selectedValue));
+
+    }
+
+});
+
+selector.addEventListener('change', async function () {
+
+    selectedValue = selector.value;
     if (['1', '2', '3', '4'].includes(selectedValue)) {
         document.getElementById('admin-selector').classList.remove('d-none');
         document.getElementById('admin-selector2').classList.add('d-none');
@@ -136,76 +294,45 @@ selector.addEventListener('change', async function () {
         const data = await loadAndParseCSV('data/district.csv', 'en', "dist_code", "dist_name");
         populateDropdown('admin-selector-dropdown', data);
     }
-    else if (selectedValue == "3" || selectedValue == "4") {
+    else if (selectedValue == "3") {
         const data = await loadAndParseCSV('data/dsd.csv', 'en', "dsd_code", "dsd_name");
         populateDropdown('admin-selector-dropdown', data);
+    }
+    else if (selectedValue == "4") {
+        const data = await loadAndParseCSV('data/dsd.csv', 'en', "dsd_code", "dsd_name");
+        populateDropdown('admin-selector-dropdown', data);
+
         document.getElementById('admin-selector-label').classList.remove('d-none');
         document.getElementById('admin-selector-label').textContent = "DS Division";
+
     }
 
     document.querySelectorAll('#admin-selector-dropdown input[type="checkbox"]').forEach(checkbox => {
-
         checkbox.addEventListener('change', async function () {
-            var checked = Array.from(document.querySelectorAll('#admin-selector-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
-            
 
-            if (selectedValue == "2") {
-                const data = await loadAndParseCSV('data/district.csv', 'en', "dist_code", "dist_name", "dist_code", checked);
-                let code_base = checked
-                    .map(element => `district_code='${element}'`)
-                    .join(" OR ");
-                
-                let name_base = data
-                    .map(element => `district_name='${element.name_en}'`)
-                    .join(" OR ");
+            if (selectedValue == "4") {
 
-                let where = `(${name_base}) OR (${code_base})`;
+                const checked = Array.from(document.querySelectorAll('#admin-selector-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
 
-                const resp = JSON.parse(await fetchAdmin(where, true));
-                console.log(resp);
+                if (checked.length > 0) {
+                    document.getElementById('admin-selector-label2').classList.remove('d-none')
+                    document.getElementById('admin-selector-label2').textContent = "GN Division";
+                    document.getElementById('admin-selector2').classList.remove('d-none');
+                    document.getElementById('admin-selector').classList.remove('d-none');
+
+                    const data = await loadAndParseCSV('data/gnd.csv', 'en', "gnd_code", "gnd_name", "dsd_code", checked);
+                    populateDropdown('admin-selector-dropdown2', data);
+
+                } else {
+                    document.getElementById('admin-selector-label2').classList.add('d-none');
+                    document.getElementById('admin-selector2').classList.add('d-none');
+                }
 
 
-                console.log("-_-");
-                const geojsonLayer = window.L.geoJSON(resp,{
-                    style: {
-                        color: "blue",
-                        fillColor: "lightblue",
-                        fillOpacity: 0.5,
-                        weight: 2
-                    }
-                });
-                window.map.addLayer(geojsonLayer);
-                window.map.fitBounds(geojsonLayer.getBounds());
-                
-                const layer = {
-                    "District Layer": geojsonLayer
-                };
-                L.control.layers(layer).addTo(map);
-                
             }
 
-
-
-            else if (selectedValue == "4") {
-                const data = await loadAndParseCSV('data/gnd.csv', 'en', "gnd_code", "gnd_name");
-                populateDropdown('admin-selector-dropdown2', data);
-                
-                document.getElementById('admin-selector-label2').classList.remove('d-none')
-                document.getElementById('admin-selector-label2').textContent = "GN Division";
-                document.getElementById('admin-selector2').classList.remove('d-none');
-                document.getElementById('admin-selector').classList.remove('d-none');
-
-                document.querySelectorAll('#admin-selector-dropdown2 input[type="checkbox"]').forEach(checkbox => {
-                    checkbox.addEventListener('change', async function () {
-                        var checked = Array.from(document.querySelectorAll('#admin-selector-dropdown2 input[type="checkbox"]:checked')).map(cb => cb.value);
-                        const resp = await fetchAdmin("GND_C", checked, true);
-                        console.log(resp);
-                    })
-                });
-
-            }
         })
-    })
+    });
 
 
 });
