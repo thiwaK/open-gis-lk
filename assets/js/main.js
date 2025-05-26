@@ -45,30 +45,30 @@ function populateDropdownsSQL(elementID, tableName, language) {
 }
 
 function isValidGeoJSON(geojson) {
-  if (typeof geojson !== 'object' || geojson === null) return false;
+    if (typeof geojson !== 'object' || geojson === null) return false;
 
-  const validTypes = ['Feature', 'FeatureCollection', 'Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString', 'MultiPolygon', 'GeometryCollection'];
+    const validTypes = ['Feature', 'FeatureCollection', 'Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString', 'MultiPolygon', 'GeometryCollection'];
 
-  if (!geojson.type || !validTypes.includes(geojson.type)) return false;
+    if (!geojson.type || !validTypes.includes(geojson.type)) return false;
 
-  if (geojson.type === 'FeatureCollection') {
-    return Array.isArray(geojson.features) && geojson.features.every(f => isValidGeoJSON(f));
-  }
+    if (geojson.type === 'FeatureCollection') {
+        return Array.isArray(geojson.features) && geojson.features.every(f => isValidGeoJSON(f));
+    }
 
-  if (geojson.type === 'Feature') {
-    return typeof geojson.geometry === 'object' && isValidGeoJSON(geojson.geometry);
-  }
+    if (geojson.type === 'Feature') {
+        return typeof geojson.geometry === 'object' && isValidGeoJSON(geojson.geometry);
+    }
 
-  if (geojson.coordinates === undefined) return false;
+    if (geojson.coordinates === undefined) return false;
 
-  return true;
+    return true;
 }
 
 
 async function updateMap(query, admin_lvl) {
     showLoading();
     const resp = JSON.parse(await fetchAdmin(query, admin_lvl, true));
-    if(!isValidGeoJSON(resp)){
+    if (!isValidGeoJSON(resp)) {
         console.log("INVALID");
     }
     if (window.currentGeoLayer) {
@@ -143,6 +143,16 @@ function populateDropdown(elementID, rows) {
     const select = document.getElementById(elementID);
     select.innerHTML = '';
 
+    const li = document.createElement("li");
+    const input = document.createElement("input");
+    input.type = "text";
+    input.id = `${elementID}-search`;
+    input.className = "form-control";
+    input.placeholder = "Search...";
+
+    li.appendChild(input);
+    select.appendChild(li);
+
     rows.forEach(row => {
         const li = document.createElement("li");
         li.className = "dropdown-item";
@@ -204,6 +214,7 @@ let selectedValue;
 selectorBtn.addEventListener('click', async function () {
 
     var checked = Array.from(document.querySelectorAll('#admin-selector-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
+    closePanelExtent();
 
     if (selectedValue == "1") {
         const data = await loadAndParseCSV('data/province.csv', 'en', "prov_code", "prov_name", "prov_code", checked);
@@ -259,7 +270,7 @@ selectorBtn.addEventListener('click', async function () {
 
         const checked = Array.from(document.querySelectorAll('#admin-selector-dropdown2 input[type="checkbox"]:checked')).map(cb => cb.value);
         const data = await loadAndParseCSV('data/gnd.csv', 'en', "gnd_code", "gndname", "gnd_code", checked);
-        
+
         let code_base = checked
             .map(element => `gnd_code='${element}'`)
             .join(" OR ");
@@ -334,10 +345,44 @@ selector.addEventListener('change', async function () {
         })
     });
 
+    if (document.getElementById('admin-selector-dropdown-search')) {
+        document.getElementById('admin-selector-dropdown-search').addEventListener('keyup', function () {
+            const filter = this.value.toLowerCase();
+            const dropdown = document.getElementById('admin-selector-dropdown');
+            const items = dropdown.querySelectorAll('li.dropdown-item');
+
+            items.forEach(item => {
+                const label = item.querySelector('label.checkbox');
+                if (label.textContent.toLowerCase().includes(filter)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    if (document.getElementById('admin-selector-dropdown2-search')) {
+        document.getElementById('admin-selector-dropdown2-search').addEventListener('keyup', function () {
+            const filter = this.value.toLowerCase();
+            const dropdown = document.getElementById('admin-selector-dropdown2');
+            const items = dropdown.querySelectorAll('li.dropdown-item');
+
+            items.forEach(item => {
+                const label = item.querySelector('label.checkbox');
+                if (label.textContent.toLowerCase().includes(filter)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    }
+
+
+
 
 });
-
-
 
 document.addEventListener('DOMContentLoaded', () => {
     hideLoading();

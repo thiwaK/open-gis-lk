@@ -1,7 +1,7 @@
 
 
 function fetchNow(url) {
-    console.log(url);
+
     return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhr.open("GET", url, true);
