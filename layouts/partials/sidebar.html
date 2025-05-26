@@ -113,7 +113,7 @@
     }
 </style>
 
-<nav class="sidebar d-flex flex-column flex-shrink-0 position-fixed">
+<nav id="sidebar" class="sidebar d-flex flex-column flex-shrink-0 position-fixed">
     <button class="toggle-btn" onclick="toggleSidebar()">
         <i class="bi bi-chevron-left"></i>
     </button>
@@ -168,8 +168,25 @@
 </nav>
 
 <script>
+    const sidebar = document.getElementById('sidebar');
+
+    function adjustMapSize() {
+        
+        const mapDiv = document.getElementById('map');
+
+        const sidebarWidth = sidebar.offsetWidth;
+        mapDiv.style.marginLeft = `${sidebarWidth}px`;
+        mapDiv.style.width = `calc(100% - ${sidebarWidth}px)`;
+
+        if (window.map) window.map.invalidateSize();
+    }
+
     function toggleSidebar() {
         const sidebar = document.querySelector('.sidebar');
         sidebar.classList.toggle('collapsed');
+        setTimeout(adjustMapSize, 310); // Wait for CSS transition to finish
     }
+
+    window.addEventListener('load', adjustMapSize);
+    window.addEventListener('resize', adjustMapSize);
 </script>
