@@ -386,4 +386,13 @@ selector.addEventListener('change', async function () {
 
 document.addEventListener('DOMContentLoaded', () => {
     hideLoading();
+    // const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    // tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+    //     new bootstrap.Tooltip(tooltipTriggerEl);
+    // });
+
+    const tooltipTriggerList = document.querySelectorAll('[title]');
+    tooltipTriggerList.forEach(function (el) {
+      new bootstrap.Tooltip(el);
+    });
 });

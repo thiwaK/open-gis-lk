@@ -1,8 +1,6 @@
 <!-- Collapsible Sidebar -->
 
 <style>
-    
-
     .sidebar {
         z-index: 100;
         width: var(--sidebar-width);
@@ -113,50 +111,56 @@
     }
 </style>
 
-<nav id="sidebar" class="sidebar d-flex flex-column flex-shrink-0 position-fixed collapsed">
+<nav id="sidebar" class="sidebar d-flex flex-column flex-shrink-0 position-fixed">
     <button class="toggle-btn" onclick="toggleSidebar()">
         <i class="bi bi-chevron-left"></i>
     </button>
 
     <div class="p-4">
         <h4 class="logo-text fw-bold mb-0">OpenGIS LK</h4>
-        {{/*  <p class="text-muted small hide-on-collapse">Dashboard</p>  */}}
+        {{/* <p class="text-muted small hide-on-collapse">Dashboard</p> */}}
     </div>
 
     <div class="nav flex-column">
-        <a id="extentBtn"
-            href="#extent-select"
-            class="sidebar-link active text-decoration-none p-3"
-            role="button"
-            onclick="openPanelExtent()">
+        <a id="extentBtn" class="sidebar-link active text-decoration-none p-3" role="button" data-bs-toggle="tooltip"
+            data-bs-placement="right" title="Select an area interested" onclick="openPanelExtent()">
             <i class="bi bi-bounding-box-circles me-3"></i>
             <span class="hide-on-collapse">Extent</span>
         </a>
 
-        <a id="productsBtn" href="#products" class="sidebar-link text-decoration-none p-3">
+        <a id="productsBtn" class="sidebar-link text-decoration-none p-3" data-bs-toggle="tooltip"
+            data-bs-placement="right" title="Choose data layers">
             <i class="bi bi-box me-3"></i>
             <span class="hide-on-collapse">Products</span>
         </a>
-        
-        <a href="#" class="sidebar-link text-decoration-none p-3">
-            <i class="bi bi-bar-chart me-3"></i>
-            <span class="hide-on-collapse">Analytics</span>
-        </a>
-        <a href="#" class="sidebar-link text-decoration-none p-3">
-            <i class="bi bi-people me-3"></i>
-            <span class="hide-on-collapse">Customers</span>
+
+        <a class="sidebar-link text-decoration-none p-3" data-bs-toggle="tooltip" data-bs-placement="right"
+            title="Download selected data">
+            <i class="bi bi-download me-3"></i>
+            <span class="hide-on-collapse">Download</span>
         </a>
 
-        
-        <a href="#" class="sidebar-link text-decoration-none p-3">
-            <i class="bi bi-gear me-3"></i>
-            <span class="hide-on-collapse">Settings</span>
+        <a class="sidebar-link text-decoration-none p-3" data-bs-toggle="modal" data-bs-target="#helpModal"
+            data-bs-placement="right" title="How to use the app">
+            <i class="bi bi-question-square me-3"></i>
+            <span class="hide-on-collapse">Help</span>
         </a>
+
+
     </div>
 
+    <!-- GitHub Footer -->
+    <div id="sidebar-footer" class="mt-auto px-3 py-2 border-top small text-center">
+        <a href="https://github.com/thiwaK/open-gis-lk" target="_blank" class="text-decoration-none">
+            <i class="bi bi-github me-2"></i>View on GitHub
+        </a>
+        {{/* <a href="https://github.com/thiwaK/open-gis-lk/stargazers" target="_blank"
+            class="text-decoration-none text-warning">
+            <i class="bi bi-star-fill me-1"></i>Star this project
+        </a> */}}
+    </div>
 
-
-    {{/*  <div class="profile-section mt-auto p-4">
+    {{/* <div class="profile-section mt-auto p-4">
         <div class="d-flex align-items-center">
             <img src="" style="height:60px" class="rounded-circle" alt="Profile">
             <div class="ms-3 profile-info">
@@ -164,14 +168,14 @@
                 <small class="text-muted">Admin</small>
             </div>
         </div>
-    </div>  */}}
+    </div> */}}
 </nav>
 
 <script>
     const sidebar = document.getElementById('sidebar');
 
     function adjustMapSize() {
-        
+
         const mapDiv = document.getElementById('map');
 
         const sidebarWidth = sidebar.offsetWidth;
@@ -182,8 +186,18 @@
     }
 
     function toggleSidebar() {
-        const sidebar = document.querySelector('.sidebar');
-        sidebar.classList.toggle('collapsed');
+        document.querySelector('.sidebar').classList.toggle('collapsed');
+        const link = document.querySelector('#sidebar-footer a');
+        if (link) {
+            if (link.textContent.includes('View on GitHub')) {
+                link.innerHTML = '<i class="bi bi-github me-2"></i>';
+            } else {
+                link.innerHTML = '<i class="bi bi-github me-2"></i>View on GitHub';
+            }
+        }
+
+
+
         setTimeout(adjustMapSize, 310); // Wait for CSS transition to finish
     }
 

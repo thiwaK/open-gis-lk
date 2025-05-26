@@ -4,12 +4,8 @@
   {{ partial "sidebar.html" . }}
   
   <main class="d-flex vh-100">
-    
 
     <div id="map" class="flex-grow-1" style="width: auto; height: 100vh; z-index: 1;"></div>
-    
-    
-
     
 
   </main>
@@ -40,5 +36,8 @@
 
   <!-- extent selector -->
   {{ partial "sidebar/extent.html" . }}
+
+  <!-- help -->
+  {{ partial "sidebar/help.html" . }}
 
 {{ end }}
