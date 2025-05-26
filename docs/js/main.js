@@ -14875,8 +14875,34 @@
     });
   }
   var selector = document.getElementById("admin-level-selector");
+  var selectedValue;
+  var selectorBtn = document.getElementById("extent-selecter-btn");
+  selectorBtn.addEventListener("click", async function() {
+    var checked = Array.from(document.querySelectorAll('#admin-selector-dropdown input[type="checkbox"]:checked')).map((cb) => cb.value);
+    if (selectedValue == "2") {
+      const data = await loadAndParseCSV("data/district.csv", "en", "dist_code", "dist_name", "dist_code", checked);
+      let code_base = checked.map((element) => `district_code='${element}'`).join(" OR ");
+      let name_base = data.map((element) => `district_name='${element.name_en}'`).join(" OR ");
+      let where = `(${name_base}) OR (${code_base})`;
+      updateMap(where);
+    } else if (selectedValue == "4") {
+      const data = await loadAndParseCSV("data/gnd.csv", "en", "gnd_code", "gnd_name");
+      populateDropdown("admin-selector-dropdown2", data);
+      document.getElementById("admin-selector-label2").classList.remove("d-none");
+      document.getElementById("admin-selector-label2").textContent = "GN Division";
+      document.getElementById("admin-selector2").classList.remove("d-none");
+      document.getElementById("admin-selector").classList.remove("d-none");
+      document.querySelectorAll('#admin-selector-dropdown2 input[type="checkbox"]').forEach((checkbox) => {
+        checkbox.addEventListener("change", async function() {
+          var checked2 = Array.from(document.querySelectorAll('#admin-selector-dropdown2 input[type="checkbox"]:checked')).map((cb) => cb.value);
+          const resp = await api_default("GND_C", checked2, true);
+          console.log(resp);
+        });
+      });
+    }
+  });
   selector.addEventListener("change", async function() {
-    const selectedValue = this.value;
+    selectedValue = selector.value;
     if (["1", "2", "3", "4"].includes(selectedValue)) {
       document.getElementById("admin-selector").classList.remove("d-none");
       document.getElementById("admin-selector2").classList.add("d-none");
@@ -14895,32 +14921,6 @@
       document.getElementById("admin-selector-label").classList.remove("d-none");
       document.getElementById("admin-selector-label").textContent = "DS Division";
     }
-    document.querySelectorAll('#admin-selector-dropdown input[type="checkbox"]').forEach((checkbox) => {
-      checkbox.addEventListener("change", async function() {
-        var checked = Array.from(document.querySelectorAll('#admin-selector-dropdown input[type="checkbox"]:checked')).map((cb) => cb.value);
-        if (selectedValue == "2") {
-          const data = await loadAndParseCSV("data/district.csv", "en", "dist_code", "dist_name", "dist_code", checked);
-          let code_base = checked.map((element) => `district_code='${element}'`).join(" OR ");
-          let name_base = data.map((element) => `district_name='${element.name_en}'`).join(" OR ");
-          let where = `(${name_base}) OR (${code_base})`;
-          updateMap(where);
-        } else if (selectedValue == "4") {
-          const data = await loadAndParseCSV("data/gnd.csv", "en", "gnd_code", "gnd_name");
-          populateDropdown("admin-selector-dropdown2", data);
-          document.getElementById("admin-selector-label2").classList.remove("d-none");
-          document.getElementById("admin-selector-label2").textContent = "GN Division";
-          document.getElementById("admin-selector2").classList.remove("d-none");
-          document.getElementById("admin-selector").classList.remove("d-none");
-          document.querySelectorAll('#admin-selector-dropdown2 input[type="checkbox"]').forEach((checkbox2) => {
-            checkbox2.addEventListener("change", async function() {
-              var checked2 = Array.from(document.querySelectorAll('#admin-selector-dropdown2 input[type="checkbox"]:checked')).map((cb) => cb.value);
-              const resp = await api_default("GND_C", checked2, true);
-              console.log(resp);
-            });
-          });
-        }
-      });
-    });
   });
   document.addEventListener("DOMContentLoaded", () => {
     hideLoading();

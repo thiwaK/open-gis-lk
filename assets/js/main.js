@@ -47,7 +47,7 @@ function populateDropdownsSQL(elementID, tableName, language) {
 async function updateMap(query) {
     showLoading();
     const resp = JSON.parse(await fetchAdmin(query, true));
-    
+
     if (window.currentGeoLayer) {
         window.map.removeLayer(window.currentGeoLayer);
     }
@@ -82,7 +82,7 @@ async function fetchData(url) {
     return csvText;
 }
 
-function populateDropdown(elementID, rows){
+function populateDropdown(elementID, rows) {
     const select = document.getElementById(elementID);
     select.innerHTML = '';
 
@@ -110,7 +110,7 @@ function populateDropdown(elementID, rows){
 }
 
 async function loadAndParseCSV(url, lang, code, name, idKey = null, idList = null) {
-    
+
     const csvText = await fetchData(url);
 
     return new Promise((resolve, reject) => {
@@ -132,8 +132,8 @@ async function loadAndParseCSV(url, lang, code, name, idKey = null, idList = nul
 
                 resolve(rows);
             },
-            error: function(error) {
-                
+            error: function (error) {
+
                 reject(error);
             }
         });
@@ -141,9 +141,54 @@ async function loadAndParseCSV(url, lang, code, name, idKey = null, idList = nul
 }
 
 const selector = document.getElementById('admin-level-selector');
-selector.addEventListener('change', async function () {
-    const selectedValue = this.value;
+let selectedValue;
+const selectorBtn = document.getElementById('extent-selecter-btn');
 
+selectorBtn.addEventListener('click', async function () {
+
+    var checked = Array.from(document.querySelectorAll('#admin-selector-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
+
+    if (selectedValue == "2") {
+        const data = await loadAndParseCSV('data/district.csv', 'en', "dist_code", "dist_name", "dist_code", checked);
+        let code_base = checked
+            .map(element => `district_code='${element}'`)
+            .join(" OR ");
+
+        let name_base = data
+            .map(element => `district_name='${element.name_en}'`)
+            .join(" OR ");
+
+        let where = `(${name_base}) OR (${code_base})`;
+
+
+        updateMap(where);
+
+    }
+
+    else if (selectedValue == "4") {
+        const data = await loadAndParseCSV('data/gnd.csv', 'en', "gnd_code", "gnd_name");
+        populateDropdown('admin-selector-dropdown2', data);
+
+        document.getElementById('admin-selector-label2').classList.remove('d-none')
+        document.getElementById('admin-selector-label2').textContent = "GN Division";
+        document.getElementById('admin-selector2').classList.remove('d-none');
+        document.getElementById('admin-selector').classList.remove('d-none');
+
+        document.querySelectorAll('#admin-selector-dropdown2 input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', async function () {
+                var checked = Array.from(document.querySelectorAll('#admin-selector-dropdown2 input[type="checkbox"]:checked')).map(cb => cb.value);
+                const resp = await fetchAdmin("GND_C", checked, true);
+                console.log(resp);
+            })
+        });
+
+    }
+
+});
+
+selector.addEventListener('change', async function () {
+
+    selectedValue = selector.value;
     if (['1', '2', '3', '4'].includes(selectedValue)) {
         document.getElementById('admin-selector').classList.remove('d-none');
         document.getElementById('admin-selector2').classList.add('d-none');
@@ -165,52 +210,6 @@ selector.addEventListener('change', async function () {
         document.getElementById('admin-selector-label').classList.remove('d-none');
         document.getElementById('admin-selector-label').textContent = "DS Division";
     }
-
-    document.querySelectorAll('#admin-selector-dropdown input[type="checkbox"]').forEach(checkbox => {
-
-        checkbox.addEventListener('change', async function () {
-            var checked = Array.from(document.querySelectorAll('#admin-selector-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
-            
-
-            if (selectedValue == "2") {
-                const data = await loadAndParseCSV('data/district.csv', 'en', "dist_code", "dist_name", "dist_code", checked);
-                let code_base = checked
-                    .map(element => `district_code='${element}'`)
-                    .join(" OR ");
-                
-                let name_base = data
-                    .map(element => `district_name='${element.name_en}'`)
-                    .join(" OR ");
-
-                let where = `(${name_base}) OR (${code_base})`;
-
-                
-                updateMap(where);
-                
-            }
-
-
-
-            else if (selectedValue == "4") {
-                const data = await loadAndParseCSV('data/gnd.csv', 'en', "gnd_code", "gnd_name");
-                populateDropdown('admin-selector-dropdown2', data);
-                
-                document.getElementById('admin-selector-label2').classList.remove('d-none')
-                document.getElementById('admin-selector-label2').textContent = "GN Division";
-                document.getElementById('admin-selector2').classList.remove('d-none');
-                document.getElementById('admin-selector').classList.remove('d-none');
-
-                document.querySelectorAll('#admin-selector-dropdown2 input[type="checkbox"]').forEach(checkbox => {
-                    checkbox.addEventListener('change', async function () {
-                        var checked = Array.from(document.querySelectorAll('#admin-selector-dropdown2 input[type="checkbox"]:checked')).map(cb => cb.value);
-                        const resp = await fetchAdmin("GND_C", checked, true);
-                        console.log(resp);
-                    })
-                });
-
-            }
-        })
-    })
 
 
 });
