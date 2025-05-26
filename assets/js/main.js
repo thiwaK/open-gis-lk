@@ -204,7 +204,8 @@ let selectedValue;
 selectorBtn.addEventListener('click', async function () {
 
     var checked = Array.from(document.querySelectorAll('#admin-selector-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
-
+    closePanelExtent();
+    
     if (selectedValue == "1") {
         const data = await loadAndParseCSV('data/province.csv', 'en', "prov_code", "prov_name", "prov_code", checked);
         let code_base = checked
