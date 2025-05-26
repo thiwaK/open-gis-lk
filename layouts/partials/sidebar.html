@@ -122,37 +122,42 @@
     </div>
 
     <div class="nav flex-column">
-        <a id="extentBtn" class="sidebar-link active text-decoration-none p-3" role="button"
-            onclick="openPanelExtent()">
+        <a id="extentBtn" class="sidebar-link active text-decoration-none p-3" role="button" data-bs-toggle="tooltip"
+            data-bs-placement="right" title="Select an area interested" onclick="openPanelExtent()">
             <i class="bi bi-bounding-box-circles me-3"></i>
             <span class="hide-on-collapse">Extent</span>
         </a>
 
-        <a id="productsBtn" class="sidebar-link text-decoration-none p-3">
+        <a id="productsBtn" class="sidebar-link text-decoration-none p-3" data-bs-toggle="tooltip"
+            data-bs-placement="right" title="Choose data layers">
             <i class="bi bi-box me-3"></i>
             <span class="hide-on-collapse">Products</span>
         </a>
 
-        <a class="sidebar-link text-decoration-none p-3">
+        <a class="sidebar-link text-decoration-none p-3" data-bs-toggle="tooltip" data-bs-placement="right"
+            title="Download selected data">
             <i class="bi bi-download me-3"></i>
             <span class="hide-on-collapse">Download</span>
         </a>
 
-        <a class="sidebar-link text-decoration-none p-3" data-bs-toggle="modal" data-bs-target="#helpModal">
+        <a class="sidebar-link text-decoration-none p-3" data-bs-toggle="modal" data-bs-target="#helpModal"
+            data-bs-placement="right" title="How to use the app">
             <i class="bi bi-question-square me-3"></i>
             <span class="hide-on-collapse">Help</span>
         </a>
 
+
     </div>
 
     <!-- GitHub Footer -->
-    <div class="mt-auto px-3 py-2 border-top small text-center">
-        <a href="https://github.com/thiwaK/open-gis-lk" target="_blank" class="text-decoration-none d-block">
+    <div id="sidebar-footer" class="mt-auto px-3 py-2 border-top small text-center">
+        <a href="https://github.com/thiwaK/open-gis-lk" target="_blank" class="text-decoration-none">
             <i class="bi bi-github me-2"></i>View on GitHub
         </a>
-        {{/*  <a href="https://github.com/thiwaK/open-gis-lk/stargazers" target="_blank" class="text-decoration-none text-warning">
+        {{/* <a href="https://github.com/thiwaK/open-gis-lk/stargazers" target="_blank"
+            class="text-decoration-none text-warning">
             <i class="bi bi-star-fill me-1"></i>Star this project
-        </a>  */}}
+        </a> */}}
     </div>
 
     {{/* <div class="profile-section mt-auto p-4">
@@ -181,8 +186,18 @@
     }
 
     function toggleSidebar() {
-        const sidebar = document.querySelector('.sidebar');
-        sidebar.classList.toggle('collapsed');
+        document.querySelector('.sidebar').classList.toggle('collapsed');
+        const link = document.querySelector('#sidebar-footer a');
+        if (link) {
+            if (link.textContent.includes('View on GitHub')) {
+                link.innerHTML = '<i class="bi bi-github me-2"></i>';
+            } else {
+                link.innerHTML = '<i class="bi bi-github me-2"></i>View on GitHub';
+            }
+        }
+
+
+
         setTimeout(adjustMapSize, 310); // Wait for CSS transition to finish
     }
 
