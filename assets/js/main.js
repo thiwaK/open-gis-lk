@@ -44,17 +44,41 @@ function populateDropdownsSQL(elementID, tableName, language) {
     });
 }
 
-async function loadMapData(parcelIdList, parcelType) {
+async function updateMap(query) {
+    showLoading();
+    const resp = JSON.parse(await fetchAdmin(query, true));
+    
+    if (window.currentGeoLayer) {
+        window.map.removeLayer(window.currentGeoLayer);
+    }
+    window.currentGeoLayer = L.geoJSON(resp, {
+        style: {
+            color: "blue",
+            fillColor: "lightblue",
+            fillOpacity: 0.5,
+            weight: 2
+        }
+    });
 
+    window.map.addLayer(window.currentGeoLayer);
+    window.map.fitBounds(window.currentGeoLayer.getBounds());
+
+    hideLoading();
+    // const layer = {
+    //     "District Layer": geojsonLayer
+    // };
+    // L.control.layers(layer).addTo(map);
 }
 
 async function fetchData(url) {
+    showLoading();
     let csvText = localStorage.getItem(url);
     if (!csvText) {
         const response = await fetch(url);
         csvText = await response.text();
         localStorage.setItem(url, csvText);
     }
+    hideLoading();
     return csvText;
 }
 
@@ -86,7 +110,6 @@ function populateDropdown(elementID, rows){
 }
 
 async function loadAndParseCSV(url, lang, code, name, idKey = null, idList = null) {
-    showLoading();
     
     const csvText = await fetchData(url);
 
@@ -106,11 +129,11 @@ async function loadAndParseCSV(url, lang, code, name, idKey = null, idList = nul
                         name_en: record[name]
                     }));
                 }
-                hideLoading();
+
                 resolve(rows);
             },
             error: function(error) {
-                hideLoading();
+                
                 reject(error);
             }
         });
@@ -161,26 +184,8 @@ selector.addEventListener('change', async function () {
 
                 let where = `(${name_base}) OR (${code_base})`;
 
-                const resp = JSON.parse(await fetchAdmin(where, true));
-                console.log(resp);
-
-
-                console.log("-_-");
-                const geojsonLayer = window.L.geoJSON(resp,{
-                    style: {
-                        color: "blue",
-                        fillColor: "lightblue",
-                        fillOpacity: 0.5,
-                        weight: 2
-                    }
-                });
-                window.map.addLayer(geojsonLayer);
-                window.map.fitBounds(geojsonLayer.getBounds());
                 
-                const layer = {
-                    "District Layer": geojsonLayer
-                };
-                L.control.layers(layer).addTo(map);
+                updateMap(where);
                 
             }
 
