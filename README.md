@@ -1,53 +1,40 @@
 # 🌐 OpenGIS LK
 _An open-source platform for visualizing and accessing geospatial data of Sri Lanka 🗺_
 
-**🌍 Live Demo**: [Explore OpenGIS LK](https://thiwak.github.io/open-gis-lk)
-
 > [!NOTE]
 > OpenGIS LK is still under development.
 
-
-
 ## Overview
+[**OpenGIS LK**](https://thiwak.github.io/open-gis-lk) is an **open-source web application** that brings **Sri Lanka’s spatial data** 🗺️ into one easily accessible place. Many geospatial datasets about Sri Lanka are scattered across different sources — OpenGIS LK collects them, so anyone can find, select, and download the data they need for any area of interest.
 
-[OpenGIS LK](https://thiwak.github.io/open-gis-lk) is a **free**, **open-source platform** that consolidates Sri Lanka’s geospatial data into a single, intuitive hub 🇱🇰. Designed for **accessibility** and **collaboration**, it empowers students, researchers, government agencies, and NGOs to explore, analyze, and leverage spatial data—without barriers.
-
-**Why it matters:**
-- 🗺 Democratizes access to critical maps, boundaries, and environmental datasets.
-- ⚡ Saves time by replacing fragmented sources with a unified, user-friendly interface.
-
-
+The goal of OpenGIS LK is to make Sri Lanka’s spatial data more discoverable, usable, and freely available to researchers, planners, developers, students, and the public — supporting better research, planning, and decision-making.
 
 ## Features
-
-- 🗺️ Interactive map with many boundaries  
+- 🗺️ Interactive data visualizer
 - 🔎 Search & filter datasets
 - 📥 Download in GeoJSON, CSV, or Shapefile formats  
 - 📱 Mobile-friendly (coming soon)  
 
 
-
-## Technology used
-
-| Technology | Purpose |
-| ---------- | ------- |
-|            |         |
-
+## 🛠️ Tech Stack
+**Static Site Generator**: Hugo ⚡️
+**Mapping Library**: LeafletJS 🗺️
+**Hosting**: GitHub Pages 🚀
 
 
 ## Where the data comes from
-
 | Source Name                                              | Data Type | Description |
 | -------------------------------------------------------- | --------- | ----------- |
-| [Department of Survey, Sri Lanka](https://survey.gov.lk) |           |             |
+| [Department of Survey, Sri Lanka](https://survey.gov.lk) |  Polygon  | Latest administrative boundaries |
 
 
 
 ## What's coming next
+✅ More datasets!
+✅ Multi language support — Sinhala, and Tamil
+✅ Enhanced mobile experience
 
-* Support three languages - English, Sinhala and Tamil
 
-  
 
 ## 🛠️ Development
 
@@ -55,7 +42,7 @@ Want to help? Check out our:
 - [Contribution Guidelines](CONTRIBUTING.md)  
 - [Project Roadmap](ROADMAP.md)  
 
-We welcome contributions of all kinds—code, data links, feature ideas, UI improvements, and documentation help!
+We welcome contributions of all kinds — code, data links, feature ideas, UI improvements, and documentation help!
 
 
 
@@ -67,6 +54,6 @@ MIT License – see the LICENSE file for details.
 
 ## ❤️ Support Open Data in Sri Lanka
 
-If you believe in open knowledge and the power of geospatial data, consider sharing this project with your network or contributing to its growth.
+If you believe in open knowledge and the power of geospatial data, consider giving a star, sharing this project with your network or contributing to its growth.
 
 > Together, we can build a more accessible and informed Sri Lanka.
