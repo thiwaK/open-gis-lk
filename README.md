@@ -16,10 +16,10 @@ The goal of OpenGIS LK is to make Sri Lanka’s spatial data more discoverable, 
 - 📱 Mobile-friendly (coming soon)  
 
 
-## Tech Stack
-- **Static Site Generator:** [Hugo](https://gohugo.io/) — fast and flexible static site builder ⚡️  
-- **Mapping Library:** [LeafletJS](https://leafletjs.com/) — lightweight open-source JavaScript library for interactive maps 🗺️  
-- **Hosting:** [GitHub Pages](https://pages.github.com/) — free and reliable static site hosting 🚀  
+## Technologies  
+- **Static Site Generator:** [Hugo](https://gohugo.io/)
+- **Mapping:** [LeafletJS](https://leafletjs.com/)  
+- **Hosting:** [GitHub Pages](https://pages.github.com/) 
 
 
 ## Where the data comes from
@@ -36,7 +36,6 @@ The goal of OpenGIS LK is to make Sri Lanka’s spatial data more discoverable, 
 
 
 ## Development
-
 Want to help? Check out our:
 - [Contribution Guidelines](CONTRIBUTING.md)  
 - [Project Roadmap](ROADMAP.md)  
@@ -46,13 +45,10 @@ We welcome contributions of all kinds — code, data links, feature ideas, UI im
 
 
 ## License
-
 MIT License – see the LICENSE file for details.
 
 
-
 ## Support Open Data in Sri Lanka
-
 If you believe in open knowledge and the power of geospatial data, consider giving a star, sharing this project with your network or contributing to its growth.
 
 > Together, we can build a more accessible and informed Sri Lanka.
