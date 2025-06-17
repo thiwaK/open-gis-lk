@@ -1,5 +1,6 @@
 import {adminLvlSelector, extentSelectorSave} from './uielements';
-import {loadAndParseCSV, fetchAdmin} from './dataloader';
+import {loadAndParseCSV, isValidGeoJSON} from './dataloader';
+import {fetchAdmin} from './api';
 
 function getAdminLevel(){
     return adminLvlSelector.value;
@@ -60,17 +61,17 @@ async function loadDataset(admin_lvl, checked){
     else if (admin_lvl == "4") {
 
         const checked = Array.from(document.querySelectorAll('#admin-selector-dropdown2 input[type="checkbox"]:checked')).map(cb => cb.value);
-        const data = await loadAndParseCSV('data/gnd.csv', 'en', "gnd_code", "gndname", "gnd_code", checked);
+        const data = await loadAndParseCSV('data/gnd.csv', 'en', "admin_code", "gndname", "admin_code", checked);
 
         let code_base = checked
-            .map(element => `gnd_code='${element}'`)
+            .map(element => `admin_code='${element}'`)
             .join(" OR ");
 
         let name_base = data
             .map(element => `gnd_name='${element.name_en}'`)
             .join(" OR ");
 
-        let where = `(${name_base}) OR (${code_base})`;
+        let where = `${code_base}`;
 
         updateMap(where, Number(admin_lvl));
 
@@ -90,6 +91,8 @@ async function updateMap(query, admin_lvl) {
     const resp = JSON.parse(await fetchAdmin(query, admin_lvl, true));
     if (!isValidGeoJSON(resp)) {
         console.log("INVALID");
+        hideLoading();
+        return;
     }
     if (window.currentGeoLayer) {
         window.map.removeLayer(window.currentGeoLayer);
@@ -122,7 +125,7 @@ function populateDropdown(elementID, rows) {
     const li = document.createElement("li");
     const input = document.createElement("input");
     input.type = "text";
-    input.id = `${elementID}`;
+    input.id = `${elementID}-search`;
     input.className = "form-control";
     input.placeholder = "Search...";
 

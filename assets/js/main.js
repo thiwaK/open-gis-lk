@@ -1,13 +1,9 @@
 import * as bootstrap from 'bootstrap';
 import './map';
 import {adminLvlSelector, extentSelectorSave} from './uielements';
-import {getAdminLevel} from './uifunctions';
-import fetchAdmin from './api';
-import {hideLoading, populateDropdown, loadDataset} from './uiupdater';
+import {hideLoading, populateDropdown, loadDataset, getAdminLevel} from './uifunctions';
 import {loadAndParseCSV} from './dataloader';
 
-
-let selectedValue;
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -44,14 +40,24 @@ function populateDropdownsSQL(elementID, tableName, language) {
 }
 
 extentSelectorSave.addEventListener('click', async function () {
-    var checked = Array.from(document.querySelectorAll('#admin-selector-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
-    closePanelExtent();
-    loadDataset(getAdminLevel(), checked);
+    
+    let selectedValue = getAdminLevel();
+    if (['1', '2', '3'].includes(selectedValue)){
+        var checked = Array.from(document.querySelectorAll('#admin-selector-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
+        closePanelExtent();
+        loadDataset(selectedValue, checked);
+    }
+    else if (['4'].includes(selectedValue)){
+        var checked = Array.from(document.querySelectorAll('#admin-selector-dropdown2 input[type="checkbox"]:checked')).map(cb => cb.value);
+        closePanelExtent();
+        loadDataset(selectedValue, checked);
+    }
+    
 });
 
 adminLvlSelector.addEventListener('change', async function () {
 
-    selectedValue = adminLvlSelector.value;
+    let selectedValue = getAdminLevel();
     if (['1', '2', '3', '4'].includes(selectedValue)) {
         document.getElementById('admin-selector').classList.remove('d-none');
         document.getElementById('admin-selector2').classList.add('d-none');
@@ -101,9 +107,7 @@ adminLvlSelector.addEventListener('change', async function () {
         });
 
     }
-
     
-
     if (document.getElementById('admin-selector-dropdown-search')) {
         document.getElementById('admin-selector-dropdown-search').addEventListener('keyup', function () {
             const filter = this.value.toLowerCase();
@@ -137,9 +141,6 @@ adminLvlSelector.addEventListener('change', async function () {
             });
         });
     }
-
-
-
 
 });
 

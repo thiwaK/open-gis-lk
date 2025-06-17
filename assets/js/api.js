@@ -51,11 +51,12 @@ async function fetchAdmin(where, admin_lvl, returnGeometry=true){
         returnGeometry: 'true',
         outSR: '4326',
         outFields: '*',
-        spatialRel:'esriSpatialRelContains',
-        geometryType: 'esriGeometryEnvelope',
+        spatialRel:'esriSpatialRelContains', //esriSpatialRelIntersects
+        geometryType: 'esriGeometryPolygon', //esriGeometryEnvelope
         where: where,
         generalize: 'true',
         units:'esriSRUnit_Meter',
+        returnTrueCurves: false
     };
 
     Object.entries(params).forEach(([key, value]) =>
@@ -63,7 +64,8 @@ async function fetchAdmin(where, admin_lvl, returnGeometry=true){
     );
 
     response = await fetchNow(url);
+    console.log(response);
     return response;
 }
 
-export default fetchAdmin;
+export {fetchAdmin};

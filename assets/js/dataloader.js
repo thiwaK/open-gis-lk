@@ -1,5 +1,5 @@
-import fetchAdmin from './api';
-import {hideLoading, showLoading, updateMap} from './uiupdater';
+import {fetchAdmin} from './api';
+import {hideLoading, showLoading, updateMap} from './uifunctions';
 
 async function loadAndParseCSV(url, lang, code, name, idKey = null, idList = null) {
 
@@ -97,7 +97,6 @@ function isValidGeoJSON(geojson) {
 
     return true;
 }
-
 
 
 export {loadAndParseCSV, fetchData, isValidGeoJSON};
