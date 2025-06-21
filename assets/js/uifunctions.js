@@ -1,6 +1,6 @@
 import {adminLvlSelector, extentSelectorSave} from './uielements';
 import {loadAndParseCSV, isValidGeoJSON} from './dataloader';
-import {fetchAdmin} from './api';
+import {fetchAdmin, fetchTile} from './api';
 
 function getAdminLevel(){
     return adminLvlSelector.value;
@@ -76,6 +76,18 @@ async function loadDataset(admin_lvl, checked){
         updateMap(where, Number(admin_lvl));
 
     }
+
+    // tile selector
+    else if (admin_lvl == "5") {
+
+        let code_base = checked
+            .map(element => `ti_cd='${element}'`)
+            .join(" OR ");
+
+        let where = `${code_base}`;
+
+        updateMap(where, Number(admin_lvl));
+    }
 }
 
 function showLoading() {
@@ -88,7 +100,14 @@ function hideLoading() {
 
 async function updateMap(query, admin_lvl) {
     showLoading();
-    const resp = JSON.parse(await fetchAdmin(query, admin_lvl, true));
+
+    let resp;
+    if ([1, 2, 3, 4].includes(admin_lvl)){
+        resp = JSON.parse(await fetchAdmin(query, admin_lvl, true));
+    } else if ([5].includes(admin_lvl)){
+        resp = JSON.parse(await fetchTile(query, admin_lvl, true));      
+    }
+    
     if (!isValidGeoJSON(resp)) {
         console.log("INVALID");
         hideLoading();
@@ -133,7 +152,8 @@ function populateDropdown(elementID, rows) {
     select.appendChild(li);
 
     rows.forEach(row => {
-        if (row.code.trim() === ""){
+        console.log(row);
+        if (row.code === undefined){
             return;
         }
         const li = document.createElement("li");

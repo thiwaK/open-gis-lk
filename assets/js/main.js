@@ -51,7 +51,12 @@ extentSelectorSave.addEventListener('click', async function () {
         var checked = Array.from(document.querySelectorAll('#admin-selector-dropdown2 input[type="checkbox"]:checked')).map(cb => cb.value);
         closePanelExtent();
         loadDataset(selectedValue, checked);
+    }else{
+        var checked = Array.from(document.querySelectorAll('#tile-selector-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
+        closePanelExtent();
+        loadDataset('5', checked);
     }
+
     
 });
 
@@ -152,7 +157,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // });
 
     const data = await loadAndParseCSV('data/gridnames_50k.csv', 'en', "code", "name", "code");
-    populateDropdown("tile-sellector-dropdown", data)
+    populateDropdown("tile-selector-dropdown", data)
 
     const tooltipTriggerList = document.querySelectorAll('[title]');
     tooltipTriggerList.forEach(function (el) {

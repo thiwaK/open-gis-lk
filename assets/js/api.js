@@ -64,8 +64,32 @@ async function fetchAdmin(where, admin_lvl, returnGeometry=true){
     );
 
     response = await fetchNow(url);
-    console.log(response);
     return response;
 }
 
-export {fetchAdmin};
+async function fetchTile(where, returnGeometry=true) {
+    console.log(where);
+    
+    let url = new URL("https://gisapps.nsdi.gov.lk/server/rest/services/SLNSDI/Survey_50K/MapServer/11/query");
+    
+    const params = {
+        f: 'geojson',
+        returnGeometry: 'true',
+        outSR: '4326',
+        outFields: '*',
+        spatialRel:'esriSpatialRelContains', //esriSpatialRelIntersects
+        geometryType: 'esriGeometryPolygon', //esriGeometryEnvelope
+        where: where,
+        units:'esriSRUnit_Meter',
+        returnTrueCurves: false
+    };
+    
+    Object.entries(params).forEach(([key, value]) =>
+        url.searchParams.append(key, value)
+    );
+
+    response = await fetchNow(url);
+    return response;
+}
+
+export {fetchAdmin, fetchTile};
