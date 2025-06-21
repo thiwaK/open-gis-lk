@@ -136,9 +136,6 @@ function populateDropdown(elementID, rows) {
         if (row.code.trim() === ""){
             return;
         }
-        if (row.name_en.trim() === ""){
-            return;
-        }
         const li = document.createElement("li");
         li.className = "dropdown-item";
 

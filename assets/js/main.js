@@ -2,7 +2,7 @@ import * as bootstrap from 'bootstrap';
 import './map';
 import {adminLvlSelector, extentSelectorSave} from './uielements';
 import {hideLoading, populateDropdown, loadDataset, getAdminLevel} from './uifunctions';
-import {loadAndParseCSV} from './dataloader';
+import {loadAndParseCSV, fetchData} from './dataloader';
 
 
 function sleep(ms) {
@@ -144,12 +144,15 @@ adminLvlSelector.addEventListener('change', async function () {
 
 });
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     hideLoading();
     // const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     // tooltipTriggerList.forEach(function (tooltipTriggerEl) {
     //     new bootstrap.Tooltip(tooltipTriggerEl);
     // });
+
+    const data = await loadAndParseCSV('data/gridnames_50k.csv', 'en', "code", "name", "code");
+    populateDropdown("tile-sellector-dropdown", data)
 
     const tooltipTriggerList = document.querySelectorAll('[title]');
     tooltipTriggerList.forEach(function (el) {

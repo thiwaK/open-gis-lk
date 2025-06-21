@@ -36,7 +36,9 @@
             <ul id="tile-sellector-dropdown" class="dropdown-menu">
                 {{ range seq 1 92 }}
                 <li class="dropdown-item">
-                    <label class="checkbox"><input type="checkbox" value="{{ . }}" wfd-id="id{{ . }}">{{ . }}</label>
+                    <label class="checkbox">
+                        <input type="checkbox" value="{{ . }}" wfd-id="id{{ . }}">{{ . }}
+                    </label>
                 </li>
                 {{ end }}
             </ul>
