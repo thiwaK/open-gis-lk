@@ -41,9 +41,6 @@ module:
     - source: "node_modules/leaflet/dist/leaflet.css"
       target: "static/css/leaflet.css"
 
-
-
-
 languages:
   si:
     languageCode: si-lk
@@ -73,14 +70,13 @@ languages:
         weight: 20
 
 params:
+  
   description: "An open-source platform for geospatial data in Sri Lanka."
 
   services:
     GoogleAnalytics:
       enable: true
       id: G-5YETP2LVL4
-  #   disqus:
-  #     shortname: your-disqus-shortname
 
   author:
     name: "Thiwanka Munasinghe"
@@ -98,7 +94,20 @@ params:
       showOnScrollUp : true
     enableSeparator: false
 
-
+  menus:
+    products:
+      - Name: Electricity
+        icon: bi-plug-fill
+        datasets:
+          - id: dataset-outage
+            name: Outages
+            description: Current electricity outages
+      - Name: Agriculture
+        icon: bi-leaf-fill
+        datasets:
+          - id: dataset-rice-yeild-2024
+            name: Rice Yeild 2024
+            description: Estimated rice crop yeild in 2024
 
 
 

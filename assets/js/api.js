@@ -1,4 +1,6 @@
-
+const mapServer = "/MapServer";
+const restService = "/server/rest/services";
+const nsdi = "gisapps.nsdi.gov.lk";
 
 function fetchNow(url) {
 
@@ -28,19 +30,21 @@ function fetchNow(url) {
 async function fetchAdmin(where, admin_lvl, returnGeometry=true){
 
     let url;
+    const host = nsdi;
+    const uri = "/SLNSDI/Boundary";
 
     switch (admin_lvl) {
         case 1:
-            url = new URL("https://gisapps.nsdi.gov.lk/server/rest/services/SLNSDI/Boundary/MapServer/6/query");
+            url = new URL(`https://${host}${restService}${uri}${mapServer}/6/query`);
             break;
         case 2:
-            url = new URL("https://gisapps.nsdi.gov.lk/server/rest/services/SLNSDI/Boundary/MapServer/5/query");
+            url = new URL(`https://${host}${restService}${uri}${mapServer}/5/query`);
             break;
         case 3:
-            url = new URL("https://gisapps.nsdi.gov.lk/server/rest/services/SLNSDI/Boundary/MapServer/4/query");
+            url = new URL(`https://${host}${restService}${uri}${mapServer}/4/query`);
             break;
         case 4:
-            url = new URL("https://gisapps.nsdi.gov.lk/server/rest/services/SLNSDI/Boundary/MapServer/3/query");
+            url = new URL(`https://${host}${restService}${uri}${mapServer}/3/query`);
             break;
         default:
             break;
@@ -70,7 +74,10 @@ async function fetchAdmin(where, admin_lvl, returnGeometry=true){
 async function fetchTile(where, returnGeometry=true) {
     console.log(where);
     
-    let url = new URL("https://gisapps.nsdi.gov.lk/server/rest/services/SLNSDI/Survey_50K/MapServer/11/query");
+    const host = nsdi;
+    const uri = "/SLNSDI/Survey_50K";
+
+    let url = new URL(`https://${host}${restService}${uri}${mapServer}/11/query`);
     
     const params = {
         f: 'geojson',

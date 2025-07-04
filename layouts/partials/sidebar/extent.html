@@ -1,11 +1,7 @@
-<!-- Overlay -->
-<div id="overlay" class="overlay" onclick="closePanelExtent()"></div>
-
-<!-- Slide-in Panel -->
-<div id="sidePanelExtent" class="slide-in p-4">
+<div id="sidebarExtent" class="d-none">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="mb-0">Extent Selector</h5>
-        <button class="close-btn" onclick="closePanelExtent()">&times;</button>
+        <button class="close-btn" onclick="closeSidebar()">&times;</button>
     </div>
 
     <hr>
@@ -89,17 +85,6 @@
 </div>
 
 <script>
-    // show-hide extent panel
-    function openPanelExtent() {
-        document.getElementById('sidePanelExtent').classList.add('show');
-        document.getElementById('overlay').classList.add('show');
-    }
-    function closePanelExtent() {
-        document.getElementById('sidePanelExtent').classList.remove('show');
-        document.getElementById('overlay').classList.remove('show');
-    }
-
-
 
     // Tile id/ admin bound content switcher
     const tileOption = document.getElementById('tileOption');
