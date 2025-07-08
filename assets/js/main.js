@@ -8,11 +8,12 @@ document.config = {
     product: {
         id: null,
         type: null,
+        level: null,
     },
     extent: {
         id: null,
         level: null,
-        aoi: null
+        aoi: null,
     }
 }
 
@@ -28,7 +29,8 @@ function getSelectedProduct(){
             if (selectedInput) {
                 const selectedValue = selectedInput.value;
                 const productAoiType = selectedInput.getAttribute("productaoitype");
-                return [selectedValue, productAoiType];
+                const productlevel = selectedInput.getAttribute("productlevel");
+                return [selectedValue, productAoiType, productlevel];
             } 
         }
     }
@@ -75,11 +77,14 @@ productSelectorSave.addEventListener('click', async function () {
         console.log(prod);
         document.config.product.id = prod[0]
         document.config.product.type = prod[1]
+        document.config.product.level = prod[2]
+    }
+
+    document.getElementById("admin-level-1").disabled = false;
+    if (parseInt(document.config.product.level, 10) === 4){
+        document.getElementById("admin-level-1").disabled = true;
     }
     
-    // console.log(payload);
-    // fetchAttributeData(payload);
-
 });
 
 adminLvlSelector.addEventListener('change', async function () {

@@ -117,7 +117,6 @@ function postNow(url, data) {
 
         xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE) {
-                console.log(`respond: ${xhr.status}`);
                 if (xhr.status === 200) {
                     resolve(xhr.responseText);
                 } else {
@@ -135,11 +134,6 @@ async function fetchAttr(payload){
     // response = await postNow(dataURL, payload);
     // return response;
 
-    document.config['aoi'] = payload['aoi']
-    document.config['level'] = payload['level']
-    document.config['id'] = payload['id']
-    
-
     const url = new URL(attributeDataURL.toString());
     Object.entries(payload).forEach(([key, value]) => {
         url.searchParams.append(key, value);
@@ -152,10 +146,6 @@ async function fetchAttr(payload){
 async function fetchAdmin(payload){
     // response = await postNow(dataURL, payload);
     // return response;
-
-    document.config['aoi'] = payload['aoi']
-    document.config['level'] = payload['level']
-    document.config['id'] = payload['id']
 
     const url = new URL(dataURL.toString());
     Object.entries(payload).forEach(([key, value]) => {

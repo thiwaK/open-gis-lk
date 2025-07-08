@@ -110,6 +110,7 @@ params:
         datasets:
           - id: gender-by-gnd-latest
             aoi_type: name
+            level: 4
             name: Gender Distribution by GND
             description: "Gender breakdown from latest data, aggregated by Grama Niladhari Division (GND). Includes counts of male, female, and total population per GND."
 

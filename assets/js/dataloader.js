@@ -99,26 +99,11 @@ function isValidGeoJSON(geojson) {
 }
 
 async function fetchAttributeData(payload) {
-    showLoading();
-    
     const res = fetchAttr(payload);
     console.log(res);
-
-    hideLoading();
+    return res;
 }
 
-async function manageData() {
 
-
-    if (document.config.product.type === "name"){
-        let names = await loadDataset(document.config.extent.level, document.config.extent.aoi, false);
-
-        if (document.config.extent.level === 5){
-            names = names.map(obj => obj.name.split(" ")[1]);
-        }
-        console.log(names);
-        payload['aoi'] = names;
-    }
-}
 
 export {loadAndParseCSV, fetchCSV, isValidGeoJSON, fetchAttributeData};
