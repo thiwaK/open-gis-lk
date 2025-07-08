@@ -1,63 +1,85 @@
 import * as bootstrap from 'bootstrap';
 import './map';
-import {adminLvlSelector, extentSelectorSave} from './uielements';
-import {hideLoading, populateDropdown, loadDataset, getAdminLevel} from './uifunctions';
-import {loadAndParseCSV, fetchData} from './dataloader';
+import { adminLvlSelector, extentSelectorSave, productSelectorSave } from './uielements';
+import { hideLoading, populateDropdown, loadDataset, getAdminLevel } from './uifunctions';
+import { loadAndParseCSV, fetchCSV, fetchAttributeData} from './dataloader';
 
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+document.config = {
+    product: {
+        id: null,
+        type: null,
+    },
+    extent: {
+        id: null,
+        level: null,
+        aoi: null
+    }
 }
 
-function populateDropdownsSQL(elementID, tableName, language) {
-    const select = document.getElementById(elementID);
-    var rows;
-    if (language == 'en') {
-        rows = alasql(`SELECT code, name_en FROM ${tableName}`);
-    }
-    rows.forEach(row => {
-        const li = document.createElement("li");
-        li.className = "dropdown-item";
+function getSelectedProduct(){
+    const activeTab = document.querySelector('#productTab .nav-link.active');
+    const selectedTabId = activeTab?.getAttribute('data-bs-target');
 
-        const label = document.createElement("label");
-        label.className = "checkbox";
+    if (selectedTabId) {
+        const tabContent = document.querySelector(`${selectedTabId}`);
+        if (tabContent) {
 
-        const input = document.createElement("input");
-        input.type = "checkbox";
-        input.value = row.id;
-
-        var text;
-        if (language == 'en') {
-            text = document.createTextNode(`${row.name_en}`);
+            const selectedInput = tabContent.querySelector('input[type="radio"]:checked');
+            if (selectedInput) {
+                const selectedValue = selectedInput.value;
+                const productAoiType = selectedInput.getAttribute("productaoitype");
+                return [selectedValue, productAoiType];
+            } 
         }
+    }
 
-        label.appendChild(input);
-        label.appendChild(text);
-        li.appendChild(label);
+    return null;
+}
 
-        select.appendChild(li)
-    });
+function getSelectedExtentTab(){
+    const activeTab = document.querySelector('#extentTab .nav-link.active');
+    const selectedTabId = activeTab?.getAttribute('data-bs-target');
+
+    if (selectedTabId) {
+        return selectedTabId;
+    }
+
+    return null;
 }
 
 extentSelectorSave.addEventListener('click', async function () {
-    
-    let selectedValue = getAdminLevel();
-    if (['1', '2', '3'].includes(selectedValue)){
-        var checked = Array.from(document.querySelectorAll('#admin-selector-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
-        closePanelExtent();
-        loadDataset(selectedValue, checked);
-    }
-    else if (['4'].includes(selectedValue)){
-        var checked = Array.from(document.querySelectorAll('#admin-selector-dropdown2 input[type="checkbox"]:checked')).map(cb => cb.value);
-        closePanelExtent();
-        loadDataset(selectedValue, checked);
-    }else{
+    closeSidebar();
+    const selectedExtentTab = getSelectedExtentTab();
+    const selectedValue = getAdminLevel();
+
+    if(selectedExtentTab === "#admin-boundary"){
+        if (['1', '2', '3'].includes(selectedValue)) {
+            var checked = Array.from(document.querySelectorAll('#admin-selector-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
+            loadDataset(selectedValue, checked);
+        }
+        else if (['4'].includes(selectedValue)) {
+            var checked = Array.from(document.querySelectorAll('#admin-selector-dropdown2 input[type="checkbox"]:checked')).map(cb => cb.value);
+            loadDataset(selectedValue, checked);
+        }
+
+    }else if(selectedExtentTab === "#tile-number"){
         var checked = Array.from(document.querySelectorAll('#tile-selector-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
-        closePanelExtent();
         loadDataset('5', checked);
     }
+});
 
+productSelectorSave.addEventListener('click', async function () {
+    closeSidebar();
+    const prod = getSelectedProduct();
+    if (prod != null){
+        console.log(prod);
+        document.config.product.id = prod[0]
+        document.config.product.type = prod[1]
+    }
     
+    // console.log(payload);
+    // fetchAttributeData(payload);
+
 });
 
 adminLvlSelector.addEventListener('change', async function () {
@@ -92,27 +114,27 @@ adminLvlSelector.addEventListener('change', async function () {
         document.querySelectorAll('#admin-selector-dropdown input[type="checkbox"]').forEach(checkbox => {
             checkbox.addEventListener('change', async function () {
 
-                    const checked = Array.from(document.querySelectorAll('#admin-selector-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
+                const checked = Array.from(document.querySelectorAll('#admin-selector-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
 
-                    if (checked.length > 0) {
-                        document.getElementById('admin-selector-label2').classList.remove('d-none')
-                        document.getElementById('admin-selector-label2').textContent = "GN Division";
-                        document.getElementById('admin-selector2').classList.remove('d-none');
-                        document.getElementById('admin-selector').classList.remove('d-none');
+                if (checked.length > 0) {
+                    document.getElementById('admin-selector-label2').classList.remove('d-none')
+                    document.getElementById('admin-selector-label2').textContent = "GN Division";
+                    document.getElementById('admin-selector2').classList.remove('d-none');
+                    document.getElementById('admin-selector').classList.remove('d-none');
 
-                        const data = await loadAndParseCSV('data/gnd.csv', 'en', "gnd_code", "gnd_name", "dsd_code", checked);
-                        populateDropdown('admin-selector-dropdown2', data);
+                    const data = await loadAndParseCSV('data/gnd.csv', 'en', "gnd_code", "gnd_name", "dsd_code", checked);
+                    populateDropdown('admin-selector-dropdown2', data);
 
-                    } else {
-                        document.getElementById('admin-selector-label2').classList.add('d-none');
-                        document.getElementById('admin-selector2').classList.add('d-none');
-                    }
+                } else {
+                    document.getElementById('admin-selector-label2').classList.add('d-none');
+                    document.getElementById('admin-selector2').classList.add('d-none');
+                }
 
             })
         });
 
     }
-    
+
     if (document.getElementById('admin-selector-dropdown-search')) {
         document.getElementById('admin-selector-dropdown-search').addEventListener('keyup', function () {
             const filter = this.value.toLowerCase();
@@ -151,16 +173,17 @@ adminLvlSelector.addEventListener('change', async function () {
 
 document.addEventListener('DOMContentLoaded', async () => {
     hideLoading();
-    // const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    // tooltipTriggerList.forEach(function (tooltipTriggerEl) {
-    //     new bootstrap.Tooltip(tooltipTriggerEl);
-    // });
 
     const data = await loadAndParseCSV('data/gridnames_50k.csv', 'en', "code", "name", "code");
     populateDropdown("tile-selector-dropdown", data)
 
-    const tooltipTriggerList = document.querySelectorAll('[title]');
-    tooltipTriggerList.forEach(function (el) {
-      new bootstrap.Tooltip(el);
-    });
+    // No tool tips
+    // const tooltipTriggerList = document.querySelectorAll('[title]');
+    // tooltipTriggerList.forEach(function (el) {
+    //     new bootstrap.Tooltip(el);
+    // });
+
+
+
+
 });

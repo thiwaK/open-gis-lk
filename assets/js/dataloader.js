@@ -1,9 +1,9 @@
-import {fetchAdmin} from './api';
+import {fetchAdmin, fetchAttr} from './api';
 import {hideLoading, showLoading, updateMap} from './uifunctions';
 
 async function loadAndParseCSV(url, lang, code, name, idKey = null, idList = null) {
 
-    const csvText = await fetchData(url);
+    const csvText = await fetchCSV(url);
 
     return new Promise((resolve, reject) => {
         Papa.parse(csvText, {
@@ -32,11 +32,11 @@ async function loadAndParseCSV(url, lang, code, name, idKey = null, idList = nul
     });
 }
 
-async function fetchData(url) {
+async function fetchCSV(url) {
     showLoading();
 
     const cached = localStorage.getItem(url);
-    const oneDay = 24 * 60 * 60 * 1000; // 1 day in milliseconds
+    const expTime = 24 * 60 * 60 * 1000 * 7; // 1 week in milliseconds
     let csvText;
 
     if (cached) {
@@ -44,7 +44,7 @@ async function fetchData(url) {
             const parsed = JSON.parse(cached);
             const age = Date.now() - parsed.timestamp;
 
-            if (age < oneDay) {
+            if (age < expTime) {
                 csvText = parsed.content;
             } else {
                 // expired — fetch new
@@ -98,5 +98,27 @@ function isValidGeoJSON(geojson) {
     return true;
 }
 
+async function fetchAttributeData(payload) {
+    showLoading();
+    
+    const res = fetchAttr(payload);
+    console.log(res);
 
-export {loadAndParseCSV, fetchData, isValidGeoJSON};
+    hideLoading();
+}
+
+async function manageData() {
+
+
+    if (document.config.product.type === "name"){
+        let names = await loadDataset(document.config.extent.level, document.config.extent.aoi, false);
+
+        if (document.config.extent.level === 5){
+            names = names.map(obj => obj.name.split(" ")[1]);
+        }
+        console.log(names);
+        payload['aoi'] = names;
+    }
+}
+
+export {loadAndParseCSV, fetchCSV, isValidGeoJSON, fetchAttributeData};
