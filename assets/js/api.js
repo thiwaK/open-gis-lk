@@ -1,3 +1,5 @@
+import {isValidGeoJSON, isValidJSON} from './dataloader';
+
 let dataURL = new URL(`https://opengislk.alwaysdata.net/getData`);
 let attributeDataURL = new URL(`https://opengislk.alwaysdata.net/getAttributeData`);
 
@@ -35,7 +37,6 @@ async function fetchAttr_(datasetId) {
 
         xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE) {
-                console.log(`respond: ${xhr.status}`);
                 if (xhr.status === 200) {
                     resolve(xhr.responseText);
                 } else {
@@ -51,32 +52,114 @@ async function fetchAttr_(datasetId) {
     });
 }
 
-function getCache(url) {
+const DB_NAME = 'OpenGISLK';
+const DB_VERSION = 3;
+const STORE_NAME = 'cache';
 
-    const cached = localStorage.getItem(url);
-    const expTime = 24 * 60 * 60 * 1000 * 7; // 1 week
-    let responseContent = null;
-
-    if (cached) {
-        try {
-            const parsed = JSON.parse(cached);
-            const age = Date.now() - parsed.timestamp;
-
-            if (age < expTime) {
-                responseContent = parsed.content;
-            } 
-        } catch (e) {
-            // corrupted or non-JSON — fallback to fresh fetch
-            responseContent = null;
+async function openDB() {
+    return new Promise((resolve, reject) => {
+        if (!window.indexedDB) {
+            alert("Sorry! Your browser does not support IndexedDB");
+            return reject("No IndexedDB support");
         }
-    }
 
-    return responseContent;
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME, { keyPath: "url" });
+            }
+        };
+
+        request.onsuccess = (event) => {
+            resolve(event.target.result);
+        };
+
+        request.onerror = (event) => {
+            reject("IndexedDB error: " + event.target.errorCode);
+        };
+    });
 }
 
-function fetchNow(url) {
+async function recordExists(store, key) {
+    return new Promise((resolve, reject) => {
+        if (typeof key !== 'string') {
+            // console.error('Invalid IndexedDB key:', key);
+            return resolve(false);
+        }
 
-    const cached = getCache(url);
+        const request = store.get(key);
+        request.onsuccess = () => {
+            resolve(request.result !== undefined);
+        };
+        request.onerror = () => {
+            // console.error("Error checking record existence:", request.error);
+            resolve(false);
+        };
+    });
+}
+
+async function getCache(url) {
+    const db = await openDB();
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+
+    const recExists = await recordExists(store, url);
+    if (!recExists){
+        return null;
+    }
+
+    return new Promise((resolve, reject) => {
+        const getRequest = store.get(url);
+        const expTime = 7 * 24 * 60 * 60 * 1000; // 1 week
+
+        getRequest.onsuccess = () => {
+            const result = getRequest.result;
+
+            if (result) {
+                const age = Date.now() - result.timestamp;
+                if (age < expTime) {
+                    resolve(result.content);
+                } else {
+                    resolve(null);
+                }
+            } else {
+                resolve(null);
+            }
+        };
+
+        getRequest.onerror = () => {
+            console.error("IndexedDB read error:", getRequest.error);
+            resolve(null);
+        };
+    });
+}
+
+async function setCache(url, content) {
+    const db = await openDB();
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+
+    const data = {
+        url,
+        content,
+        timestamp: Date.now()
+    };
+
+    return new Promise((resolve, reject) => {
+        const putRequest = store.put(data);
+        putRequest.onsuccess = () => resolve(true);
+        putRequest.onerror = () => {
+            console.error("IndexedDB write error:", putRequest.error);
+            reject(putRequest.error);
+        };
+    });
+}
+
+async function fetchNow(url) {
+
+    const cached = await getCache(url.toString());
     if (cached != null){
         return cached;
     }
@@ -88,13 +171,9 @@ function fetchNow(url) {
 
         xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE) {
-                console.log(`respond: ${xhr.status}`);
                 if (xhr.status === 200) {
 
-                    localStorage.setItem(url, JSON.stringify({
-                        content: xhr.responseText,
-                        timestamp: Date.now()
-                    }));
+                    setCache(url.toString(), xhr.responseText);
                     resolve(xhr.responseText);
                 } else {
                     reject(xhr.status);
@@ -139,7 +218,7 @@ async function fetchAttr(payload){
         url.searchParams.append(key, value);
     });
 
-    response = await fetchNow(url);
+    const response = await fetchNow(url);
     return response;
 }
 
@@ -151,9 +230,19 @@ async function fetchAdmin(payload){
     Object.entries(payload).forEach(([key, value]) => {
         url.searchParams.append(key, value);
     });
-    // console.log(url);
 
-    response = await fetchNow(url);
+    let response = await fetchNow(url);
+    
+    if (!isValidJSON(response)){
+        console.log("invalidJSON");
+        return;
+    }
+    response = JSON.parse(response);
+
+    // if (!isValidGeoJSON(response)) {
+    //     console.log("invalidGeoJSON");
+    //     return;
+    // }
     return response;
 }
 

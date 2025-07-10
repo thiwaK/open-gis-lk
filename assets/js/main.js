@@ -1,8 +1,8 @@
 import * as bootstrap from 'bootstrap';
 import './map';
 import { adminLvlSelector, extentSelectorSave, productSelectorSave } from './uielements';
-import { hideLoading, populateDropdown, loadDataset, getAdminLevel } from './uifunctions';
-import { loadAndParseCSV, fetchCSV, fetchAttributeData} from './dataloader';
+import { hideLoading, populateDropdown, getAdminLevel } from './uifunctions';
+import { loadAndParseCSV, fetchCSV, fetchData} from './dataloader';
 
 document.config = {
     product: {
@@ -54,31 +54,52 @@ extentSelectorSave.addEventListener('click', async function () {
     const selectedExtentTab = getSelectedExtentTab();
     const selectedValue = getAdminLevel();
 
+    document.config.extent.level = parseInt(selectedValue, 10);
+    switch(document.config.extent.level) {
+        case 1:
+            document.config.extent.id = 'poly_province';
+            break;
+        
+        case 2:
+            document.config.extent.id = 'poly_district';
+            break;
+        
+        case 3:
+            document.config.extent.id = 'poly_dsd';
+            break;
+        
+        case 4:
+            document.config.extent.id = 'poly_gnd';
+            break;
+        
+        case 5:
+            document.config.extent.id = 'poly_50k';
+            break;
+    }
+
     if(selectedExtentTab === "#admin-boundary"){
         if (['1', '2', '3'].includes(selectedValue)) {
             var checked = Array.from(document.querySelectorAll('#admin-selector-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
-            loadDataset(selectedValue, checked);
-        }
-        else if (['4'].includes(selectedValue)) {
+            document.config.extent.aoi = checked;
+        } else if (['4'].includes(selectedValue)) {
             var checked = Array.from(document.querySelectorAll('#admin-selector-dropdown2 input[type="checkbox"]:checked')).map(cb => cb.value);
-            loadDataset(selectedValue, checked);
+            document.config.extent.aoi = checked;
         }
-
     }else if(selectedExtentTab === "#tile-number"){
         var checked = Array.from(document.querySelectorAll('#tile-selector-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
-        loadDataset('5', checked);
+        document.config.extent.aoi = checked;
+        document.config.extent.level = 5;
     }
+
+    fetchData();
 });
 
 productSelectorSave.addEventListener('click', async function () {
     closeSidebar();
     const prod = getSelectedProduct();
-    if (prod != null){
-        console.log(prod);
-        document.config.product.id = prod[0]
-        document.config.product.type = prod[1]
-        document.config.product.level = prod[2]
-    }
+    document.config.product.id = prod[0]
+    document.config.product.type = prod[1]
+    document.config.product.level = prod[2]
 
     document.getElementById("admin-level-1").disabled = false;
     if (parseInt(document.config.product.level, 10) === 4){
