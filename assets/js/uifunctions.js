@@ -46,7 +46,8 @@ function hideLoading() {
 }
 
 function updateMap(poly, attr=null) {
-    showLoading();
+    // showLoading();
+    console.log(poly[0]);
 
     if (window.currentGeoLayer) {
         window.map.removeLayer(window.currentGeoLayer);

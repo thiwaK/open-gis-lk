@@ -122,11 +122,41 @@ async function fetchSpatialData() {
     return res;
 }
 
-async function fetchData() {
-    // await fetchAttributeData(attributePayload)
+function getBBox(data) {
+  const features = data.features;
 
+  if (!Array.isArray(features)) {
+    return null;
+  }
+
+  let minX = Infinity, minY = Infinity;
+  let maxX = -Infinity, maxY = -Infinity;
+
+  features.forEach(feature => {
+
+    const rings = feature.geometry?.coordinates || [];
+    rings.forEach(ring => {
+      ring.forEach(([x, y]) => {
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      });
+    });
+  });
+
+  return { xmin: minX, ymin: minY, xmax: maxX, ymax: maxY };
+}
+
+
+async function fetchData() {
     const spatialdata = await fetchSpatialData();
     await updateMap(spatialdata);
+
+    const bbox = getBBox(spatialdata);
+    console.log(bbox);
+
+    // await fetchAttributeData(bbox)
 }
 
 async function fetchSpatialData__(payload_){
