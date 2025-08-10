@@ -77,40 +77,17 @@ params:
       showOnScrollUp : true
     enableSeparator: false
 
-
-
-
-
-
-
-
-
-# Menus:
-#   main:
-#     - identifier: blog
-#       name: Blog
-#       title: Blog posts
-#       url: /blogs
-#       weight: 1
-#     - identifier: gallery
-#       name: Gallery
-#       title: Blog posts
-#       url: /gallery
-#       weight: 2
-    #Dropdown menu
-    # - identifier: dropdown
-    #   title: Example dropdown menu
-    #   name: Dropdown
-    #   weight: 3
-    # - identifier: dropdown1
-    #   title: example dropdown 1
-    #   name: example 1
-    #   url: /#
-    #   parent: dropdown
-    #   weight: 1
-    # - identifier: dropdown2
-    #   title: example dropdown 2
-    #   name: example 2
-    #   url: /#
-    #   parent: dropdown
-    #   weight: 2
+  menus:
+    products:
+      - Name: Electricity
+        icon: bi-plug-fill
+        datasets:
+          - id: dataset-outage
+            name: Outages
+            description: Current electricity outages
+      - Name: Agriculture
+        icon: bi-leaf-fill
+        datasets:
+          - id: dataset-cereal-production-2012-yala
+            name: Cereal Production 2012
+            description: Cereal Production Statistics - Yala Season 2012

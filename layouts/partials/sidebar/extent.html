@@ -6,75 +6,75 @@
 
     <hr>
 
-    <!-- Option Group -->
-    <div class="btn-group" role="group" aria-label="Selection Options">
-        <input type="radio" class="btn-check" name="inputOption" id="adminOption" autocomplete="off" checked>
-        <label class="btn btn-outline-secondary" for="adminOption">
-            <i class="bi bi-hexagon-half me-2"></i> Admin Boundary
-        </label>
 
-        <input type="radio" class="btn-check" name="inputOption" id="tileOption" autocomplete="off">
-        <label class="btn btn-outline-secondary" for="tileOption">
-            <i class="bi bi-1-square me-2"></i> Tile Number
-        </label>
-    </div>
-
-    <!-- Dynamic Content -->
-    <div class="mt-4">
-
-        {{/* Tile selector content */}}
-        <div id="tileContent" class="d-none">
-            <label for="tile-sellector" class="form-label"><i class="bi bi-layers me-2"></i>Tiles</label>
-            <button type="button" id="" class="btn btn-outline-secondary dropdown-toggle w-100"
-                data-bs-toggle="dropdown" aria-expanded="false">
-                <span id=""><i class="bi bi-check2-square me-2"></i>Choose</span>
-            </button>
-            <ul id="tile-selector-dropdown" class="dropdown-menu">
-                {{ range seq 1 92 }}
-                <li class="dropdown-item">
-                    <label class="checkbox">
-                        <input type="checkbox" value="{{ . }}" wfd-id="id{{ . }}">{{ . }}
-                    </label>
-                </li>
+    <ul class="nav nav-tabs" id="extentTab" role="tablist">
+        {{ range $index, $item := .Site.Params.menus.extents }}
+        <li class="nav-item" role="presentation">
+            <button id="{{ lower $item.Name | urlize }}-tab" class="nav-link {{ if eq $index 0 }}active{{ end }}"
+                data-bs-toggle="tab" data-bs-target="#{{ lower $item.Name | urlize }}" type="button" role="tab"
+                aria-controls="{{ lower $item.Name | urlize }}"
+                aria-selected="{{ if eq $index 0 }}true{{ else }}false{{ end }}">
+                {{ if $item.icon }}
+                <i class="{{ $item.icon }} me-2"></i>
                 {{ end }}
-            </ul>
+                {{ $item.Name }}
+            </button>
+        </li>
+        {{ end }}
+    </ul>
+
+    <div id="extentTabContent" class="tab-content mt-3">
+        <div id="admin-boundary" class="tab-pane fade show active" role="tabpanel" aria-labelledby="admin-boundary-tab">
+            <div class="row g-3 m-2">
+                <select id="admin-level-selector" class="form-select">
+                    <option selected disabled>Select level</option>
+                    <option id="admin-level-1" value="1">Province</option>
+                    <option id="admin-level-2" value="2">District</option>
+                    <option id="admin-level-3" value="3">Divisional Secretry Division</option>
+                    <option id="admin-level-4" value="4">Grama Niladhari Division</option>
+                </select>
+
+                <div id="admin-selector" class="col-md-6 py-3 d-none">
+                    <label id="admin-selector-label" for="" class="form-label"></label>
+                    <button type="button" id="" class="btn btn-outline-secondary dropdown-toggle w-100"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <span id="admin-selector-btn"><i class="bi bi-check2-square me-2"></i>Choose</span>
+                    </button>
+                    <ul id="admin-selector-dropdown" class="dropdown-menu">
+                        <!-- Populate dynamically -->
+                    </ul>
+                </div>
+
+                <div id="admin-selector2" class="col-md-6 d-none">
+                    <label id="admin-selector-label2" for="" class="form-label"></label>
+                    <button type="button" id="" class="btn btn-outline-secondary dropdown-toggle w-100"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <span id="admin-selector-btn2"><i class="bi bi-check2-square me-2"></i>Choose</span>
+                    </button>
+
+                    <ul id="admin-selector-dropdown2" class="dropdown-menu">
+                        <!-- Populate dynamically -->
+                    </ul>
+                </div>
+            </div>
         </div>
 
-        {{/* Admin bound selector */}}
-        <div id="adminContent" class="">
-
-            <label id="" for="" class="form-label"><i class="bi bi-geo-alt me-2"></i> Administrative Boundary Level</label>
-            <select id="admin-level-selector" class="form-select">
-                <option selected disabled>Select level</option>
-                <option value="1">Province</option>
-                <option value="2">District</option>
-                <option value="3">Divisional Secretry Division</option>
-                <option value="4">Grama Niladhari Division</option>
-            </select>
-
-            <div id="admin-selector" class="col-md-6 py-3 d-none">
-                <label id="admin-selector-label" for="" class="form-label"></label>
+        <div id="tile-number" class="tab-pane fade" role="tabpanel" aria-labelledby="tile-number-tab">
+            <div class="row g-3 m-2">
                 <button type="button" id="" class="btn btn-outline-secondary dropdown-toggle w-100"
                     data-bs-toggle="dropdown" aria-expanded="false">
-                    <span id="admin-selector-btn"><i class="bi bi-check2-square me-2"></i>Choose</span>
+                    <span id=""><i class="bi bi-check2-square me-2"></i>Choose</span>
                 </button>
-                <ul id="admin-selector-dropdown" class="dropdown-menu">
-                    <!-- Populate dynamically -->
+                <ul id="tile-selector-dropdown" class="dropdown-menu">
+                    {{ range seq 1 92 }}
+                    <li class="dropdown-item">
+                        <label class="checkbox">
+                            <input type="checkbox" value="{{ . }}" wfd-id="id{{ . }}">{{ . }}
+                        </label>
+                    </li>
+                    {{ end }}
                 </ul>
             </div>
-
-            <div id="admin-selector2" class="col-md-6 d-none">
-                <label id="admin-selector-label2" for="" class="form-label"></label>
-                <button type="button" id="" class="btn btn-outline-secondary dropdown-toggle w-100"
-                    data-bs-toggle="dropdown" aria-expanded="false">
-                    <span id="admin-selector-btn2"><i class="bi bi-check2-square me-2"></i>Choose</span>
-                </button>
-
-                <ul id="admin-selector-dropdown2" class="dropdown-menu">
-                    <!-- Populate dynamically -->
-                </ul>
-            </div>
-
         </div>
     </div>
 
@@ -83,26 +83,3 @@
     </button>
 
 </div>
-
-<script>
-
-    // Tile id/ admin bound content switcher
-    const tileOption = document.getElementById('tileOption');
-    const adminOption = document.getElementById('adminOption');
-    const tileContent = document.getElementById('tileContent');
-    const adminContent = document.getElementById('adminContent');
-
-    function toggleContent() {
-        if (tileOption.checked) {
-            tileContent.classList.remove('d-none');
-            adminContent.classList.add('d-none');
-        } else if (adminOption.checked) {
-            adminContent.classList.remove('d-none');
-            tileContent.classList.add('d-none');
-        }
-    }
-
-    tileOption.addEventListener('change', toggleContent);
-    adminOption.addEventListener('change', toggleContent);
-
-</script>

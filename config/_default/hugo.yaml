@@ -69,6 +69,7 @@ languages:
         pageRef: /services
         weight: 20
 
+# menus content need to be updated in production config as well
 params:
   
   description: "An open-source platform for geospatial data in Sri Lanka."
@@ -95,22 +96,47 @@ params:
     enableSeparator: false
 
   menus:
+    extents:
+      - Name: Admin Boundary
+        icon: bi-people-fill
+      
+      - Name: Tile Number
+        icon: bi-people-fill
+ 
+
     products:
-      - Name: Electricity
-        icon: bi-plug-fill
+      - Name: Demographic
+        icon: bi-people-fill
         datasets:
-          - id: dataset-outage
-            name: Outages
-            description: Current electricity outages
-      - Name: Agriculture
-        icon: bi-leaf-fill
-        datasets:
-          - id: dataset-rice-yeild-2024
-            name: Rice Yeild 2024
-            description: Estimated rice crop yeild in 2024
+          - id: gender-by-gnd-latest
+            aoi_type: name
+            level: 4
+            name: Gender Distribution by GND
+            description: "Gender breakdown from latest data, aggregated by Grama Niladhari Division (GND). Includes counts of male, female, and total population per GND."
+
+      # - Name: Electricity
+      #   icon: bi-plug-fill
+      #   datasets:
+      #     - id: dataset-outage
+      #       name: Outages
+      #       description: Current electricity outages
+
+      # - Name: Agriculture
+      #   icon: bi-leaf-fill
+      #   datasets:
+      #   - id: dataset-cereal-production-area-2012-yala
+      #     name: Cereal Production Area (Hectares) - Yala 2012
+      #     description: Total area used for cereal production in hectares during Yala Season 2012
+
+      #   - id: dataset-cereal-production-mt-2012-yala
+      #     name: Cereal Production Quantity (Metric Tons) - Yala 2012
+      #     description: Total cereal production in metric tons during Yala Season 2012
 
 
 
+
+# Name: Census [Year]: [Subject] by [Geography Level]
+# Description: [What is measured], from the [year] census, grouped by [unit]. Includes [key metrics].
 
 
 
