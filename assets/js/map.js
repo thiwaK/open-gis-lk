@@ -7,7 +7,7 @@ const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl")
 
 if (!gl) {
     document.getElementById("webgl-warning").classList.remove("d-none");
-    throw new Error("WebGL not supported. Stopping script.");
+    // throw new Error("WebGL not supported. Stopping script.");
 } 
 
 window.map = L.map('map').setView([7.9, 80.7], 8);

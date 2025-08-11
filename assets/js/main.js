@@ -1,8 +1,6 @@
 import * as bootstrap from 'bootstrap';
 import './map';
-import { adminLvlSelector, extentSelectorSave, productSelectorSave } from './uielements';
-import { hideLoading, populateDropdown, getAdminLevel } from './uifunctions';
-import { loadAndParseCSV, fetchCSV, fetchData} from './dataloader';
+import { fetchData, fetchAdminLevelData} from './dataloader';
 
 document.config = {
     product: {
@@ -17,6 +15,14 @@ document.config = {
     }
 }
 
+// UI ELEMENTS
+const adminLvlSelector = document.getElementById('admin-level-selector');
+const extentSelectorSave = document.getElementById('extent-selecter-save');
+const tileSelectorDropdown = document.getElementById('tile-selector-dropdown');
+const productSelectorSave = document.getElementById('product-selecter-save');
+
+
+// UI FUNCTIONS
 function getSelectedProduct(){
     const activeTab = document.querySelector('#productTab .nav-link.active');
     const selectedTabId = activeTab?.getAttribute('data-bs-target');
@@ -49,6 +55,104 @@ function getSelectedExtentTab(){
     return null;
 }
 
+function getAdminLevel(){
+    return adminLvlSelector.value;
+}
+
+function showLoading() {
+    document.getElementById('loading-overlay').classList.remove('d-none');
+}
+
+function hideLoading() {
+    document.getElementById('loading-overlay').classList.add('d-none');
+}
+
+function updateMap(poly, attr=null) {
+    // showLoading();
+    console.log(poly[0]);
+
+    if (window.currentGeoLayer) {
+        window.map.removeLayer(window.currentGeoLayer);
+    }
+
+    window.currentGeoLayer = L.geoJSON(poly, {
+        style: {
+            color: "blue",
+            fillColor: "lightblue",
+            fillOpacity: 0.5,
+            weight: 2
+        }
+    });
+
+    window.map.addLayer(window.currentGeoLayer);
+    window.map.fitBounds(window.currentGeoLayer.getBounds());
+
+    if (attr == null){
+        hideLoading();
+        return;
+    }
+
+    /* ===== Fetch attribute data */
+    let payload = {
+        id: document.config.product.id,
+        level: document.config.extent.level,
+        aoi: document.config.extent.aoi,
+    }
+
+    const respAttr = fetchAttributeData(payload);
+    console.log(respAttr);
+
+    hideLoading();
+    // const layer = {
+    //     "District Layer": geojsonLayer
+    // };
+    // L.control.layers(layer).addTo(map);
+}
+
+function populateDropdown(elementID, rows) {
+
+    // console.log(`updating ${elementID}`);
+    const select = document.getElementById(elementID);
+    select.innerHTML = '';
+
+    const li = document.createElement("li");
+    const input = document.createElement("input");
+    input.type = "text";
+    input.id = `${elementID}-search`;
+    input.className = "form-control";
+    input.placeholder = "Search...";
+
+    li.appendChild(input);
+    select.appendChild(li);
+
+    rows.forEach(row => {
+        // console.log(row);
+        if (row.code === undefined){
+            return;
+        }
+        const li = document.createElement("li");
+        li.className = "dropdown-item";
+
+        const label = document.createElement("label");
+        label.className = "checkbox";
+
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.value = row.code;
+
+        const text = document.createTextNode(row.name_en);
+
+        label.appendChild(input);
+        label.appendChild(text);
+        li.appendChild(label);
+
+
+        select.appendChild(li); // Then add the new one(s)
+
+    });
+}
+
+// EVENTS LISTENERS
 extentSelectorSave.addEventListener('click', async function () {
     closeSidebar();
     const selectedExtentTab = getSelectedExtentTab();
@@ -119,20 +223,20 @@ adminLvlSelector.addEventListener('change', async function () {
     }
 
     if (selectedValue == "1") {
-        const data = await loadAndParseCSV('data/province.csv', 'en', "prov_code", "prov_name");
+        const data = await fetchAdminLevelData(1);
         populateDropdown('admin-selector-dropdown', data);
     }
     else if (selectedValue == "2") {
-        const data = await loadAndParseCSV('data/district.csv', 'en', "dist_code", "dist_name");
+        const data = await fetchAdminLevelData(2);
         populateDropdown('admin-selector-dropdown', data);
     }
     else if (selectedValue == "3") {
-        const data = await loadAndParseCSV('data/dsd.csv', 'en', "dsd_code", "dsd_name");
+        const data = await fetchAdminLevelData(3);
         populateDropdown('admin-selector-dropdown', data);
     }
     else if (selectedValue == "4") {
-        const data = await loadAndParseCSV('data/dsd.csv', 'en', "dsd_code", "dsd_name");
-        populateDropdown('admin-selector-dropdown', data);
+        const dataDSD = await fetchAdminLevelData(3);
+        populateDropdown('admin-selector-dropdown', dataDSD);
 
         document.getElementById('admin-selector-label').classList.remove('d-none');
         document.getElementById('admin-selector-label').textContent = "DS Division";
@@ -148,7 +252,9 @@ adminLvlSelector.addEventListener('change', async function () {
                     document.getElementById('admin-selector2').classList.remove('d-none');
                     document.getElementById('admin-selector').classList.remove('d-none');
 
-                    const data = await loadAndParseCSV('data/gnd.csv', 'en', "gnd_code", "gnd_name", "dsd_code", checked);
+                    let data = await fetchAdminLevelData(4);
+                    data = data?.filter(record => record.code && checked.includes(String(record.dsd_code)));
+
                     populateDropdown('admin-selector-dropdown2', data);
 
                 } else {
@@ -198,10 +304,7 @@ adminLvlSelector.addEventListener('change', async function () {
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
-    hideLoading();
-
-    const data = await loadAndParseCSV('data/gridnames_50k.csv', 'en', "code", "name", "code");
-    populateDropdown("tile-selector-dropdown", data)
+    
 
     // No tool tips
     // const tooltipTriggerList = document.querySelectorAll('[title]');
@@ -210,6 +313,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     // });
 
 
+    // const gndArray = await fetchAdminLevelData(5);
+    // populateDropdown("tile-selector-dropdown", gndArray);
 
+    await fetchAdminLevelData(4);
+    await fetchAdminLevelData(3);
+    await fetchAdminLevelData(2);
+    await fetchAdminLevelData(1);
+
+    hideLoading();
 
 });
