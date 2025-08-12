@@ -1,1 +1,41 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml"><url><loc>https://thiwak.github.io/open-gis-lk/si/categories/</loc><xhtml:link rel="alternate" hreflang="en-us" href="https://thiwak.github.io/open-gis-lk/categories/"/><xhtml:link rel="alternate" hreflang="si-lk" href="https://thiwak.github.io/open-gis-lk/si/categories/"/></url><url><loc>https://thiwak.github.io/open-gis-lk/si/</loc><xhtml:link rel="alternate" hreflang="en-us" href="https://thiwak.github.io/open-gis-lk/"/><xhtml:link rel="alternate" hreflang="si-lk" href="https://thiwak.github.io/open-gis-lk/si/"/></url><url><loc>https://thiwak.github.io/open-gis-lk/si/tags/</loc><xhtml:link rel="alternate" hreflang="en-us" href="https://thiwak.github.io/open-gis-lk/tags/"/><xhtml:link rel="alternate" hreflang="si-lk" href="https://thiwak.github.io/open-gis-lk/si/tags/"/></url></urlset>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>//localhost:1313/si/categories/</loc>
+    <xhtml:link
+                rel="alternate"
+                hreflang="en-us"
+                href="//localhost:1313/categories/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="si-lk"
+                href="//localhost:1313/si/categories/"
+                />
+  </url><url>
+    <loc>//localhost:1313/si/</loc>
+    <xhtml:link
+                rel="alternate"
+                hreflang="en-us"
+                href="//localhost:1313/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="si-lk"
+                href="//localhost:1313/si/"
+                />
+  </url><url>
+    <loc>//localhost:1313/si/tags/</loc>
+    <xhtml:link
+                rel="alternate"
+                hreflang="en-us"
+                href="//localhost:1313/tags/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="si-lk"
+                href="//localhost:1313/si/tags/"
+                />
+  </url>
+</urlset>
