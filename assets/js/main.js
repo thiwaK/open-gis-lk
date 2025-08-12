@@ -1,6 +1,7 @@
 import * as bootstrap from 'bootstrap';
-import './map';
-import { fetchData, fetchAdminLevelData} from './dataloader';
+// import './map';
+import {fetchSpatialData, fetchAttributeData, fetchAdminLevelData, getBBox} from './dataloader';
+import {updateMap} from './map';
 
 document.config = {
     product: {
@@ -12,6 +13,9 @@ document.config = {
         id: null,
         level: null,
         aoi: null,
+    },
+    map:{
+        dataset: null,
     }
 }
 
@@ -67,48 +71,6 @@ function hideLoading() {
     document.getElementById('loading-overlay').classList.add('d-none');
 }
 
-function updateMap(poly, attr=null) {
-    // showLoading();
-    console.log(poly[0]);
-
-    if (window.currentGeoLayer) {
-        window.map.removeLayer(window.currentGeoLayer);
-    }
-
-    window.currentGeoLayer = L.geoJSON(poly, {
-        style: {
-            color: "blue",
-            fillColor: "lightblue",
-            fillOpacity: 0.5,
-            weight: 2
-        }
-    });
-
-    window.map.addLayer(window.currentGeoLayer);
-    window.map.fitBounds(window.currentGeoLayer.getBounds());
-
-    if (attr == null){
-        hideLoading();
-        return;
-    }
-
-    /* ===== Fetch attribute data */
-    let payload = {
-        id: document.config.product.id,
-        level: document.config.extent.level,
-        aoi: document.config.extent.aoi,
-    }
-
-    const respAttr = fetchAttributeData(payload);
-    console.log(respAttr);
-
-    hideLoading();
-    // const layer = {
-    //     "District Layer": geojsonLayer
-    // };
-    // L.control.layers(layer).addTo(map);
-}
-
 function populateDropdown(elementID, rows) {
 
     // console.log(`updating ${elementID}`);
@@ -150,6 +112,20 @@ function populateDropdown(elementID, rows) {
         select.appendChild(li); // Then add the new one(s)
 
     });
+}
+
+async function fetchData() {
+    showLoading();
+    
+    const spatialdata = await fetchSpatialData();
+    updateMap(spatialdata);
+
+    const bbox = getBBox(spatialdata);
+    console.log(bbox);
+
+    // await fetchAttributeData(bbox)
+
+    hideLoading();
 }
 
 // EVENTS LISTENERS
@@ -304,7 +280,7 @@ adminLvlSelector.addEventListener('change', async function () {
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
-    
+    showLoading();
 
     // No tool tips
     // const tooltipTriggerList = document.querySelectorAll('[title]');

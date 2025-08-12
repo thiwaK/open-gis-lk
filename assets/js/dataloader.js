@@ -72,16 +72,6 @@ function getBBox(data) {
   return { xmin: minX, ymin: minY, xmax: maxX, ymax: maxY };
 }
 
-async function fetchData() {
-    const spatialdata = await fetchSpatialData();
-    await updateMap(spatialdata);
-
-    const bbox = getBBox(spatialdata);
-    console.log(bbox);
-
-    // await fetchAttributeData(bbox)
-}
-
 function getSpatialPayload() {
     /*
     - `aoi` indicate the are of interest or extent.
@@ -119,4 +109,4 @@ function getAttributePayload() {
 }
 
 
-export {fetchData, fetchAdminLevelData};
+export {fetchAttributeData, fetchSpatialData, fetchAdminLevelData, getBBox};
