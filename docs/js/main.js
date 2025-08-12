@@ -14990,7 +14990,7 @@
       }
     }
     const popupContent2 = `
-        <div class="card" style="width: 18rem;">
+        <div class="card border-0" style="width: 18rem;">
             <div class="card-body">
                 <h5 class="card-title">${name}</h5>
                 ${rows ? `<table class="table table-sm">
@@ -15053,7 +15053,9 @@
     if (selectedTabId) {
       const tabContent = document.querySelector(`${selectedTabId}`);
       if (tabContent) {
-        const selectedInput = tabContent.querySelector('input[type="radio"]:checked');
+        const selectedInput = tabContent.querySelector(
+          'input[type="radio"]:checked'
+        );
         if (selectedInput) {
           const selectedValue = selectedInput.value;
           const productAoiType = selectedInput.getAttribute("productaoitype");
@@ -15142,14 +15144,26 @@
     }
     if (selectedExtentTab === "#admin-boundary") {
       if (["1", "2", "3"].includes(selectedValue)) {
-        var checked = Array.from(document.querySelectorAll('#admin-selector-dropdown input[type="checkbox"]:checked')).map((cb) => cb.value);
+        var checked = Array.from(
+          document.querySelectorAll(
+            '#admin-selector-dropdown input[type="checkbox"]:checked'
+          )
+        ).map((cb) => cb.value);
         document.config.extent.aoi = checked;
       } else if (["4"].includes(selectedValue)) {
-        var checked = Array.from(document.querySelectorAll('#admin-selector-dropdown2 input[type="checkbox"]:checked')).map((cb) => cb.value);
+        var checked = Array.from(
+          document.querySelectorAll(
+            '#admin-selector-dropdown2 input[type="checkbox"]:checked'
+          )
+        ).map((cb) => cb.value);
         document.config.extent.aoi = checked;
       }
     } else if (selectedExtentTab === "#tile-number") {
-      var checked = Array.from(document.querySelectorAll('#tile-selector-dropdown input[type="checkbox"]:checked')).map((cb) => cb.value);
+      var checked = Array.from(
+        document.querySelectorAll(
+          '#tile-selector-dropdown input[type="checkbox"]:checked'
+        )
+      ).map((cb) => cb.value);
       document.config.extent.aoi = checked;
       document.config.extent.level = 5;
     }
@@ -15190,14 +15204,20 @@
       document.getElementById("admin-selector-label").textContent = "DS Division";
       document.querySelectorAll('#admin-selector-dropdown input[type="checkbox"]').forEach((checkbox) => {
         checkbox.addEventListener("change", async function() {
-          const checked = Array.from(document.querySelectorAll('#admin-selector-dropdown input[type="checkbox"]:checked')).map((cb) => cb.value);
+          const checked = Array.from(
+            document.querySelectorAll(
+              '#admin-selector-dropdown input[type="checkbox"]:checked'
+            )
+          ).map((cb) => cb.value);
           if (checked.length > 0) {
             document.getElementById("admin-selector-label2").classList.remove("d-none");
             document.getElementById("admin-selector-label2").textContent = "GN Division";
             document.getElementById("admin-selector2").classList.remove("d-none");
             document.getElementById("admin-selector").classList.remove("d-none");
             let data = await fetchAdminLevelData(4);
-            data = data?.filter((record) => record.code && checked.includes(String(record.dsd_code)));
+            data = data?.filter(
+              (record) => record.code && checked.includes(String(record.dsd_code))
+            );
             populateDropdown("admin-selector-dropdown2", data);
           } else {
             document.getElementById("admin-selector-label2").classList.add("d-none");
