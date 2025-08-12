@@ -52,6 +52,9 @@ languages:
         weight: 20
 
 params:
+  dataURL: "https://opengislk.alwaysdata.net/getData"
+  attributeDataURL: "https://opengislk.alwaysdata.net/getAttributeData"
+  
   description: "An open-source platform for geospatial data in Sri Lanka."
 
   services:

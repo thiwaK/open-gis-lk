@@ -72,6 +72,9 @@ languages:
 # menus content need to be updated in production config as well
 params:
   
+  dataURL: "http://localhost:8000/getData"
+  attributeDataURL: "http://localhost:8000/getAttributeData"
+
   description: "An open-source platform for geospatial data in Sri Lanka."
 
   services:
@@ -113,6 +116,8 @@ params:
             level: 4
             name: Gender Distribution by GND
             description: "Gender breakdown from latest data, aggregated by Grama Niladhari Division (GND). Includes counts of male, female, and total population per GND."
+
+
 
       # - Name: Electricity
       #   icon: bi-plug-fill

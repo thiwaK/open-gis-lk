@@ -1,113 +1,37 @@
 import {fetchAdmin, fetchAttr} from './api';
-import {hideLoading, showLoading, updateMap} from './uifunctions';
 
-async function loadAndParseCSV(url, lang, code, name, idKey = null, idList = null) {
+async function fetchAdminLevelData(admin_lvl){
+    
+    let payload = {
+        id:"attr_gnd",
+        level:4,
+        aoi:["*"]
+    }
 
-    const csvText = await fetchCSV(url);
-
-    return new Promise((resolve, reject) => {
-        Papa.parse(csvText, {
-            header: true,
-            quoteChar: "'",
-            complete: async function (results) {
-                let rows;
-
-                if (idKey != null && idList != null) {
-                    results.data = results.data?.filter(record => record[code] && idList.includes(String(record[idKey])));
-                }
-
-                if (lang === 'en' && Array.isArray(results?.data)) {
-                    rows = results.data.map(record => ({
-                        code: record[code],
-                        name_en: record[name]
-                    }));
-                }
-                resolve(rows);
-            },
-            error: function (error) {
-
-                reject(error);
-            }
-        });
-    });
-}
-
-async function fetchCSV(url) {
-    showLoading();
-
-    const cached = localStorage.getItem(url);
-    const expTime = 24 * 60 * 60 * 1000 * 7; // 1 week in milliseconds
-    let csvText;
-
-    if (cached) {
-        try {
-            const parsed = JSON.parse(cached);
-            const age = Date.now() - parsed.timestamp;
-
-            if (age < expTime) {
-                csvText = parsed.content;
-            } else {
-                // expired — fetch new
-                const response = await fetch(url);
-                csvText = await response.text();
-                localStorage.setItem(url, JSON.stringify({
-                    content: csvText,
-                    timestamp: Date.now()
-                }));
-            }
-        } catch (e) {
-            // corrupted or non-JSON — fallback to fresh fetch
-            const response = await fetch(url);
-            csvText = await response.text();
-            localStorage.setItem(url, JSON.stringify({
-                content: csvText,
-                timestamp: Date.now()
-            }));
+    if (admin_lvl === 3) {
+        payload = {
+            id:"attr_dsd",
+            level:parseInt(3, 10),
+            aoi:"*"
         }
-    } else {
-        // no cached data — fetch
-        const response = await fetch(url);
-        csvText = await response.text();
-        localStorage.setItem(url, JSON.stringify({
-            content: csvText,
-            timestamp: Date.now()
-        }));
     }
-
-    hideLoading();
-    return csvText;
-}
-
-function isValidJSON(jsonString) {
-    try {
-        JSON.parse(jsonString);
-        return true;
-    } catch (e) {
-        return false;
+    else if (admin_lvl === 2) {
+        payload = {
+            id:"attr_dist",
+            level:parseInt(2, 10),
+            aoi:"*"
+        }
     }
-}
-
-function isValidGeoJSON(geojson) {
-
-    if (typeof geojson !== 'object' || geojson === null) {
-        return false;
+    else if (admin_lvl === 1) {
+        payload = {
+            id:"attr_prov",
+            level:parseInt(1, 10),
+            aoi:"*"
+        }
     }
-
-    const validTypes = ['Feature', 'FeatureCollection', 'Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString', 'MultiPolygon', 'GeometryCollection'];
-
-    if (!geojson.type || !validTypes.includes(geojson.type)) return false;
-
-    if (geojson.type === 'FeatureCollection') {
-        return Array.isArray(geojson.features) && geojson.features.every(f => isValidGeoJSON(f));
-    }
-
-    if (geojson.type === 'Feature') {
-        return typeof geojson.geometry === 'object' && isValidGeoJSON(geojson.geometry);
-    }
-
-    if (geojson.coordinates === undefined) return false;
-
-    return true;
+    
+    let data = await fetchAttr(payload);
+    return data;
 }
 
 async function fetchAttributeData() {
@@ -148,119 +72,6 @@ function getBBox(data) {
   return { xmin: minX, ymin: minY, xmax: maxX, ymax: maxY };
 }
 
-
-async function fetchData() {
-    const spatialdata = await fetchSpatialData();
-    await updateMap(spatialdata);
-
-    const bbox = getBBox(spatialdata);
-    console.log(bbox);
-
-    // await fetchAttributeData(bbox)
-}
-
-async function fetchSpatialData__(payload_){
-    let payload;
-    let qDataset;
-    let qDatasetLevelCode;
-    let qDatasetLevelName;
-    let qCheckResult;
-
-    // if document.config.product.level, result will 
-    switch(parseInt(admin_lvl, 10)) {
-        case 1:
-            qDataset = "data/province.csv";
-            qDatasetLevelCode = "prov_code";
-            qDatasetLevelName = "prov_name";
-            break;
-        
-        case 2:
-            qDataset = "data/district.csv";
-            qDatasetLevelCode = "dist_code";
-            qDatasetLevelName = "dist_name";
-            break;
-        
-        case 3:
-            qDataset = "data/dsd.csv";
-            qDatasetLevelCode = "dsd_code";
-            qDatasetLevelName = "dsd_name";
-            break;
-        
-        case 4:
-            qDataset = "data/gnd.csv";
-            qDatasetLevelCode = "admin_code";
-            qDatasetLevelName = "gnd_name";
-            break;
-    }
-
-    switch(parseInt(admin_lvl, 10)) {
-        case 1:
-            qCheckResult = "prov_code";
-            break;
-        case 2:
-            qCheckResult = "dist_code";
-            break;
-        case 3:
-            qCheckResult = "dsd_code";
-            break;
-        case 4:
-            qCheckResult = "admin_code";
-            break;
-    }
-    
-    let result = await loadAndParseCSV(qDataset, 'en', qDatasetLevelCode, qDatasetLevelName, qCheckResult, checked);
-    if (document.config.product.type === "name"){
-        result = result.map(obj => obj.name_en);
-    }else{
-        result = result.map(obj => obj.code);
-    }
-
-    // use checked. above code make not impact. they can be used to resolve level differences.
-    result = checked;
-    switch(parseInt(admin_lvl, 10)) {
-        case 1:
-            payload = {
-                level: 1,
-                aoi: result,
-                id: 'poly_province'
-            };
-            break;
-        
-        case 2:
-            payload = {
-                level: 2,
-                aoi: result,
-                id: 'poly_district'
-            };
-            break;
-        
-        case 3:
-            payload = {
-                level: 3,
-                aoi: result,
-                id: 'poly_dsd'
-            };
-            break;
-        
-        case 4:
-            payload = {
-                level: 4,
-                aoi: result,
-                id: 'poly_gnd'
-            };
-            break;
-    }
-
-    document.config.extent = payload; 
-    
-    if (document.config.product.level != null){
-        payload['level'] = document.config.product.level;
-    }
-    
-    updateMap(payload, parseInt(payload['level'], 10));
-
-}
-
 function getSpatialPayload() {
     /*
     - `aoi` indicate the are of interest or extent.
@@ -297,4 +108,5 @@ function getAttributePayload() {
     return payload;
 }
 
-export {loadAndParseCSV, fetchCSV, isValidGeoJSON, isValidJSON, fetchData};
+
+export {fetchAttributeData, fetchSpatialData, fetchAdminLevelData, getBBox};
