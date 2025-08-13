@@ -9,7 +9,6 @@ favicon: "/fav.png"
 defaultContentLanguage: en
 # theme: open-gis-lk
 
-
 # outputs:
 #   home:
 #     - "HTML"
@@ -19,10 +18,6 @@ defaultContentLanguage: en
 #     - "HTML"
 #     - "RSS"
 
-
-
-
-
 languages:
   si:
     languageCode: si-lk
@@ -31,12 +26,12 @@ languages:
     weight: 2
     menus:
       main:
-      - name: Products
-        pageRef: /products
-        weight: 10
-      - name: Services
-        pageRef: /services
-        weight: 20
+        - name: Products
+          pageRef: /products
+          weight: 10
+        - name: Services
+          pageRef: /services
+          weight: 20
   en:
     languageCode: en-us
     languageName: English
@@ -44,17 +39,17 @@ languages:
     weight: 1
     menus:
       main:
-      - name: Products
-        pageRef: /products
-        weight: 10
-      - name: Services
-        pageRef: /services
-        weight: 20
+        - name: Products
+          pageRef: /products
+          weight: 10
+        - name: Services
+          pageRef: /services
+          weight: 20
 
 params:
   dataURL: "https://opengislk.alwaysdata.net/getData"
   attributeDataURL: "https://opengislk.alwaysdata.net/getAttributeData"
-  
+
   description: "An open-source platform for geospatial data in Sri Lanka."
 
   services:
@@ -76,21 +71,29 @@ params:
       enable: true
       placeholder: "Search"
     stickyNavBar:
-      enable : true
-      showOnScrollUp : true
+      enable: true
+      showOnScrollUp: true
     enableSeparator: false
 
   menus:
     products:
-      - Name: Electricity
-        icon: bi-plug-fill
+      # - Name: Electricity
+      #   icon: bi-plug-fill
+      #   datasets:
+      #     - id: dataset-outage
+      #       name: Outages
+      #       description: Current electricity outages
+      # - Name: Agriculture
+      #   icon: bi-leaf-fill
+      #   datasets:
+      #     - id: dataset-cereal-production-2012-yala
+      #       name: Cereal Production 2012
+      #       description: Cereal Production Statistics - Yala Season 2012
+      - Name: Demographic
+        icon: bi-people-fill
         datasets:
-          - id: dataset-outage
-            name: Outages
-            description: Current electricity outages
-      - Name: Agriculture
-        icon: bi-leaf-fill
-        datasets:
-          - id: dataset-cereal-production-2012-yala
-            name: Cereal Production 2012
-            description: Cereal Production Statistics - Yala Season 2012
+          - id: gender-by-gnd-latest
+            aoi_type: name
+            level: 4
+            name: Gender Distribution by GND
+            description: "Gender breakdown from latest data, aggregated by Grama Niladhari Division (GND). Includes counts of male, female, and total population per GND."
