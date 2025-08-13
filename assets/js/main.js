@@ -5,6 +5,7 @@ import {
   fetchAttributeData,
   fetchAdminLevelData,
   getBBox,
+  spatialAttributeMerge,
 } from "./dataloader";
 import { updateMap } from "./map";
 
@@ -122,10 +123,9 @@ async function fetchData() {
   const spatialdata = await fetchSpatialData();
   updateMap(spatialdata);
 
-  const bbox = getBBox(spatialdata);
-  console.log(bbox);
-
-  // await fetchAttributeData(bbox)
+  const attributedata = await fetchAttributeData();
+  const mergedData = spatialAttributeMerge(spatialdata, attributedata);
+  updateMap(mergedData);
 
   hideLoading();
 }
