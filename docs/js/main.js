@@ -14836,7 +14836,6 @@
     }
   }
   async function fetchNow(url) {
-    console.log("fetchNow", url.toString());
     const cached = await getCache(url.toString());
     if (cached != null) {
       return cached;
@@ -14913,6 +14912,19 @@
       };
     }
     let data = await fetchAttr(payload);
+    return data;
+  }
+  async function fetchProducts() {
+    const payload = {
+      id: "products",
+      level: 1,
+      aoi: ["*"]
+    };
+    let data = await fetchAttr(payload);
+    if (!data || !Array.isArray(data)) {
+      console.error("Invalid product data received");
+      return [];
+    }
     return data;
   }
   async function fetchAttributeData() {
@@ -15150,6 +15162,73 @@
     const mergedData = spatialAttributeMerge(spatialdata, attributedata);
     updateMap(mergedData);
     hideLoading();
+  }
+  async function populateProducts() {
+    let data = await fetchProducts();
+    const tabList = document.getElementById("productTab");
+    const tabContent = document.getElementById("productTabContent");
+    tabList.innerHTML = "";
+    tabContent.innerHTML = "";
+    data.forEach((product, index) => {
+      const tabItem = document.createElement("li");
+      tabItem.className = "nav-item";
+      tabItem.setAttribute("role", "presentation");
+      const tabButton = document.createElement("button");
+      tabButton.id = `${product.name.toLowerCase()}-tab`;
+      tabButton.className = `nav-link ${index === 0 ? "active" : ""}`;
+      tabButton.setAttribute("data-bs-toggle", "tab");
+      tabButton.setAttribute("data-bs-target", `#${product.name.toLowerCase()}`);
+      tabButton.setAttribute("type", "button");
+      tabButton.setAttribute("role", "tab");
+      tabButton.setAttribute("aria-controls", product.name.toLowerCase());
+      tabButton.setAttribute("aria-selected", index === 0 ? "true" : "false");
+      if (product.icon) {
+        const iconEl = document.createElement("i");
+        iconEl.className = `${product.icon} me-2`;
+        tabButton.appendChild(iconEl);
+      }
+      tabButton.appendChild(document.createTextNode(product.name));
+      tabItem.appendChild(tabButton);
+      tabList.appendChild(tabItem);
+      const contentPane = document.createElement("div");
+      contentPane.id = product.name.toLowerCase();
+      contentPane.className = `tab-pane fade ${index === 0 ? "show active" : ""}`;
+      contentPane.setAttribute("role", "tabpanel");
+      contentPane.setAttribute("aria-labelledby", `${product.name.toLowerCase()}-tab`);
+      const rowDiv = document.createElement("div");
+      rowDiv.className = "row g-3";
+      product.datasets.forEach((dataset) => {
+        const colDiv = document.createElement("div");
+        colDiv.className = "col-12 col-md-6";
+        const formCheck = document.createElement("div");
+        formCheck.className = "form-check border p-3 rounded h-100";
+        const inputEl = document.createElement("input");
+        inputEl.className = "form-check-input";
+        inputEl.type = "radio";
+        inputEl.name = `dataset-${product.name.toLowerCase()}`;
+        inputEl.id = dataset.id.toLowerCase();
+        inputEl.value = dataset.id;
+        inputEl.setAttribute("productaoitype", dataset.aoi_type);
+        inputEl.setAttribute("productlevel", dataset.level);
+        const labelEl = document.createElement("label");
+        labelEl.className = "form-check-label";
+        labelEl.setAttribute("for", dataset.id.toLowerCase());
+        const strongEl = document.createElement("strong");
+        strongEl.textContent = dataset.name;
+        const smallEl = document.createElement("small");
+        smallEl.className = "text-muted";
+        smallEl.textContent = dataset.description;
+        labelEl.appendChild(strongEl);
+        labelEl.appendChild(document.createElement("br"));
+        labelEl.appendChild(smallEl);
+        formCheck.appendChild(inputEl);
+        formCheck.appendChild(labelEl);
+        colDiv.appendChild(formCheck);
+        rowDiv.appendChild(colDiv);
+      });
+      contentPane.appendChild(rowDiv);
+      tabContent.appendChild(contentPane);
+    });
   }
   extentSelectorSave.addEventListener("click", async function() {
     closeSidebar();
