@@ -111,12 +111,21 @@ params:
       - Name: Demographic
         icon: bi-people-fill
         datasets:
-          - id: gender-by-gnd-latest
+          - id: gender-by-gnd-nsdi
             aoi_type: name
             level: 4
             name: Gender Distribution by GND
             description: "Gender breakdown from latest data, aggregated by Grama Niladhari Division (GND). Includes counts of male, female, and total population per GND."
-
+          - id: gender-by-dsd-nsdi
+            aoi_type: name
+            level: 3
+            name: Gender Distribution by DSD
+            description: "Gender breakdown from latest data, aggregated by Grama Niladhari Division (GND). Includes counts of male, female, and total population per GND."
+          - id: gender-by-dist-nsdi
+            aoi_type: name
+            level: 3
+            name: Gender Distribution by District
+            description: "Gender breakdown from latest data, aggregated by Grama Niladhari Division (GND). Includes counts of male, female, and total population per GND."
 
 
       # - Name: Electricity

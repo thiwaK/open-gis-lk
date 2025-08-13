@@ -6,6 +6,7 @@ import {
   fetchAdminLevelData,
   getBBox,
   spatialAttributeMerge,
+  fetchProducts
 } from "./dataloader";
 import { updateMap } from "./map";
 
@@ -129,6 +130,8 @@ async function fetchData() {
 
   hideLoading();
 }
+
+
 
 // EVENTS LISTENERS
 extentSelectorSave.addEventListener("click", async function () {
@@ -317,6 +320,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // const gndArray = await fetchAdminLevelData(5);
   // populateDropdown("tile-selector-dropdown", gndArray);
 
+  await populateProducts();
   await fetchAdminLevelData(4);
   await fetchAdminLevelData(3);
   await fetchAdminLevelData(2);
