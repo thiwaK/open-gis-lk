@@ -5,7 +5,7 @@
         <button class="close-btn" onclick="closeSidebar()">&times;</button>
     </div>
 
-    <hr>
+    <hr class="w-100">
 
     <ul class="nav nav-tabs" id="productTab" role="tablist">
     </ul>
@@ -13,10 +13,17 @@
     <div id="productTabContent" class="tab-content mt-3">
     </div>
 
-    <hr class="my-3 position-absolute bottom-0 end-0">
-
-    <button id="product-selecter-save" class="btn btn-primary position-absolute bottom-0 end-0 m-2">
-        <i class="bi bi-floppy2-fill me-2"></i>Save
+<div style="height: 100px;">
+    <hr class="position-absolute end-0" style="bottom: 3rem; width: 100%;">
+    <button id="product-selecter-save"
+            class="btn btn-primary position-absolute bottom-0 end-0 m-2 d-flex align-items-center p-0">
+        <span class="px-3 py-1">Goto Extent</span>
+        <span class="px-3 py-1 border-start" style="border-color: currentColor;">
+            <i class="bi bi-bounding-box-circles"></i>
+        </span>
     </button>
+</div>
+
+
 
 </div>
