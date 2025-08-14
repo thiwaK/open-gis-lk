@@ -43,6 +43,14 @@ function popupContent(feature, layer) {
     "prov_c",
     "pcode",
     "code",
+    "dist_name",
+    "dsd_name",
+    "gnd_name",
+    "prov_name",
+    "dist_code",
+    "dsd_code",
+    "gnd_code",
+    "prov_code",
   ];
 
   for (const key in props) {
