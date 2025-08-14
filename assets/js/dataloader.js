@@ -39,7 +39,7 @@ async function fetchProducts() {
   };
 
   let data = await fetchAttr(payload);
-  if (!data || !Array.isArray(data)) {
+  if (!data) {
     console.error("Invalid product data received");
     return [];
   }
