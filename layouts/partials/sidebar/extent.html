@@ -6,7 +6,6 @@
 
     <hr>
 
-
     <ul class="nav nav-tabs" id="extentTab" role="tablist">
         {{ range $index, $item := .Site.Params.menus.extents }}
         <li class="nav-item" role="presentation">
@@ -78,8 +77,21 @@
         </div>
     </div>
 
-    <button id="extent-selecter-save" class="btn btn-primary position-absolute bottom-0 end-0 m-2">
-        <i class="bi bi-floppy2-fill me-2"></i>Save
-    </button>
+    <div class="border-top d-flex" style="position: absolute; bottom: 0; left: 0; right: 0; padding: 0.5rem 1rem; justify-content: start; gap: 0.5rem;">
+        
+        <button id="extent-selecter-save" class="btn btn-secondary d-flex align-items-center p-0">
+            <span class="px-3 py-1 border-end">
+                <i class="bi bi-x-lg"></i>
+            </span>
+            <span class="px-3 py-1">Close</span>
+        </button>
+
+        <button id="extent-selecter-next" class="btn btn-primary d-flex align-items-center p-0 disabled">
+            <span class="px-3 py-1 border-end">
+                <i class="bi bi-download"></i>
+            </span>
+            <span class="px-3 py-1">Next</span>
+        </button>
+    </div>
 
 </div>

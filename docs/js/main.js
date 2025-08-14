@@ -15033,10 +15033,10 @@
     for (const key in props) {
       if (props.hasOwnProperty(key) && !skipKeys.includes(key)) {
         rows += `
-                <tr>
-                    <th style="text-align:left; padding-right: 10px;">${key}</th>
-                    <td>${props[key]}</td>
-                </tr>`;
+        <tr>
+            <th style="text-align:left; padding-right: 10px;">${key}</th>
+            <td>${props[key]}</td>
+        </tr>`;
       }
     }
     const popupContent2 = `
@@ -15095,8 +15095,10 @@
   };
   var adminLvlSelector = document.getElementById("admin-level-selector");
   var extentSelectorSave = document.getElementById("extent-selecter-save");
+  var extentSelectorNext = document.getElementById("extent-selecter-next");
   var tileSelectorDropdown = document.getElementById("tile-selector-dropdown");
   var productSelectorSave = document.getElementById("product-selecter-save");
+  var productSelectorNext = document.getElementById("product-selecter-next");
   function getSelectedProduct() {
     const activeTab = document.querySelector("#productTab .nav-link.active");
     const selectedTabId = activeTab?.getAttribute("data-bs-target");
@@ -15164,12 +15166,17 @@
   }
   async function fetchData() {
     showLoading();
-    const spatialdata = await fetchSpatialData();
-    updateMap(spatialdata);
-    const attributedata = await fetchAttributeData();
-    const mergedData = spatialAttributeMerge(spatialdata, attributedata);
-    updateMap(mergedData);
+    try {
+      const spatialdata = await fetchSpatialData();
+      updateMap(spatialdata);
+      const attributedata = await fetchAttributeData();
+      const mergedData = spatialAttributeMerge(spatialdata, attributedata);
+      updateMap(mergedData);
+    } catch (error) {
+      return false;
+    }
     hideLoading();
+    return true;
   }
   async function populateProducts() {
     let data = await fetchProducts();
@@ -15238,8 +15245,22 @@
       tabContent.appendChild(contentPane);
     });
   }
-  extentSelectorSave.addEventListener("click", async function() {
-    closeSidebar();
+  function updateProductConfig() {
+    const prod = getSelectedProduct();
+    document.config.product.id = prod[0];
+    document.config.product.type = prod[1];
+    document.config.product.level = prod[2];
+    if (document.config.product.id) {
+      document.getElementById("product-selecter-next").classList.remove("disabled");
+    } else {
+      document.getElementById("product-selecter-next").classList.add("disabled");
+    }
+    document.getElementById("admin-level-1").disabled = false;
+    if (parseInt(document.config.product.level, 10) === 4) {
+      document.getElementById("admin-level-1").disabled = true;
+    }
+  }
+  function updateExtentConfig() {
     const selectedExtentTab = getSelectedExtentTab();
     const selectedValue = getAdminLevel();
     document.config.extent.level = parseInt(selectedValue, 10);
@@ -15285,18 +15306,34 @@
       document.config.extent.aoi = checked;
       document.config.extent.level = 5;
     }
-    fetchData();
+    if (document.config.extent.aoi.length > 0) {
+      document.getElementById("extent-selecter-next").classList.remove("disabled");
+    } else {
+      document.getElementById("extent-selecter-next").classList.add("disabled");
+    }
+  }
+  extentSelectorSave.addEventListener("click", async function() {
+    closeSidebar();
+    updateExtentConfig();
+    if (fetchData()) {
+      openSidebar(`Download`);
+    }
   });
   productSelectorSave.addEventListener("click", async function() {
     closeSidebar();
-    const prod = getSelectedProduct();
-    document.config.product.id = prod[0];
-    document.config.product.type = prod[1];
-    document.config.product.level = prod[2];
-    document.getElementById("admin-level-1").disabled = false;
-    if (parseInt(document.config.product.level, 10) === 4) {
-      document.getElementById("admin-level-1").disabled = true;
+    updateProductConfig();
+  });
+  extentSelectorNext.addEventListener("click", async function() {
+    closeSidebar();
+    updateExtentConfig();
+    if (fetchData()) {
+      openSidebar(`Download`);
     }
+  });
+  productSelectorNext.addEventListener("click", async function() {
+    closeSidebar();
+    updateProductConfig();
+    openSidebar(`Extent`);
   });
   adminLvlSelector.addEventListener("change", async function() {
     let selectedValue = getAdminLevel();
@@ -15384,17 +15421,20 @@
     await fetchAdminLevelData(1);
     hideLoading();
   });
-  document.querySelectorAll(".form-check-input").forEach((radio) => {
-    radio.addEventListener("change", () => {
-      document.querySelectorAll(".form-check").forEach((fc) => {
-        fc.classList.remove("border-success");
-        fc.classList.remove("bg-success");
+  document.querySelector("#productTabContent").addEventListener("change", (e) => {
+    if (e.target.classList.contains("form-check-input")) {
+      document.querySelectorAll("#productTabContent .form-check").forEach((fc) => {
+        fc.classList.remove("border-primary");
       });
+      const radio = e.target;
       if (radio.checked) {
-        radio.closest(".form-check").classList.add("border-success");
-        radio.closest(".form-check").classList.add("bg-success");
+        updateProductConfig();
+        radio.closest(".form-check").classList.add("border-primary");
       }
-    });
+    }
+  });
+  document.querySelector("#extentTabContent").addEventListener("change", (e) => {
+    updateExtentConfig();
   });
 })();
 /*! Bundled license information:

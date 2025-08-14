@@ -56,10 +56,10 @@ function popupContent(feature, layer) {
   for (const key in props) {
     if (props.hasOwnProperty(key) && !skipKeys.includes(key)) {
       rows += `
-                <tr>
-                    <th style="text-align:left; padding-right: 10px;">${key}</th>
-                    <td>${props[key]}</td>
-                </tr>`;
+        <tr>
+            <th style="text-align:left; padding-right: 10px;">${key}</th>
+            <td>${props[key]}</td>
+        </tr>`;
     }
   }
 

@@ -13,17 +13,21 @@
     <div id="productTabContent" class="tab-content mt-3">
     </div>
 
-<div style="height: 100px;">
-    <hr class="position-absolute end-0" style="bottom: 3rem; width: 100%;">
-    <button id="product-selecter-save"
-            class="btn btn-primary position-absolute bottom-0 end-0 m-2 d-flex align-items-center p-0">
-        <span class="px-3 py-1">Goto Extent</span>
-        <span class="px-3 py-1 border-start" style="border-color: currentColor;">
-            <i class="bi bi-bounding-box-circles"></i>
-        </span>
-    </button>
-</div>
+    <div class="border-top d-flex" style="position: absolute; bottom: 0; left: 0; right: 0; padding: 0.5rem 1rem; justify-content: start; gap: 0.5rem;">
+        
+        <button id="product-selecter-save" class="btn btn-secondary d-flex align-items-center p-0">
+            <span class="px-3 py-1 border-end">
+                <i class="bi bi-x-lg"></i>
+            </span>
+            <span class="px-3 py-1">Close</span>
+        </button>
 
-
+        <button id="product-selecter-next" class="btn btn-primary d-flex align-items-center p-0 disabled">
+            <span class="px-3 py-1 border-end">
+                <i class="bi bi-bounding-box-circles"></i>
+            </span>
+            <span class="px-3 py-1">Next</span>
+        </button>
+    </div>
 
 </div>

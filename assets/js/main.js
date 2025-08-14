@@ -29,8 +29,10 @@ document.config = {
 // UI ELEMENTS
 const adminLvlSelector = document.getElementById("admin-level-selector");
 const extentSelectorSave = document.getElementById("extent-selecter-save");
+const extentSelectorNext = document.getElementById("extent-selecter-next");
 const tileSelectorDropdown = document.getElementById("tile-selector-dropdown");
 const productSelectorSave = document.getElementById("product-selecter-save");
+const productSelectorNext= document.getElementById("product-selecter-next");
 
 // UI FUNCTIONS
 function getSelectedProduct() {
@@ -121,14 +123,19 @@ function populateDropdown(elementID, rows) {
 async function fetchData() {
   showLoading();
 
-  const spatialdata = await fetchSpatialData();
-  updateMap(spatialdata);
+  try {
+    const spatialdata = await fetchSpatialData();
+    updateMap(spatialdata);
 
-  const attributedata = await fetchAttributeData();
-  const mergedData = spatialAttributeMerge(spatialdata, attributedata);
-  updateMap(mergedData);
+    const attributedata = await fetchAttributeData();
+    const mergedData = spatialAttributeMerge(spatialdata, attributedata);
+    updateMap(mergedData);
+  } catch (error) {
+    return false;
+  }
 
   hideLoading();
+  return true;
 }
 
 async function populateProducts(){
@@ -221,9 +228,26 @@ async function populateProducts(){
 
 }
 
-// EVENTS LISTENERS
-extentSelectorSave.addEventListener("click", async function () {
-  closeSidebar();
+function updateProductConfig(){
+  const prod = getSelectedProduct();
+  document.config.product.id = prod[0];
+  document.config.product.type = prod[1];
+  document.config.product.level = prod[2];
+
+  if (document.config.product.id){
+    document.getElementById("product-selecter-next").classList.remove("disabled");
+  } else {
+    document.getElementById("product-selecter-next").classList.add("disabled");
+  }
+
+  document.getElementById("admin-level-1").disabled = false;
+  if (parseInt(document.config.product.level, 10) === 4) {
+    document.getElementById("admin-level-1").disabled = true;
+  }
+}
+
+function updateExtentConfig() {
+  
   const selectedExtentTab = getSelectedExtentTab();
   const selectedValue = getAdminLevel();
 
@@ -272,27 +296,54 @@ extentSelectorSave.addEventListener("click", async function () {
         '#tile-selector-dropdown input[type="checkbox"]:checked',
       ),
     ).map((cb) => cb.value);
+
+    
     document.config.extent.aoi = checked;
     document.config.extent.level = 5;
   }
+  
+  if (document.config.extent.aoi.length > 0) {
+    document.getElementById("extent-selecter-next").classList.remove("disabled");
+  } else {
+    document.getElementById("extent-selecter-next").classList.add("disabled");
+  }
+  
+}
 
-  fetchData();
+// EVENTS LISTENERS
+extentSelectorSave.addEventListener("click", async function () {
+  closeSidebar();
+  updateExtentConfig();
+
+  if (fetchData()){
+    openSidebar(`Download`);
+  }
 });
 
 productSelectorSave.addEventListener("click", async function () {
   closeSidebar();
-  const prod = getSelectedProduct();
-  document.config.product.id = prod[0];
-  document.config.product.type = prod[1];
-  document.config.product.level = prod[2];
+  updateProductConfig();
+});
 
-  document.getElementById("admin-level-1").disabled = false;
-  if (parseInt(document.config.product.level, 10) === 4) {
-    document.getElementById("admin-level-1").disabled = true;
+extentSelectorNext.addEventListener("click", async function () {
+  closeSidebar();
+  updateExtentConfig();
+
+  if (fetchData()){
+    openSidebar(`Download`);
   }
 });
 
+productSelectorNext.addEventListener("click", async function () {
+  closeSidebar();
+  updateProductConfig();
+
+  openSidebar(`Extent`);
+});
+
+
 adminLvlSelector.addEventListener("change", async function () {
+  
   let selectedValue = getAdminLevel();
   if (["1", "2", "3", "4"].includes(selectedValue)) {
     document.getElementById("admin-selector").classList.remove("d-none");
@@ -394,6 +445,8 @@ adminLvlSelector.addEventListener("change", async function () {
         });
       });
   }
+
+  
 });
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -417,17 +470,26 @@ document.addEventListener("DOMContentLoaded", async () => {
   hideLoading();
 });
 
-document.querySelectorAll('.form-check-input').forEach(radio => {
-  radio.addEventListener('change', () => {
+// event delegation (works even if elements are dynamically loaded later)
+document.querySelector('#productTabContent').addEventListener('change', e => {
+  if (e.target.classList.contains('form-check-input')) {
+    // console.log('.form-check-input inside #productTabContent');
 
-    document.querySelectorAll('.form-check').forEach(fc => {
-      fc.classList.remove('border-success');
-      fc.classList.remove('bg-success');
+    document.querySelectorAll('#productTabContent .form-check').forEach(fc => {
+      fc.classList.remove('border-primary');
     });
 
+    const radio = e.target;
     if (radio.checked) {
-      radio.closest('.form-check').classList.add('border-success');
-      radio.closest('.form-check').classList.add('bg-success');
+      updateProductConfig();
+      radio.closest('.form-check').classList.add('border-primary');
     }
-  });
+  }
 });
+
+document.querySelector('#extentTabContent').addEventListener('change', e => {
+  updateExtentConfig();
+});
+
+
+
