@@ -15384,6 +15384,18 @@
     await fetchAdminLevelData(1);
     hideLoading();
   });
+  document.querySelectorAll(".form-check-input").forEach((radio) => {
+    radio.addEventListener("change", () => {
+      document.querySelectorAll(".form-check").forEach((fc) => {
+        fc.classList.remove("border-success");
+        fc.classList.remove("bg-success");
+      });
+      if (radio.checked) {
+        radio.closest(".form-check").classList.add("border-success");
+        radio.closest(".form-check").classList.add("bg-success");
+      }
+    });
+  });
 })();
 /*! Bundled license information:
 
