@@ -5,52 +5,30 @@
         <button class="close-btn" onclick="closeSidebar()">&times;</button>
     </div>
 
-    <hr>
+    <hr class="w-100">
 
     <ul class="nav nav-tabs" id="productTab" role="tablist">
-        {{/*  {{ range $index, $item := .Site.Params.menus.products }}
-        <li class="nav-item" role="presentation">
-            <button id="{{ lower $item.Name | urlize }}-tab" class="nav-link {{ if eq $index 0 }}active{{ end }}"
-                data-bs-toggle="tab" data-bs-target="#{{ lower $item.Name | urlize }}" type="button" role="tab"
-                aria-controls="{{ lower $item.Name | urlize }}"
-                aria-selected="{{ if eq $index 0 }}true{{ else }}false{{ end }}">
-                {{ if $item.icon }}
-                <i class="{{ $item.icon }} me-2"></i>
-                {{ end }}
-                {{ $item.Name }}
-            </button>
-        </li>
-        {{ end }}  */}}
     </ul>
 
     <div id="productTabContent" class="tab-content mt-3">
-        {{/*  {{ range $index, $product := .Site.Params.menus.products }}
-        <div id="{{ lower $product.Name | urlize }}" class="tab-pane fade {{ if eq $index 0 }}show active{{ end }}"
-            role="tabpanel" aria-labelledby="{{ lower $product.Name | urlize }}-tab">
-            <div class="row g-3">
-                {{ range $dataset := $product.datasets }}
-                <div class="col-12 col-md-6">
-                    <div class="form-check border p-3 rounded h-100">
-                        <input class="form-check-input" type="radio" name="dataset-{{ lower $product.Name | urlize }}"
-                            id="{{ $dataset.id | urlize }}" value="{{ $dataset.id }}" 
-                            productaoitype="{{ $dataset.aoi_type }}" productlevel="{{ $dataset.level }}">
-                        <label class="form-check-label" for="{{ $dataset.id | urlize }}">
-                            <strong>{{ $dataset.name }}</strong><br>
-                            <small class="text-muted">{{ $dataset.description }}</small>
-                        </label>
-                    </div>
-                </div>
-                {{ end }}
-            </div>
-        </div>
-        {{ end }}  */}}
     </div>
 
+    <div class="border-top d-flex"
+        style="position: absolute; bottom: 0; left: 0; right: 0; padding: 0.5rem 1rem; justify-content: start; gap: 0.5rem;">
 
+        <button id="product-selecter-save" class="btn btn-secondary d-flex align-items-center p-0">
+            <span class="px-3 py-1 border-end">
+                <i class="bi bi-x-lg"></i>
+            </span>
+            <span class="px-3 py-1">Close</span>
+        </button>
 
-
-    <button id="product-selecter-save" class="btn btn-primary position-absolute bottom-0 end-0 m-2">
-        <i class="bi bi-floppy2-fill me-2"></i>Save
-    </button>
+        <button id="product-selecter-next" class="btn btn-primary d-flex align-items-center p-0 disabled">
+            <span class="px-3 py-1 border-end">
+                <i class="bi bi-bounding-box-circles"></i>
+            </span>
+            <span class="px-3 py-1">Next</span>
+        </button>
+    </div>
 
 </div>

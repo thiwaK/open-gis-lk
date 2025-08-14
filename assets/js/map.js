@@ -43,15 +43,23 @@ function popupContent(feature, layer) {
     "prov_c",
     "pcode",
     "code",
+    "dist_name",
+    "dsd_name",
+    "gnd_name",
+    "prov_name",
+    "dist_code",
+    "dsd_code",
+    "gnd_code",
+    "prov_code",
   ];
 
   for (const key in props) {
     if (props.hasOwnProperty(key) && !skipKeys.includes(key)) {
       rows += `
-                <tr>
-                    <th style="text-align:left; padding-right: 10px;">${key}</th>
-                    <td>${props[key]}</td>
-                </tr>`;
+        <tr>
+            <th style="text-align:left; padding-right: 10px;">${key}</th>
+            <td>${props[key]}</td>
+        </tr>`;
     }
   }
 

@@ -29,8 +29,11 @@ document.config = {
 // UI ELEMENTS
 const adminLvlSelector = document.getElementById("admin-level-selector");
 const extentSelectorSave = document.getElementById("extent-selecter-save");
+const extentSelectorNext = document.getElementById("extent-selecter-next");
 const tileSelectorDropdown = document.getElementById("tile-selector-dropdown");
 const productSelectorSave = document.getElementById("product-selecter-save");
+const productSelectorNext= document.getElementById("product-selecter-next");
+
 
 // UI FUNCTIONS
 function getSelectedProduct() {
@@ -121,109 +124,163 @@ function populateDropdown(elementID, rows) {
 async function fetchData() {
   showLoading();
 
-  const spatialdata = await fetchSpatialData();
-  updateMap(spatialdata);
+  try {
+    const spatialdata = await fetchSpatialData();
+    updateMap(spatialdata);
 
-  const attributedata = await fetchAttributeData();
-  const mergedData = spatialAttributeMerge(spatialdata, attributedata);
-  updateMap(mergedData);
+    const attributedata = await fetchAttributeData();
+    const mergedData = spatialAttributeMerge(spatialdata, attributedata);
+    updateMap(mergedData);
+  } catch (error) {
+    return false;
+  }
 
   hideLoading();
+  return true;
 }
 
 async function populateProducts(){
 
-  let data = await fetchProducts();
-
+  const data = await fetchProducts(); // returns your categories + datasets JSON
   const tabList = document.getElementById("productTab");
   const tabContent = document.getElementById("productTabContent");
 
-  tabList.innerHTML = "";
-  tabContent.innerHTML = "";
+  // Render category tabs
+  data.categories.forEach((category, index) => {
+    const tabId = `tab-${category.name.toLowerCase()}`;
+    const activeClass = index === 0 ? "active" : "";
 
-  data.forEach((product, index) => {
+    tabList.innerHTML += `
+      <li class="nav-item" role="presentation">
+        <button class="nav-link ${activeClass}" id="${tabId}-tab"
+          data-bs-toggle="tab" data-bs-target="#${tabId}" type="button"
+          role="tab" aria-controls="${tabId}" aria-selected="${index === 0}">
+          <i class="${category.icon} me-2"></i>${category.name}
+        </button>
+      </li>
+    `;
 
-      // ---- Create Tab ----
-      const tabItem = document.createElement("li");
-      tabItem.className = "nav-item";
-      tabItem.setAttribute("role", "presentation");
+    tabContent.innerHTML += `
+      <div class="tab-pane fade ${index === 0 ? "show active" : ""}"
+           id="${tabId}" role="tabpanel" aria-labelledby="${tabId}-tab">
+        <div class="row g-3" id="dataset-list-${category.name.toLowerCase()}"></div>
+      </div>
+    `;
+  });
 
-      const tabButton = document.createElement("button");
-      tabButton.id = `${product.name.toLowerCase()}-tab`;
-      tabButton.className = `nav-link ${index === 0 ? "active" : ""}`;
-      tabButton.setAttribute("data-bs-toggle", "tab");
-      tabButton.setAttribute("data-bs-target", `#${product.name.toLowerCase()}`);
-      tabButton.setAttribute("type", "button");
-      tabButton.setAttribute("role", "tab");
-      tabButton.setAttribute("aria-controls", product.name.toLowerCase());
-      tabButton.setAttribute("aria-selected", index === 0 ? "true" : "false");
+  // Render datasets under each matching category tab
+  const levelMap = {
+    1: "Province",
+    2: "District",
+    3: "DSD",
+    4: "GND"
+  };
 
-      if (product.icon) {
-          const iconEl = document.createElement("i");
-          iconEl.className = `${product.icon} me-2`;
-          tabButton.appendChild(iconEl);
-      }
-      tabButton.appendChild(document.createTextNode(product.name));
+  data.datasets.forEach(dataset => {
+    dataset.tags.forEach(tag => {
+      const listContainer = document.getElementById(`dataset-list-${tag.toLowerCase()}`);
+      if (!listContainer) return; // category may not exist in tabs
 
-      tabItem.appendChild(tabButton);
-      tabList.appendChild(tabItem);
+      // Sort descending to get highest level first
+      const sortedLevels = dataset.level.sort((a, b) => b - a); 
+      const defaultLevel = sortedLevels[0]; // highest number
+      const defaultLabel = levelMap[defaultLevel] || `Level ${defaultLevel}`;
+      
+      const dropdownItems = sortedLevels
+      .map(lvl => `<li><a class="dropdown-item" href="#" data-level="${lvl}">${levelMap[lvl] || `Level ${lvl}`}</a></li>`)
+      .join("");
 
-      // ---- Create Tab Content ----
-      const contentPane = document.createElement("div");
-      contentPane.id = product.name.toLowerCase();
-      contentPane.className = `tab-pane fade ${index === 0 ? "show active" : ""}`;
-      contentPane.setAttribute("role", "tabpanel");
-      contentPane.setAttribute("aria-labelledby", `${product.name.toLowerCase()}-tab`);
 
-      const rowDiv = document.createElement("div");
-      rowDiv.className = "row g-3";
+      // Build tags string
+      const tagsHtml = dataset.tags
+        .map(t => `<span class="badge bg-secondary">${t}</span>`)
+        .join("");
 
-      product.datasets.forEach(dataset => {
-          const colDiv = document.createElement("div");
-          colDiv.className = "col-12 col-md-6";
+      listContainer.innerHTML += `
+        <div class="col-12 p-0">
+          <div class="form-check border p-3 pt-1 pb-1 mx-2 rounded h-100 border-primary">
+            <input class="form-check-input" type="radio"
+              name="dataset-${tag.toLowerCase()}"
+              id="${dataset.id}" value="${dataset.id}"
+              productaoitype="undefined"
+              productlevel="${dataset.level.join(',')}">
+            
+            <label class="form-check-label" for="${dataset.id}">
+              <strong>${dataset.name}</strong><br>
+              <div class="mt-2 small text-muted dataset-meta">
+                <span class="" title="Source">
+                  <i class="bi bi-globe"></i>
+                  <a href="${dataset.sourceLink}" target="_blank" class="text-decoration-none">${dataset.source}</a>
+                </span>
+                
+                <span class="ms-3" title="Date added">
+                  <i class="bi bi-calendar2-event"></i> ${dataset.dateAdded}
+                </span>
 
-          const formCheck = document.createElement("div");
-          formCheck.className = "form-check border p-3 rounded h-100";
+                <span class="ms-3" title="Dataset level">
+                  <i class="bi bi-geo-alt"></i> ${defaultLabel}
+                </span>
 
-          const inputEl = document.createElement("input");
-          inputEl.className = "form-check-input";
-          inputEl.type = "radio";
-          inputEl.name = `dataset-${product.name.toLowerCase()}`;
-          inputEl.id = dataset.id.toLowerCase();
-          inputEl.value = dataset.id;
-          inputEl.setAttribute("productaoitype", dataset.aoi_type);
-          inputEl.setAttribute("productlevel", dataset.level);
+                <span class="ms-3" title="Tags">
+                  <i class="bi bi-tags"></i>
+                  ${tagsHtml}
+                </span>
+                
+              </div>
+              <small class="text-muted">${dataset.description}</small>
+              <div class="d-flex justify-content-start align-items-center mt-2">
+                <!-- a href="#" title="Preview this dataset" class="btn btn-light btn-sm pb-0 pt-0 me-3">Preview</a -->
+                <div id="derivedLevel" class="d-flex justify-content-start align-items-center">
+                  <a href="#" title="Aggregation level" class="btn btn-light btn-sm pb-0 pt-0 dropdown-toggle" id="derive-${dataset.id}" data-bs-toggle="dropdown" aria-expanded="false">
+                    ${defaultLabel}
+                  </a>
+                  <ul class="dropdown-menu" aria-labelledby="derive-${dataset.id}">
+                    ${dropdownItems}
+                  </ul>
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+      `;
+    });
+  });
 
-          const labelEl = document.createElement("label");
-          labelEl.className = "form-check-label";
-          labelEl.setAttribute("for", dataset.id.toLowerCase());
+  const derivedLevelDiv = document.getElementById("derivedLevel");
 
-          const strongEl = document.createElement("strong");
-          strongEl.textContent = dataset.name;
+  // Event delegation
+  derivedLevelDiv.addEventListener('click', e => {
+    const item = e.target.closest('.dropdown-item'); // check if clicked on a dropdown item
+    if (!item) return; // ignore clicks outside items
 
-          const smallEl = document.createElement("small");
-          smallEl.className = "text-muted";
-          smallEl.textContent = dataset.description;
-
-          labelEl.appendChild(strongEl);
-          labelEl.appendChild(document.createElement("br"));
-          labelEl.appendChild(smallEl);
-
-          formCheck.appendChild(inputEl);
-          formCheck.appendChild(labelEl);
-          colDiv.appendChild(formCheck);
-          rowDiv.appendChild(colDiv);
-      });
-
-      contentPane.appendChild(rowDiv);
-      tabContent.appendChild(contentPane);
+    e.preventDefault();
+    const btn = derivedLevelDiv.querySelector(".dropdown-toggle");
+    btn.textContent = item.textContent;             // update button text
+    btn.dataset.selectedLevel = item.dataset.level; // store numeric value
   });
 
 }
 
-// EVENTS LISTENERS
-extentSelectorSave.addEventListener("click", async function () {
-  closeSidebar();
+function updateProductConfig(){
+  const prod = getSelectedProduct();
+  document.config.product.id = prod[0];
+  document.config.product.type = prod[1];
+  document.config.product.level = prod[2];
+
+  if (document.config.product.id){
+    document.getElementById("product-selecter-next").classList.remove("disabled");
+  } else {
+    document.getElementById("product-selecter-next").classList.add("disabled");
+  }
+
+  document.getElementById("admin-level-1").disabled = false;
+  if (parseInt(document.config.product.level, 10) === 4) {
+    document.getElementById("admin-level-1").disabled = true;
+  }
+}
+
+function updateExtentConfig() {
+  
   const selectedExtentTab = getSelectedExtentTab();
   const selectedValue = getAdminLevel();
 
@@ -272,27 +329,54 @@ extentSelectorSave.addEventListener("click", async function () {
         '#tile-selector-dropdown input[type="checkbox"]:checked',
       ),
     ).map((cb) => cb.value);
+
+    
     document.config.extent.aoi = checked;
     document.config.extent.level = 5;
   }
+  
+  if (document.config.extent.aoi.length > 0) {
+    document.getElementById("extent-selecter-next").classList.remove("disabled");
+  } else {
+    document.getElementById("extent-selecter-next").classList.add("disabled");
+  }
+  
+}
 
-  fetchData();
+// EVENTS LISTENERS
+extentSelectorSave.addEventListener("click", async function () {
+  closeSidebar();
+  updateExtentConfig();
+
+  if (fetchData()){
+    openSidebar(`Download`);
+  }
 });
 
 productSelectorSave.addEventListener("click", async function () {
   closeSidebar();
-  const prod = getSelectedProduct();
-  document.config.product.id = prod[0];
-  document.config.product.type = prod[1];
-  document.config.product.level = prod[2];
+  updateProductConfig();
+});
 
-  document.getElementById("admin-level-1").disabled = false;
-  if (parseInt(document.config.product.level, 10) === 4) {
-    document.getElementById("admin-level-1").disabled = true;
+extentSelectorNext.addEventListener("click", async function () {
+  closeSidebar();
+  updateExtentConfig();
+
+  if (fetchData()){
+    openSidebar(`Download`);
   }
 });
 
+productSelectorNext.addEventListener("click", async function () {
+  closeSidebar();
+  updateProductConfig();
+
+  openSidebar(`Extent`);
+});
+
+
 adminLvlSelector.addEventListener("change", async function () {
+  
   let selectedValue = getAdminLevel();
   if (["1", "2", "3", "4"].includes(selectedValue)) {
     document.getElementById("admin-selector").classList.remove("d-none");
@@ -394,6 +478,8 @@ adminLvlSelector.addEventListener("change", async function () {
         });
       });
   }
+
+  
 });
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -416,3 +502,30 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   hideLoading();
 });
+
+// event delegation (works even if elements are dynamically loaded later)
+document.querySelector('#productTabContent').addEventListener('change', e => {
+  if (e.target.classList.contains('form-check-input')) {
+    // console.log('.form-check-input inside #productTabContent');
+
+    document.querySelectorAll('#productTabContent .form-check').forEach(fc => {
+      fc.classList.remove('border-primary');
+    });
+
+    const radio = e.target;
+    if (radio.checked) {
+      updateProductConfig();
+      radio.closest('.form-check').classList.add('border-primary');
+    }
+  }
+});
+
+document.querySelector('#extentTabContent').addEventListener('change', e => {
+  updateExtentConfig();
+});
+
+
+
+
+
+
