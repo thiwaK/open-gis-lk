@@ -34,7 +34,7 @@ function isValidGeoJSON(geojson) {
 
 async function fetchNow(url) {
 
-    console.log("fetchNow", url.toString());
+    // console.log("fetchNow", url.toString());
     const cached = await getCache(url.toString());
     if (cached != null){
         return cached;

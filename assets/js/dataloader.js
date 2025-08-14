@@ -31,6 +31,22 @@ async function fetchAdminLevelData(admin_lvl) {
   return data;
 }
 
+async function fetchProducts() {
+  const payload = {
+    id: "products",
+    level: 1,
+    aoi: ["*"],
+  };
+
+  let data = await fetchAttr(payload);
+  if (!data || !Array.isArray(data)) {
+    console.error("Invalid product data received");
+    return [];
+  }
+
+  return data;
+}
+
 async function fetchAttributeData() {
   const attributePayload = getAttributePayload();
   const res = await fetchAttr(attributePayload);
@@ -159,4 +175,5 @@ export {
   fetchAdminLevelData,
   getBBox,
   spatialAttributeMerge,
+  fetchProducts
 };

@@ -8,7 +8,7 @@
     <hr>
 
     <ul class="nav nav-tabs" id="productTab" role="tablist">
-        {{ range $index, $item := .Site.Params.menus.products }}
+        {{/*  {{ range $index, $item := .Site.Params.menus.products }}
         <li class="nav-item" role="presentation">
             <button id="{{ lower $item.Name | urlize }}-tab" class="nav-link {{ if eq $index 0 }}active{{ end }}"
                 data-bs-toggle="tab" data-bs-target="#{{ lower $item.Name | urlize }}" type="button" role="tab"
@@ -20,11 +20,11 @@
                 {{ $item.Name }}
             </button>
         </li>
-        {{ end }}
+        {{ end }}  */}}
     </ul>
 
     <div id="productTabContent" class="tab-content mt-3">
-        {{ range $index, $product := .Site.Params.menus.products }}
+        {{/*  {{ range $index, $product := .Site.Params.menus.products }}
         <div id="{{ lower $product.Name | urlize }}" class="tab-pane fade {{ if eq $index 0 }}show active{{ end }}"
             role="tabpanel" aria-labelledby="{{ lower $product.Name | urlize }}-tab">
             <div class="row g-3">
@@ -43,7 +43,7 @@
                 {{ end }}
             </div>
         </div>
-        {{ end }}
+        {{ end }}  */}}
     </div>
 
 

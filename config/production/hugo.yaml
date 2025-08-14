@@ -76,24 +76,9 @@ params:
     enableSeparator: false
 
   menus:
-    products:
-      # - Name: Electricity
-      #   icon: bi-plug-fill
-      #   datasets:
-      #     - id: dataset-outage
-      #       name: Outages
-      #       description: Current electricity outages
-      # - Name: Agriculture
-      #   icon: bi-leaf-fill
-      #   datasets:
-      #     - id: dataset-cereal-production-2012-yala
-      #       name: Cereal Production 2012
-      #       description: Cereal Production Statistics - Yala Season 2012
-      - Name: Demographic
+    extents:
+      - Name: Admin Boundary
         icon: bi-people-fill
-        datasets:
-          - id: gender-by-gnd-latest
-            aoi_type: name
-            level: 4
-            name: Gender Distribution by GND
-            description: "Gender breakdown from latest data, aggregated by Grama Niladhari Division (GND). Includes counts of male, female, and total population per GND."
+      
+      - Name: Tile Number
+        icon: bi-people-fill
