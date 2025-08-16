@@ -2,5 +2,9 @@
 node_modules
 resources
 themes
-assets\js\api.js
+api.js
+*.sql
+*.sqlite
+*.sqlite3
+*.db
 changes.txt

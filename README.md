@@ -4,6 +4,9 @@ _An open-source platform for visualizing and accessing geospatial data of Sri La
 > [!NOTE]
 > OpenGIS LK is still under development.
 
+![Static Badge](https://img.shields.io/badge/1-black?style=flat-square&logo=databricks&label=%C2%A0Datasets&color=red)
+
+
 ## Overview
 [**OpenGIS LK**](https://thiwak.github.io/open-gis-lk) is an **open-source web application** that brings **Sri Lanka’s spatial data** 🗺️ into one easily accessible place. Many geospatial datasets about Sri Lanka are scattered across different sources — OpenGIS LK collects them, so anyone can find, select, and download the data they need for any area of interest.
 
@@ -13,26 +16,26 @@ The goal of OpenGIS LK is to make Sri Lanka’s spatial data more discoverable, 
 - 🗺️ Interactive data visualizer
 - 🔎 Search & filter datasets
 - 📥 Download in GeoJSON, CSV, or Shapefile formats  
-- 📱 Mobile-friendly (coming soon)  
 
 
 ## Technologies  
-- **Static Site Generator:** [Hugo](https://gohugo.io/)
-- **Mapping:** [LeafletJS](https://leafletjs.com/)  
-- **Hosting:** [GitHub Pages](https://pages.github.com/) 
+- [Flask](https://flask.palletsprojects.com/en/stable/)
+- [SpatiaLite](https://www.gaia-gis.it/fossil/libspatialite/index)
+- [Hugo](https://gohugo.io/)
+- [Node.js](https://nodejs.org/en)
 
 
 ## Where the data comes from
 | Source Name                                              | Data Type | Description |
 | -------------------------------------------------------- | --------- | ----------- |
 | [Department of Survey, Sri Lanka](https://survey.gov.lk) |  Polygon  | Latest administrative boundaries |
+| [National Spatial Data Infrastructure (NSDI), Sri Lanka](https://nsdi.gov.lk/) |  Attribute  | Population by sex per GND |
 
 
 ## What's coming next
 - ⌛ More datasets!
 - ⌛ Multi-language support — Sinhala, and Tamil
 - ⌛ Enhanced mobile experience
-
 
 
 ## Development

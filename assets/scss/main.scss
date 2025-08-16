@@ -59,3 +59,10 @@
 // @import "theme";
 @import "extent_selector";
 @import "product_selector";
+
+.btn-group-xs > .btn, .btn-xs {
+  padding: .25rem .4rem;
+  font-size: .7rem;
+//   line-height: .5;
+  border-radius: .2rem;
+}

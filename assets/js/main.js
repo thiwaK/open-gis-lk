@@ -229,9 +229,9 @@ async function populateProducts(){
               </div>
               <small class="text-muted">${dataset.description}</small>
               <div class="d-flex justify-content-start align-items-center mt-2">
-                <!-- a href="#" title="Preview this dataset" class="btn btn-light btn-sm pb-0 pt-0 me-3">Preview</a -->
+                <!-- a href="#" title="Preview this dataset" class="btn btn-light btn-xs pb-0 pt-0 me-3">Preview</a -->
                 <div id="derivedLevel" class="d-flex justify-content-start align-items-center">
-                  <a href="#" title="Aggregation level" class="btn btn-light btn-sm pb-0 pt-0 dropdown-toggle" id="derive-${dataset.id}" data-bs-toggle="dropdown" aria-expanded="false">
+                  <a href="#" title="Aggregation level" class="btn btn-light btn-xs pb-0 pt-0 dropdown-toggle" id="derive-${dataset.id}" data-bs-toggle="dropdown" aria-expanded="false">
                     ${defaultLabel}
                   </a>
                   <ul class="dropdown-menu" aria-labelledby="derive-${dataset.id}">

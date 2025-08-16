@@ -1,3 +1,4 @@
+BEGIN TRANSACTION;
 CREATE VIEW gnd AS
 SELECT
     adm4.pcode AS gnd_code,
@@ -43,7 +44,7 @@ FROM adm2
 JOIN adm1
     ON adm2.adm1_pcode = adm1.pcode;
 
--- Data
+-- SELECT STATEMENTS
 
 SELECT 
     gnd.dsd_name,
@@ -74,3 +75,4 @@ FROM gnd
 JOIN geo_data as data
 ON gnd.gnd_code = data.gnd_code
 GROUP BY gnd.prov_code;
+COMMIT;
