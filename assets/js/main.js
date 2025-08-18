@@ -7,7 +7,7 @@ import {
   getBBox,
   spatialAttributeMerge,
   fetchProducts
-} from "./dataloader";
+} from "./datahandler";
 import { updateMap } from "./map";
 
 document.config = {
@@ -25,6 +25,13 @@ document.config = {
     dataset: null,
   },
 };
+
+const levelMap = {
+    1: "Province",
+    2: "District",
+    3: "DSD",
+    4: "GND"
+  };
 
 // UI ELEMENTS
 const adminLvlSelector = document.getElementById("admin-level-selector");
@@ -121,10 +128,26 @@ function populateDropdown(elementID, rows) {
   });
 }
 
+// Geo + Attr data fetch
 async function fetchData() {
   showLoading();
 
+  // does the user have selected both product and extent?
+  if (document.config.product.id === null || document.config.extent.aoi.length === 0) {
+    hideLoading();
+    alert("Please select a product and extent before fetching data.");
+    return false;
+  }
+
   try {
+    const derivedLevel = getDerivedLevel();
+    if (derivedLevel.lvl_number === document.config.extent.level) {
+      console.log("Derived level matches extent level.");
+    } else {
+      console.log("Derived level does not match extent level. Adjusting extent level.");
+      document.config.extent.level = derivedLevel.lvl_number;
+    }
+
     const spatialdata = await fetchSpatialData();
     updateMap(spatialdata);
 
@@ -132,6 +155,7 @@ async function fetchData() {
     const mergedData = spatialAttributeMerge(spatialdata, attributedata);
     updateMap(mergedData);
   } catch (error) {
+    console.log("Error fetching data:", error);
     return false;
   }
 
@@ -167,14 +191,6 @@ async function populateProducts(){
       </div>
     `;
   });
-
-  // Render datasets under each matching category tab
-  const levelMap = {
-    1: "Province",
-    2: "District",
-    3: "DSD",
-    4: "GND"
-  };
 
   data.datasets.forEach(dataset => {
     dataset.tags.forEach(tag => {
@@ -230,7 +246,7 @@ async function populateProducts(){
               <small class="text-muted">${dataset.description}</small>
               <div class="d-flex justify-content-start align-items-center mt-2">
                 <!-- a href="#" title="Preview this dataset" class="btn btn-light btn-xs pb-0 pt-0 me-3">Preview</a -->
-                <div id="derivedLevel" class="d-flex justify-content-start align-items-center">
+                <div class="derivedLevel d-flex justify-content-start align-items-center">
                   <a href="#" title="Aggregation level" class="btn btn-light btn-xs pb-0 pt-0 dropdown-toggle" id="derive-${dataset.id}" data-bs-toggle="dropdown" aria-expanded="false">
                     ${defaultLabel}
                   </a>
@@ -246,17 +262,19 @@ async function populateProducts(){
     });
   });
 
-  const derivedLevelDiv = document.getElementById("derivedLevel");
 
-  // Event delegation
-  derivedLevelDiv.addEventListener('click', e => {
-    const item = e.target.closest('.dropdown-item'); // check if clicked on a dropdown item
-    if (!item) return; // ignore clicks outside items
+  // DERIVED LEVEL SELECTION
+  document.querySelectorAll('.derivedLevel').forEach(derivedLevelDiv => {
+    derivedLevelDiv.addEventListener('click', e => {
+      const item = e.target.closest('.dropdown-item');
+      if (!item) return;
 
-    e.preventDefault();
-    const btn = derivedLevelDiv.querySelector(".dropdown-toggle");
-    btn.textContent = item.textContent;             // update button text
-    btn.dataset.selectedLevel = item.dataset.level; // store numeric value
+      e.preventDefault();
+      const btn = derivedLevelDiv.querySelector(".dropdown-toggle");
+      btn.textContent = item.textContent;
+      btn.dataset.selectedLevel = item.dataset.level;
+      btn.dataset.selectedName = item.textContent;
+    });
   });
 
 }
@@ -343,6 +361,27 @@ function updateExtentConfig() {
   
 }
 
+function getKeyByValue(obj, value) {
+  return Object.keys(obj).find(key => obj[key] === value);
+}
+
+function getDerivedLevel() {
+
+  const derivedLevel = document.getElementById(`derive-${getSelectedProduct()[0]}`).innerText.trim();
+  if (!derivedLevel) {
+    console.log("No derived level selected");
+    return {
+      lvl_name: null,
+      lvl_number: null
+    };
+  }
+
+  return {
+    lvl_name: derivedLevel,
+    lvl_number: getKeyByValue(levelMap, derivedLevel)
+  };
+}
+
 // EVENTS LISTENERS
 extentSelectorSave.addEventListener("click", async function () {
   closeSidebar();
@@ -373,7 +412,6 @@ productSelectorNext.addEventListener("click", async function () {
 
   openSidebar(`Extent`);
 });
-
 
 adminLvlSelector.addEventListener("change", async function () {
   

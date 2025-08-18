@@ -1,5 +1,6 @@
 import { fetchAdmin, fetchAttr } from "./api";
 
+// exposed admin level data fetch endpoint
 async function fetchAdminLevelData(admin_lvl) {
   let payload = {
     id: "attr_gnd",
@@ -47,12 +48,14 @@ async function fetchProducts() {
   return data;
 }
 
+// exposed attr data fetch endpoint
 async function fetchAttributeData() {
   const attributePayload = getAttributePayload();
   const res = await fetchAttr(attributePayload);
   return res;
 }
 
+// exposed geo data fetch endpoint
 async function fetchSpatialData() {
   const spatialPayload = getSpatialPayload();
   const res = await fetchAdmin(spatialPayload);
