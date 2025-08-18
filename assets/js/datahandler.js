@@ -101,11 +101,11 @@ function getSpatialPayload() {
     */
 
   let payload = {
-    id: document.config.extent.id,
-    level: parseInt(document.config.extent.level, 10),
-    aoi: document.config.extent.aoi,
+    id: window.AppConfig.extent.id,
+    level: parseInt(window.AppConfig.extent.level, 10),
+    aoi: window.AppConfig.extent.aoi,
   };
-  payload["id"] = document.config.product.id;
+  payload["id"] = window.AppConfig.product.id;
   return payload;
 }
 
@@ -117,9 +117,9 @@ function getAttributePayload() {
     */
 
   let payload = {
-    id: document.config.product.id,
-    level: parseInt(document.config.extent.level, 10),
-    aoi: document.config.extent.aoi,
+    id: window.AppConfig.product.id,
+    level: parseInt(window.AppConfig.extent.level, 10),
+    aoi: window.AppConfig.extent.aoi,
   };
   return payload;
 }
@@ -134,26 +134,26 @@ function spatialAttributeMerge(spatialDataset, attributeDataset) {
   
   for (var i = 0; i < spatialDataset.features.length; i++) {
 
-    if (parseInt(document.config.extent.level, 10) == 1) {
+    if (parseInt(window.AppConfig.extent.level, 10) == 1) {
       attributeDataset.find(item => {
         if (item.prov_code === spatialDataset.features[i].properties.prov_c){
           match = item;
         }
       });
     }
-    else if (parseInt(document.config.extent.level, 10) == 2) {
+    else if (parseInt(window.AppConfig.extent.level, 10) == 2) {
       attributeDataset.find(item => {
         if (item.dist_code === spatialDataset.features[i].properties.dist_c){
           match = item;
         }
       });
-    } else if (parseInt(document.config.extent.level, 10) == 3) {
+    } else if (parseInt(window.AppConfig.extent.level, 10) == 3) {
       attributeDataset.find(item => {
         if (item.dsd_code === spatialDataset.features[i].properties.dsd_c){
           match = item;
         }
       });
-    } else if (parseInt(document.config.extent.level, 10) == 4) {
+    } else if (parseInt(window.AppConfig.extent.level, 10) == 4) {
       attributeDataset.find(item => {
         if (item.gnd_code === spatialDataset.features[i].properties.gnd_c){
           match = item;

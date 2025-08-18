@@ -10,27 +10,20 @@ import {
 } from "./datahandler";
 import { updateMap } from "./map";
 
-document.config = {
-  product: {
-    id: null,
-    type: null,
-    level: null,
-  },
-  extent: {
-    id: null,
-    level: null,
-    aoi: null,
-  },
-  map: {
-    dataset: null,
-  },
+// CONFIGURATION
+window.AppConfig = {
+  product: { id: null, type: null, level: null, derivedLevel: null },
+  extent: { level: null, aoi: null }
 };
 
+// LEVEL MAPPING
 const levelMap = {
+    0: "Country",
     1: "Province",
     2: "District",
     3: "DSD",
-    4: "GND"
+    4: "GND",
+    5: "50K_Tile"
   };
 
 // UI ELEMENTS
@@ -133,7 +126,7 @@ async function fetchData() {
   showLoading();
 
   // does the user have selected both product and extent?
-  if (document.config.product.id === null || document.config.extent.aoi.length === 0) {
+  if (window.AppConfig.product.id === null || window.AppConfig.extent.aoi.length === 0) {
     hideLoading();
     alert("Please select a product and extent before fetching data.");
     return false;
@@ -141,11 +134,12 @@ async function fetchData() {
 
   try {
     const derivedLevel = getDerivedLevel();
-    if (derivedLevel.lvl_number === document.config.extent.level) {
-      console.log("Derived level matches extent level.");
+    window.AppConfig.product.derivedLevel = derivedLevel.lvl_number;
+
+    if (derivedLevel.lvl_number === window.AppConfig.product.level) {
+      console.log("Derived level matches product level.");
     } else {
-      console.log("Derived level does not match extent level. Adjusting extent level.");
-      document.config.extent.level = derivedLevel.lvl_number;
+      console.log("Derived level does not match product level.");
     }
 
     const spatialdata = await fetchSpatialData();
@@ -281,18 +275,18 @@ async function populateProducts(){
 
 function updateProductConfig(){
   const prod = getSelectedProduct();
-  document.config.product.id = prod[0];
-  document.config.product.type = prod[1];
-  document.config.product.level = prod[2];
+  window.AppConfig.product.id = prod[0];
+  window.AppConfig.product.type = prod[1];
+  window.AppConfig.product.level = prod[2];
 
-  if (document.config.product.id){
+  if (window.AppConfig.product.id){
     document.getElementById("product-selecter-next").classList.remove("disabled");
   } else {
     document.getElementById("product-selecter-next").classList.add("disabled");
   }
 
   document.getElementById("admin-level-1").disabled = false;
-  if (parseInt(document.config.product.level, 10) === 4) {
+  if (parseInt(window.AppConfig.product.level, 10) === 4) {
     document.getElementById("admin-level-1").disabled = true;
   }
 }
@@ -302,26 +296,26 @@ function updateExtentConfig() {
   const selectedExtentTab = getSelectedExtentTab();
   const selectedValue = getAdminLevel();
 
-  document.config.extent.level = parseInt(selectedValue, 10);
-  switch (document.config.extent.level) {
+  window.AppConfig.extent.level = parseInt(selectedValue, 10);
+  switch (window.AppConfig.extent.level) {
     case 1:
-      document.config.extent.id = "poly_province";
+      window.AppConfig.extent.id = "poly_province";
       break;
 
     case 2:
-      document.config.extent.id = "poly_district";
+      window.AppConfig.extent.id = "poly_district";
       break;
 
     case 3:
-      document.config.extent.id = "poly_dsd";
+      window.AppConfig.extent.id = "poly_dsd";
       break;
 
     case 4:
-      document.config.extent.id = "poly_gnd";
+      window.AppConfig.extent.id = "poly_gnd";
       break;
 
     case 5:
-      document.config.extent.id = "poly_50k";
+      window.AppConfig.extent.id = "poly_50k";
       break;
   }
 
@@ -332,14 +326,14 @@ function updateExtentConfig() {
           '#admin-selector-dropdown input[type="checkbox"]:checked',
         ),
       ).map((cb) => cb.value);
-      document.config.extent.aoi = checked;
+      window.AppConfig.extent.aoi = checked;
     } else if (["4"].includes(selectedValue)) {
       var checked = Array.from(
         document.querySelectorAll(
           '#admin-selector-dropdown2 input[type="checkbox"]:checked',
         ),
       ).map((cb) => cb.value);
-      document.config.extent.aoi = checked;
+      window.AppConfig.extent.aoi = checked;
     }
   } else if (selectedExtentTab === "#tile-number") {
     var checked = Array.from(
@@ -349,11 +343,11 @@ function updateExtentConfig() {
     ).map((cb) => cb.value);
 
     
-    document.config.extent.aoi = checked;
-    document.config.extent.level = 5;
+    window.AppConfig.extent.aoi = checked;
+    window.AppConfig.extent.level = 5;
   }
   
-  if (document.config.extent.aoi.length > 0) {
+  if (window.AppConfig.extent.aoi.length > 0) {
     document.getElementById("extent-selecter-next").classList.remove("disabled");
   } else {
     document.getElementById("extent-selecter-next").classList.add("disabled");
