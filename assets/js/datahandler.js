@@ -49,16 +49,22 @@ async function fetchProducts() {
 }
 
 // exposed attr data fetch endpoint
-async function fetchAttributeData() {
-  const attributePayload = getAttributePayload();
+async function fetchAttributeData(attributePayload) {
+  // if (!attributePayload) {
+  //   attributePayload = getAttributePayload();
+  // }
   const res = await fetchAttr(attributePayload);
+  console.log("fetchAttributeData", res);
   return res;
 }
 
 // exposed geo data fetch endpoint
-async function fetchSpatialData() {
-  const spatialPayload = getSpatialPayload();
+async function fetchSpatialData(spatialPayload) {
+  // if (!spatialPayload) {
+  //   spatialPayload = getSpatialPayload();
+  // }
   const res = await fetchAdmin(spatialPayload);
+  console.log("fetchSpatialData", res);
   return res;
 }
 
@@ -101,11 +107,11 @@ function getSpatialPayload() {
     */
 
   let payload = {
-    id: window.AppConfig.extent.id,
-    level: parseInt(window.AppConfig.extent.level, 10),
-    aoi: window.AppConfig.extent.aoi,
+    id: window.AppConfig.product_id,
+    level: parseInt(window.AppConfig.extent_level, 10),
+    aoi: window.AppConfig.extents,
   };
-  payload["id"] = window.AppConfig.product.id;
+
   return payload;
 }
 
@@ -117,9 +123,9 @@ function getAttributePayload() {
     */
 
   let payload = {
-    id: window.AppConfig.product.id,
-    level: parseInt(window.AppConfig.extent.level, 10),
-    aoi: window.AppConfig.extent.aoi,
+    id: window.AppConfig.product_id,
+    level: parseInt(window.AppConfig.product_level, 10),
+    aoi: window.AppConfig.extents,
   };
   return payload;
 }
@@ -134,28 +140,30 @@ function spatialAttributeMerge(spatialDataset, attributeDataset) {
   
   for (var i = 0; i < spatialDataset.features.length; i++) {
 
-    if (parseInt(window.AppConfig.extent.level, 10) == 1) {
+    if (parseInt(window.AppConfig.extent_level, 10) == 1) {
       attributeDataset.find(item => {
-        if (item.prov_code === spatialDataset.features[i].properties.prov_c){
+        if (Number(item.prov_code) === Number(spatialDataset.features[i].properties.prov_c)){
           match = item;
         }
       });
     }
-    else if (parseInt(window.AppConfig.extent.level, 10) == 2) {
+    else if (parseInt(window.AppConfig.extent_level, 10) == 2) {
       attributeDataset.find(item => {
-        if (item.dist_code === spatialDataset.features[i].properties.dist_c){
+        if (Number(item.dist_code) === Number(spatialDataset.features[i].properties.dist_c)){
           match = item;
         }
       });
-    } else if (parseInt(window.AppConfig.extent.level, 10) == 3) {
+    } 
+    else if (parseInt(window.AppConfig.extent_level, 10) == 3) {
       attributeDataset.find(item => {
-        if (item.dsd_code === spatialDataset.features[i].properties.dsd_c){
+        if (Number(item.dsd_code) === Number(spatialDataset.features[i].properties.dsd_c)){
           match = item;
         }
       });
-    } else if (parseInt(window.AppConfig.extent.level, 10) == 4) {
+    } 
+    else if (parseInt(window.AppConfig.extent_level, 10) == 4) {
       attributeDataset.find(item => {
-        if (item.gnd_code === spatialDataset.features[i].properties.gnd_c){
+        if (Number(item.gnd_code) === Number(spatialDataset.features[i].properties.gnd_c)){
           match = item;
         }
       });

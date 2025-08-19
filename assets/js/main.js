@@ -12,8 +12,11 @@ import { updateMap } from "./map";
 
 // CONFIGURATION
 window.AppConfig = {
-  product: { id: null, type: null, level: null, derivedLevel: null },
-  extent: { level: null, aoi: null }
+  product_id: null,
+  product_level: null,
+  extents: null,
+  extent_level: null,
+  derived_extent_level: null,
 };
 
 // LEVEL MAPPING
@@ -24,7 +27,7 @@ const levelMap = {
     3: "DSD",
     4: "GND",
     5: "50K_Tile"
-  };
+};
 
 // UI ELEMENTS
 const adminLvlSelector = document.getElementById("admin-level-selector");
@@ -49,8 +52,10 @@ function getSelectedProduct() {
       if (selectedInput) {
         const selectedValue = selectedInput.value;
         const productAoiType = selectedInput.getAttribute("productaoitype");
-        const productlevel = selectedInput.getAttribute("productlevel");
-        return [selectedValue, productAoiType, productlevel];
+        let productlevel = selectedInput.getAttribute("productlevel");
+        productlevel = productlevel ? productlevel.trim().split(",").map(Number) : [];
+        productlevel = productlevel.sort((a, b) => b - a);
+        return [selectedValue, productAoiType, productlevel[0]];
       }
     }
   }
@@ -125,29 +130,47 @@ function populateDropdown(elementID, rows) {
 async function fetchData() {
   showLoading();
 
+  const derivedLevel = getDerivedLevel();
+  console.log(`Derived level: ${derivedLevel.lvl_name} (${derivedLevel.lvl_number})`);
+  window.AppConfig.derived_extent_level = Number(derivedLevel.lvl_number);
+
   // does the user have selected both product and extent?
-  if (window.AppConfig.product.id === null || window.AppConfig.extent.aoi.length === 0) {
+  if (window.AppConfig.product_id === null || 
+    window.AppConfig.extents.length === 0
+  ) {
     hideLoading();
     alert("Please select a product and extent before fetching data.");
     return false;
   }
 
   try {
-    const derivedLevel = getDerivedLevel();
-    window.AppConfig.product.derivedLevel = derivedLevel.lvl_number;
+    
 
-    if (derivedLevel.lvl_number === window.AppConfig.product.level) {
-      console.log("Derived level matches product level.");
-    } else {
-      console.log("Derived level does not match product level.");
-    }
+    // extent(level) always should be matched with derived level
+    let payload = {
+      id: window.AppConfig.product_id,
+      level: window.AppConfig.extent_level, 
+      aoi: window.AppConfig.extents,
+      derived_level: window.AppConfig.derived_extent_level
+    };
 
-    const spatialdata = await fetchSpatialData();
+    const spatialdata = await fetchSpatialData(payload);
     updateMap(spatialdata);
 
-    const attributedata = await fetchAttributeData();
-    const mergedData = spatialAttributeMerge(spatialdata, attributedata);
-    updateMap(mergedData);
+    // --- fetch attribute data ---//
+
+    if (window.AppConfig.derived_extent_level === window.AppConfig.product_level) {
+      console.log(`Derived level matches product level. ${derivedLevel.lvl_number} == ${window.AppConfig.product_level}`);
+      
+    } else {
+      console.log(`Derived level does not match product level. ${derivedLevel.lvl_number} != ${window.AppConfig.product_level}`);
+    
+    }
+
+    // const attributedata = await fetchAttributeData();
+    // const mergedData = spatialAttributeMerge(spatialdata, attributedata);
+    // updateMap(mergedData);
+
   } catch (error) {
     console.log("Error fetching data:", error);
     return false;
@@ -159,11 +182,11 @@ async function fetchData() {
 
 async function populateProducts(){
 
-  const data = await fetchProducts(); // returns your categories + datasets JSON
+  const data = await fetchProducts();
   const tabList = document.getElementById("productTab");
   const tabContent = document.getElementById("productTabContent");
 
-  // Render category tabs
+  // category tabs
   data.categories.forEach((category, index) => {
     const tabId = `tab-${category.name.toLowerCase()}`;
     const activeClass = index === 0 ? "active" : "";
@@ -186,6 +209,7 @@ async function populateProducts(){
     `;
   });
 
+  // dataset items
   data.datasets.forEach(dataset => {
     dataset.tags.forEach(tag => {
       const listContainer = document.getElementById(`dataset-list-${tag.toLowerCase()}`);
@@ -275,20 +299,22 @@ async function populateProducts(){
 
 function updateProductConfig(){
   const prod = getSelectedProduct();
-  window.AppConfig.product.id = prod[0];
-  window.AppConfig.product.type = prod[1];
-  window.AppConfig.product.level = prod[2];
+  window.AppConfig.product_id = prod[0];
+  window.AppConfig.product_type = prod[1];
+  window.AppConfig.product_level = prod[2]; 
 
-  if (window.AppConfig.product.id){
+  if (window.AppConfig.product_id){
     document.getElementById("product-selecter-next").classList.remove("disabled");
   } else {
     document.getElementById("product-selecter-next").classList.add("disabled");
   }
 
   document.getElementById("admin-level-1").disabled = false;
-  if (parseInt(window.AppConfig.product.level, 10) === 4) {
+  if (parseInt(window.AppConfig.product_level, 10) === 4) {
     document.getElementById("admin-level-1").disabled = true;
   }
+
+  console.log(`Product selected: ${window.AppConfig.product_id} ${window.AppConfig.product_type} ${window.AppConfig.product_level}`);
 }
 
 function updateExtentConfig() {
@@ -296,28 +322,28 @@ function updateExtentConfig() {
   const selectedExtentTab = getSelectedExtentTab();
   const selectedValue = getAdminLevel();
 
-  window.AppConfig.extent.level = parseInt(selectedValue, 10);
-  switch (window.AppConfig.extent.level) {
-    case 1:
-      window.AppConfig.extent.id = "poly_province";
-      break;
+  // window.AppConfig.extent_level = parseInt(selectedValue, 10);
+  // switch (window.AppConfig.extent_level) {
+  //   case 1:
+  //     window.AppConfig.extent.id = "poly_province";
+  //     break;
 
-    case 2:
-      window.AppConfig.extent.id = "poly_district";
-      break;
+  //   case 2:
+  //     window.AppConfig.extent.id = "poly_district";
+  //     break;
 
-    case 3:
-      window.AppConfig.extent.id = "poly_dsd";
-      break;
+  //   case 3:
+  //     window.AppConfig.extent.id = "poly_dsd";
+  //     break;
 
-    case 4:
-      window.AppConfig.extent.id = "poly_gnd";
-      break;
+  //   case 4:
+  //     window.AppConfig.extent.id = "poly_gnd";
+  //     break;
 
-    case 5:
-      window.AppConfig.extent.id = "poly_50k";
-      break;
-  }
+  //   case 5:
+  //     window.AppConfig.extent.id = "poly_50k";
+  //     break;
+  // }
 
   if (selectedExtentTab === "#admin-boundary") {
     if (["1", "2", "3"].includes(selectedValue)) {
@@ -326,14 +352,14 @@ function updateExtentConfig() {
           '#admin-selector-dropdown input[type="checkbox"]:checked',
         ),
       ).map((cb) => cb.value);
-      window.AppConfig.extent.aoi = checked;
+      window.AppConfig.extents = checked;
     } else if (["4"].includes(selectedValue)) {
       var checked = Array.from(
         document.querySelectorAll(
           '#admin-selector-dropdown2 input[type="checkbox"]:checked',
         ),
       ).map((cb) => cb.value);
-      window.AppConfig.extent.aoi = checked;
+      window.AppConfig.extents = checked;
     }
   } else if (selectedExtentTab === "#tile-number") {
     var checked = Array.from(
@@ -343,11 +369,11 @@ function updateExtentConfig() {
     ).map((cb) => cb.value);
 
     
-    window.AppConfig.extent.aoi = checked;
-    window.AppConfig.extent.level = 5;
+    window.AppConfig.extents = checked;
+    window.AppConfig.extent_level = 5;
   }
   
-  if (window.AppConfig.extent.aoi.length > 0) {
+  if (window.AppConfig.extents.length > 0) {
     document.getElementById("extent-selecter-next").classList.remove("disabled");
   } else {
     document.getElementById("extent-selecter-next").classList.add("disabled");
