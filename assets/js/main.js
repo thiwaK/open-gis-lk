@@ -131,7 +131,6 @@ async function fetchData() {
   showLoading();
 
   const derivedLevel = getDerivedLevel();
-  console.log(`Derived level: ${derivedLevel.lvl_name} (${derivedLevel.lvl_number})`);
   window.AppConfig.derived_extent_level = Number(derivedLevel.lvl_number);
 
   // does the user have selected both product and extent?
@@ -264,6 +263,7 @@ async function populateProducts(){
               <small class="text-muted">${dataset.description}</small>
               <div class="d-flex justify-content-start align-items-center mt-2">
                 <!-- a href="#" title="Preview this dataset" class="btn btn-light btn-xs pb-0 pt-0 me-3">Preview</a -->
+                <span class="form-label mb-0 btn-xs" id="label-derive-${dataset.id}">Aggregation Level</span>
                 <div class="derivedLevel d-flex justify-content-start align-items-center">
                   <a href="#" title="Aggregation level" class="btn btn-light btn-xs pb-0 pt-0 dropdown-toggle" id="derive-${dataset.id}" data-bs-toggle="dropdown" aria-expanded="false">
                     ${defaultLabel}
