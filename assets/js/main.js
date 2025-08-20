@@ -130,6 +130,22 @@ function populateDropdown(elementID, rows) {
 async function fetchData() {
   showLoading();
 
+  /* 
+    - The extent user select is nothing but the boundary of
+      are that data will be fetched.
+    - Product level is the default level of admin polygon
+      that will be featched that with in the extent.
+    - If derived level is set, product will be aggregate to higher
+      level if it is avilable.
+
+    * product_id & product_level
+      used to identify individual attribute dataset and the the level
+      of that dataset needs to be fetched.
+
+    * extents & extent_level
+      responsible for fetching suitable polygon layer to visualize data fetched in.
+  */
+
   const derivedLevel = getDerivedLevel();
   window.AppConfig.derived_extent_level = Number(derivedLevel.lvl_number);
 
@@ -142,33 +158,26 @@ async function fetchData() {
     return false;
   }
 
+
   try {
     
-
-    // extent(level) always should be matched with derived level
     let payload = {
-      id: window.AppConfig.product_id,
-      level: window.AppConfig.extent_level, 
-      aoi: window.AppConfig.extents,
-      derived_level: window.AppConfig.derived_extent_level
+      product_id: window.AppConfig.product_id,
+      product_level: window.AppConfig.derived_extent_level || window.AppConfig.product_level,
+      extents: window.AppConfig.extents,
+      extent_level: window.AppConfig.extent_level, 
     };
+
+    console.log(payload);
 
     const spatialdata = await fetchSpatialData(payload);
     updateMap(spatialdata);
 
     // --- fetch attribute data ---//
 
-    if (window.AppConfig.derived_extent_level === window.AppConfig.product_level) {
-      console.log(`Derived level matches product level. ${derivedLevel.lvl_number} == ${window.AppConfig.product_level}`);
-      
-    } else {
-      console.log(`Derived level does not match product level. ${derivedLevel.lvl_number} != ${window.AppConfig.product_level}`);
-    
-    }
-
-    // const attributedata = await fetchAttributeData();
-    // const mergedData = spatialAttributeMerge(spatialdata, attributedata);
-    // updateMap(mergedData);
+    const attributedata = await fetchAttributeData();
+    const mergedData = spatialAttributeMerge(spatialdata, attributedata);
+    updateMap(mergedData);
 
   } catch (error) {
     console.log("Error fetching data:", error);
@@ -280,7 +289,6 @@ async function populateProducts(){
     });
   });
 
-
   // DERIVED LEVEL SELECTION
   document.querySelectorAll('.derivedLevel').forEach(derivedLevelDiv => {
     derivedLevelDiv.addEventListener('click', e => {
@@ -322,7 +330,7 @@ function updateExtentConfig() {
   const selectedExtentTab = getSelectedExtentTab();
   const selectedValue = getAdminLevel();
 
-  // window.AppConfig.extent_level = parseInt(selectedValue, 10);
+  window.AppConfig.extent_level = parseInt(selectedValue, 10);
   // switch (window.AppConfig.extent_level) {
   //   case 1:
   //     window.AppConfig.extent.id = "poly_province";

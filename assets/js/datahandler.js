@@ -3,28 +3,32 @@ import { fetchAdmin, fetchAttr } from "./api";
 // exposed admin level data fetch endpoint
 async function fetchAdminLevelData(admin_lvl) {
   let payload = {
-    id: "attr_gnd",
-    level: 4,
-    aoi: ["*"],
+    product_id: "attr_gnd",
+    product_level: 4,
+    extents: ["*"],
+    extent_level: 4
   };
 
   if (admin_lvl === 3) {
     payload = {
-      id: "attr_dsd",
-      level: parseInt(3, 10),
-      aoi: "*",
+      product_id: "attr_dsd",
+      product_level: parseInt(3, 10),
+      extents: ["*"],
+      extent_level: 3
     };
   } else if (admin_lvl === 2) {
     payload = {
-      id: "attr_dist",
-      level: parseInt(2, 10),
-      aoi: "*",
+      product_id: "attr_dist",
+      product_level: parseInt(2, 10),
+      extents: ["*"],
+      extent_level: 2
     };
   } else if (admin_lvl === 1) {
     payload = {
-      id: "attr_prov",
-      level: parseInt(1, 10),
-      aoi: "*",
+      product_id: "attr_prov",
+      product_level: parseInt(1, 10),
+      extents: ["*"],
+      extent_level: 1
     };
   }
 
@@ -34,9 +38,10 @@ async function fetchAdminLevelData(admin_lvl) {
 
 async function fetchProducts() {
   const payload = {
-    id: "products",
-    level: 1,
-    aoi: ["*"],
+    product_id: "products",
+    product_level: 1,
+    extents: ["*"],
+    extent_level: 1
   };
 
   let data = await fetchAttr(payload);
