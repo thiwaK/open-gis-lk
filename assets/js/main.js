@@ -168,14 +168,12 @@ async function fetchData() {
       extent_level: window.AppConfig.extent_level, 
     };
 
-    console.log(payload);
-
+    // --- fetch spatial data ---//
     const spatialdata = await fetchSpatialData(payload);
     updateMap(spatialdata);
 
     // --- fetch attribute data ---//
-
-    const attributedata = await fetchAttributeData();
+    const attributedata = await fetchAttributeData(payload);
     const mergedData = spatialAttributeMerge(spatialdata, attributedata);
     updateMap(mergedData);
 

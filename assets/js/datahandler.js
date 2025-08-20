@@ -59,7 +59,6 @@ async function fetchAttributeData(attributePayload) {
   //   attributePayload = getAttributePayload();
   // }
   const res = await fetchAttr(attributePayload);
-  console.log("fetchAttributeData", res);
   return res;
 }
 
@@ -69,7 +68,6 @@ async function fetchSpatialData(spatialPayload) {
   //   spatialPayload = getSpatialPayload();
   // }
   const res = await fetchAdmin(spatialPayload);
-  console.log("fetchSpatialData", res);
   return res;
 }
 
@@ -98,41 +96,6 @@ function getBBox(data) {
   });
 
   return { xmin: minX, ymin: minY, xmax: maxX, ymax: maxY };
-}
-
-function getSpatialPayload() {
-  /*
-    - `aoi` indicate the are of interest or extent.
-      aoi is a array contains one or more area codes (aoi always code).
-
-    - `level` indicate the admin level that `aoi` specifies.
-      level is always a single integer number.
-
-    - `id` id of the attribute dataset.
-    */
-
-  let payload = {
-    id: window.AppConfig.product_id,
-    level: parseInt(window.AppConfig.extent_level, 10),
-    aoi: window.AppConfig.extents,
-  };
-
-  return payload;
-}
-
-function getAttributePayload() {
-  /*
-    - must use `id` parameter to uniqely identify the attribute dataset
-    - `aoi` indicate the are of interest or extent
-    - `level` indicate the admin level that `aoi` specifies.
-    */
-
-  let payload = {
-    id: window.AppConfig.product_id,
-    level: parseInt(window.AppConfig.product_level, 10),
-    aoi: window.AppConfig.extents,
-  };
-  return payload;
 }
 
 function spatialAttributeMerge(spatialDataset, attributeDataset) {
