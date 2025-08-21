@@ -320,7 +320,7 @@ function updateProductConfig(){
     document.getElementById("admin-level-1").disabled = true;
   }
 
-  console.log(`Product selected: ${window.AppConfig.product_id} ${window.AppConfig.product_type} ${window.AppConfig.product_level}`);
+  // console.log(`Product selected: ${window.AppConfig.product_id} ${window.AppConfig.product_type} ${window.AppConfig.product_level}`);
 }
 
 function updateExtentConfig() {

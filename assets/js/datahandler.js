@@ -99,54 +99,41 @@ function getBBox(data) {
 }
 
 function spatialAttributeMerge(spatialDataset, attributeDataset) {
-
   if (!spatialDataset || !attributeDataset) {
     return null;
   }
 
-  let match;
-  
-  for (var i = 0; i < spatialDataset.features.length; i++) {
+  const extentLevel = parseInt(window.AppConfig.derived_extent_level || window.AppConfig.product_level, 10);
 
-    if (parseInt(window.AppConfig.extent_level, 10) == 1) {
-      attributeDataset.find(item => {
-        if (Number(item.prov_code) === Number(spatialDataset.features[i].properties.prov_c)){
-          match = item;
-        }
-      });
-    }
-    else if (parseInt(window.AppConfig.extent_level, 10) == 2) {
-      attributeDataset.find(item => {
-        if (Number(item.dist_code) === Number(spatialDataset.features[i].properties.dist_c)){
-          match = item;
-        }
-      });
+  for (let i = 0; i < spatialDataset.features.length; i++) {
+    const props = spatialDataset.features[i].properties;
+    let match;
+
+    if (extentLevel === 1) {
+      match = attributeDataset.find(item => Number(item.prov_code) === Number(props.prov_c));
+      // console.log("Matching prov_code:", match);
     } 
-    else if (parseInt(window.AppConfig.extent_level, 10) == 3) {
-      attributeDataset.find(item => {
-        if (Number(item.dsd_code) === Number(spatialDataset.features[i].properties.dsd_c)){
-          match = item;
-        }
-      });
+    else if (extentLevel === 2) {
+      match = attributeDataset.find(item => Number(item.dist_code) === Number(props.dist_c));
+      // console.log("Matching dist_code:", match);
     } 
-    else if (parseInt(window.AppConfig.extent_level, 10) == 4) {
-      attributeDataset.find(item => {
-        if (Number(item.gnd_code) === Number(spatialDataset.features[i].properties.gnd_c)){
-          match = item;
-        }
-      });
+    else if (extentLevel === 3) {
+      match = attributeDataset.find(item => Number(item.dsd_code) === Number(props.dsd_c));
+      // console.log("Matching dsd_code:", match);
+    } 
+    else if (extentLevel === 4) {
+      match = attributeDataset.find(item => Number(item.gnd_code) === Number(props.gnd_c));
+      // console.log("Matching gnd_code:", match);
     }
-    
 
     if (match) {
-      Object.assign(spatialDataset.features[i].properties, match);
+      Object.assign(props, match);
     }
-
   }
 
   return spatialDataset;
-  
 }
+
 
 export {
   fetchAttributeData,
