@@ -7,23 +7,26 @@ import {
   getBBox,
   spatialAttributeMerge,
   fetchProducts
-} from "./dataloader";
+} from "./datahandler";
 import { updateMap } from "./map";
 
-document.config = {
-  product: {
-    id: null,
-    type: null,
-    level: null,
-  },
-  extent: {
-    id: null,
-    level: null,
-    aoi: null,
-  },
-  map: {
-    dataset: null,
-  },
+// CONFIGURATION
+window.AppConfig = {
+  product_id: null,
+  product_level: null,
+  extents: null,
+  extent_level: null,
+  derived_extent_level: null,
+};
+
+// LEVEL MAPPING
+const levelMap = {
+    0: "Country",
+    1: "Province",
+    2: "District",
+    3: "DSD",
+    4: "GND",
+    5: "50K_Tile"
 };
 
 // UI ELEMENTS
@@ -49,8 +52,10 @@ function getSelectedProduct() {
       if (selectedInput) {
         const selectedValue = selectedInput.value;
         const productAoiType = selectedInput.getAttribute("productaoitype");
-        const productlevel = selectedInput.getAttribute("productlevel");
-        return [selectedValue, productAoiType, productlevel];
+        let productlevel = selectedInput.getAttribute("productlevel");
+        productlevel = productlevel ? productlevel.trim().split(",").map(Number) : [];
+        productlevel = productlevel.sort((a, b) => b - a);
+        return [selectedValue, productAoiType, productlevel[0]];
       }
     }
   }
@@ -121,17 +126,59 @@ function populateDropdown(elementID, rows) {
   });
 }
 
+// Geo + Attr data fetch
 async function fetchData() {
   showLoading();
 
+  /* 
+    - The extent user select is nothing but the boundary of
+      are that data will be fetched.
+    - Product level is the default level of admin polygon
+      that will be featched that with in the extent.
+    - If derived level is set, product will be aggregate to higher
+      level if it is avilable.
+
+    * product_id & product_level
+      used to identify individual attribute dataset and the the level
+      of that dataset needs to be fetched.
+
+    * extents & extent_level
+      responsible for fetching suitable polygon layer to visualize data fetched in.
+  */
+
+  const derivedLevel = getDerivedLevel();
+  window.AppConfig.derived_extent_level = Number(derivedLevel.lvl_number);
+
+  // does the user have selected both product and extent?
+  if (window.AppConfig.product_id === null || 
+    window.AppConfig.extents.length === 0
+  ) {
+    hideLoading();
+    alert("Please select a product and extent before fetching data.");
+    return false;
+  }
+
+
   try {
-    const spatialdata = await fetchSpatialData();
+    
+    let payload = {
+      product_id: window.AppConfig.product_id,
+      product_level: window.AppConfig.derived_extent_level || window.AppConfig.product_level,
+      extents: window.AppConfig.extents,
+      extent_level: window.AppConfig.extent_level, 
+    };
+
+    // --- fetch spatial data ---//
+    const spatialdata = await fetchSpatialData(payload);
     updateMap(spatialdata);
 
-    const attributedata = await fetchAttributeData();
+    // --- fetch attribute data ---//
+    const attributedata = await fetchAttributeData(payload);
     const mergedData = spatialAttributeMerge(spatialdata, attributedata);
     updateMap(mergedData);
+
   } catch (error) {
+    console.log("Error fetching data:", error);
     return false;
   }
 
@@ -141,11 +188,11 @@ async function fetchData() {
 
 async function populateProducts(){
 
-  const data = await fetchProducts(); // returns your categories + datasets JSON
+  const data = await fetchProducts();
   const tabList = document.getElementById("productTab");
   const tabContent = document.getElementById("productTabContent");
 
-  // Render category tabs
+  // category tabs
   data.categories.forEach((category, index) => {
     const tabId = `tab-${category.name.toLowerCase()}`;
     const activeClass = index === 0 ? "active" : "";
@@ -168,14 +215,7 @@ async function populateProducts(){
     `;
   });
 
-  // Render datasets under each matching category tab
-  const levelMap = {
-    1: "Province",
-    2: "District",
-    3: "DSD",
-    4: "GND"
-  };
-
+  // dataset items
   data.datasets.forEach(dataset => {
     dataset.tags.forEach(tag => {
       const listContainer = document.getElementById(`dataset-list-${tag.toLowerCase()}`);
@@ -230,7 +270,8 @@ async function populateProducts(){
               <small class="text-muted">${dataset.description}</small>
               <div class="d-flex justify-content-start align-items-center mt-2">
                 <!-- a href="#" title="Preview this dataset" class="btn btn-light btn-xs pb-0 pt-0 me-3">Preview</a -->
-                <div id="derivedLevel" class="d-flex justify-content-start align-items-center">
+                <span class="form-label mb-0 btn-xs" id="label-derive-${dataset.id}">Aggregation Level</span>
+                <div class="derivedLevel d-flex justify-content-start align-items-center">
                   <a href="#" title="Aggregation level" class="btn btn-light btn-xs pb-0 pt-0 dropdown-toggle" id="derive-${dataset.id}" data-bs-toggle="dropdown" aria-expanded="false">
                     ${defaultLabel}
                   </a>
@@ -246,37 +287,40 @@ async function populateProducts(){
     });
   });
 
-  const derivedLevelDiv = document.getElementById("derivedLevel");
+  // DERIVED LEVEL SELECTION
+  document.querySelectorAll('.derivedLevel').forEach(derivedLevelDiv => {
+    derivedLevelDiv.addEventListener('click', e => {
+      const item = e.target.closest('.dropdown-item');
+      if (!item) return;
 
-  // Event delegation
-  derivedLevelDiv.addEventListener('click', e => {
-    const item = e.target.closest('.dropdown-item'); // check if clicked on a dropdown item
-    if (!item) return; // ignore clicks outside items
-
-    e.preventDefault();
-    const btn = derivedLevelDiv.querySelector(".dropdown-toggle");
-    btn.textContent = item.textContent;             // update button text
-    btn.dataset.selectedLevel = item.dataset.level; // store numeric value
+      e.preventDefault();
+      const btn = derivedLevelDiv.querySelector(".dropdown-toggle");
+      btn.textContent = item.textContent;
+      btn.dataset.selectedLevel = item.dataset.level;
+      btn.dataset.selectedName = item.textContent;
+    });
   });
 
 }
 
 function updateProductConfig(){
   const prod = getSelectedProduct();
-  document.config.product.id = prod[0];
-  document.config.product.type = prod[1];
-  document.config.product.level = prod[2];
+  window.AppConfig.product_id = prod[0];
+  window.AppConfig.product_type = prod[1];
+  window.AppConfig.product_level = prod[2]; 
 
-  if (document.config.product.id){
+  if (window.AppConfig.product_id){
     document.getElementById("product-selecter-next").classList.remove("disabled");
   } else {
     document.getElementById("product-selecter-next").classList.add("disabled");
   }
 
   document.getElementById("admin-level-1").disabled = false;
-  if (parseInt(document.config.product.level, 10) === 4) {
+  if (parseInt(window.AppConfig.product_level, 10) === 4) {
     document.getElementById("admin-level-1").disabled = true;
   }
+
+  // console.log(`Product selected: ${window.AppConfig.product_id} ${window.AppConfig.product_type} ${window.AppConfig.product_level}`);
 }
 
 function updateExtentConfig() {
@@ -284,28 +328,28 @@ function updateExtentConfig() {
   const selectedExtentTab = getSelectedExtentTab();
   const selectedValue = getAdminLevel();
 
-  document.config.extent.level = parseInt(selectedValue, 10);
-  switch (document.config.extent.level) {
-    case 1:
-      document.config.extent.id = "poly_province";
-      break;
+  window.AppConfig.extent_level = parseInt(selectedValue, 10);
+  // switch (window.AppConfig.extent_level) {
+  //   case 1:
+  //     window.AppConfig.extent.id = "poly_province";
+  //     break;
 
-    case 2:
-      document.config.extent.id = "poly_district";
-      break;
+  //   case 2:
+  //     window.AppConfig.extent.id = "poly_district";
+  //     break;
 
-    case 3:
-      document.config.extent.id = "poly_dsd";
-      break;
+  //   case 3:
+  //     window.AppConfig.extent.id = "poly_dsd";
+  //     break;
 
-    case 4:
-      document.config.extent.id = "poly_gnd";
-      break;
+  //   case 4:
+  //     window.AppConfig.extent.id = "poly_gnd";
+  //     break;
 
-    case 5:
-      document.config.extent.id = "poly_50k";
-      break;
-  }
+  //   case 5:
+  //     window.AppConfig.extent.id = "poly_50k";
+  //     break;
+  // }
 
   if (selectedExtentTab === "#admin-boundary") {
     if (["1", "2", "3"].includes(selectedValue)) {
@@ -314,14 +358,14 @@ function updateExtentConfig() {
           '#admin-selector-dropdown input[type="checkbox"]:checked',
         ),
       ).map((cb) => cb.value);
-      document.config.extent.aoi = checked;
+      window.AppConfig.extents = checked;
     } else if (["4"].includes(selectedValue)) {
       var checked = Array.from(
         document.querySelectorAll(
           '#admin-selector-dropdown2 input[type="checkbox"]:checked',
         ),
       ).map((cb) => cb.value);
-      document.config.extent.aoi = checked;
+      window.AppConfig.extents = checked;
     }
   } else if (selectedExtentTab === "#tile-number") {
     var checked = Array.from(
@@ -331,16 +375,37 @@ function updateExtentConfig() {
     ).map((cb) => cb.value);
 
     
-    document.config.extent.aoi = checked;
-    document.config.extent.level = 5;
+    window.AppConfig.extents = checked;
+    window.AppConfig.extent_level = 5;
   }
   
-  if (document.config.extent.aoi.length > 0) {
+  if (window.AppConfig.extents.length > 0) {
     document.getElementById("extent-selecter-next").classList.remove("disabled");
   } else {
     document.getElementById("extent-selecter-next").classList.add("disabled");
   }
   
+}
+
+function getKeyByValue(obj, value) {
+  return Object.keys(obj).find(key => obj[key] === value);
+}
+
+function getDerivedLevel() {
+
+  const derivedLevel = document.getElementById(`derive-${getSelectedProduct()[0]}`).innerText.trim();
+  if (!derivedLevel) {
+    console.log("No derived level selected");
+    return {
+      lvl_name: null,
+      lvl_number: null
+    };
+  }
+
+  return {
+    lvl_name: derivedLevel,
+    lvl_number: getKeyByValue(levelMap, derivedLevel)
+  };
 }
 
 // EVENTS LISTENERS
@@ -373,7 +438,6 @@ productSelectorNext.addEventListener("click", async function () {
 
   openSidebar(`Extent`);
 });
-
 
 adminLvlSelector.addEventListener("change", async function () {
   
