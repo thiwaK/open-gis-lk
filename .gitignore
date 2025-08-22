@@ -1,7 +1,7 @@
 .hugo_build.lock
-node_modules
-resources
-themes
+node_modules/
+resources/
+themes/
 backend/
 api.js
 *.sql
