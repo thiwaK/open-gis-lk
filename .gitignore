@@ -2,6 +2,7 @@
 node_modules
 resources
 themes
+backend/
 api.js
 *.sql
 *.sqlite

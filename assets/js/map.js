@@ -1,5 +1,5 @@
 import "leaflet";
-// import 'leaflet/dist/leaflet.css';
+
 
 const canvas = document.createElement("canvas");
 const gl =
