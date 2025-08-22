@@ -1,14 +1,30 @@
 {{ define "main" }}
 
-  <!-- navbar -->
-  {{ partial "navbar.html" . }}
-  
-  <main class="d-flex vh-100">
 
-    <div id="map" class="flex-grow-1" style="width: auto; height: 100vh; z-index: 1;"></div>
-    
+  <div class="row p-0 m-0 flex-nowrap vh-100">
+      <!-- Sidebar -->
+      <div class="col-md-3 col-lg-2 p-0 border-end" style="height: 100vh; position: sticky; top: 0; overflow-y: auto;">
+        {{ partial "new_navbar.html" . }}
+      </div>
 
-  </main>
+      <!-- Catalog (scrollable) -->
+      <div class="col-md-6 col-lg-6 p-3 d-flex flex-column" style="height: 100vh;">
+        <h4 class="text-center fw-bold mb-3">Product Catalogue</h4>
+
+        <div id="productTabContent" class="tab-content mt-3 flex-grow-0"
+          style="align-items: stretch;align-items: stretch;">
+          <!-- dataset cards will render here -->
+        </div>
+      </div>
+
+      <!-- Map -->
+      <div class="col-md-3 col-lg-4 p-0" style="height: 100vh; position: sticky; top: 0;">
+        <div id="dataset-map" class="h-100">
+          <div id="map" style="height: 100%; width: 100%;"></div>
+        </div>
+      </div>
+  </div>
+
 
   <!-- Loading Overlay -->
   <div id="loading-overlay" class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-dark bg-opacity-50" style="z-index: 10000; display: none;">
@@ -21,10 +37,10 @@
   </div>
 
   <!-- webgl warn -->
-  <div id="webgl-warning" class="d-none d-flex justify-content-center py-5">
+  <div id="webgl-warning" class="d-flex justify-content-center py-5 d-none">
       <div class="card text-danger border-danger bg-danger-subtle text-danger-emphasis">
           <div class="card-header align-content-between justify-content-center fs-5">
-          <i class="fa-solid fa-exclamation-triangle-fill"></i> Error
+            <i class="fa-solid fa-exclamation-triangle-fill"></i> Error
           </div>
           <div class="card-body">
           <h5 class="card-title">WebGL is not supported or is disabled in your browser</h5>
@@ -33,6 +49,14 @@
           </div>
       </div>
   </div>
+
+  <script>
+    const canvas = document.createElement("canvas");
+    const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+    {{/*  if (!gl) {
+      document.getElementById("webgl-warning").classList.remove("d-none");
+    }  */}}
+  </script>
 
   <!-- sidebar -->
   {{ partial "sidebar.html" . }}

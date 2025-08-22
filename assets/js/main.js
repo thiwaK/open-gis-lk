@@ -186,26 +186,34 @@ async function fetchData() {
   return true;
 }
 
+async function populateCategories(){
+
+}
+
 async function populateProducts(){
 
   const data = await fetchProducts();
   const tabList = document.getElementById("productTab");
   const tabContent = document.getElementById("productTabContent");
+  const topicsList = document.querySelector("#topics-list"); // UL element
 
   // category tabs
   data.categories.forEach((category, index) => {
     const tabId = `tab-${category.name.toLowerCase()}`;
     const activeClass = index === 0 ? "active" : "";
 
-    tabList.innerHTML += `
-      <li class="nav-item" role="presentation">
-        <button class="nav-link ${activeClass}" id="${tabId}-tab"
-          data-bs-toggle="tab" data-bs-target="#${tabId}" type="button"
-          role="tab" aria-controls="${tabId}" aria-selected="${index === 0}">
-          <i class="${category.icon} me-2"></i>${category.name}
-        </button>
+    topicsList.innerHTML += `
+      <li class="nav-item">
+        <a href="${category.url}"
+          class="nav-link d-flex justify-content-between align-items-center ${activeClass}">
+          <span class="item-label">
+            <i class="${category.icon} me-2"></i>${category.name}
+          </span>
+          <span class="badge bg-secondary">${category.count}</span>
+        </a>
       </li>
     `;
+
 
     tabContent.innerHTML += `
       <div class="tab-pane fade ${index === 0 ? "show active" : ""}"
@@ -304,6 +312,7 @@ async function populateProducts(){
 }
 
 function updateProductConfig(){
+  
   const prod = getSelectedProduct();
   window.AppConfig.product_id = prod[0];
   window.AppConfig.product_type = prod[1];
@@ -587,9 +596,4 @@ document.querySelector('#productTabContent').addEventListener('change', e => {
 document.querySelector('#extentTabContent').addEventListener('change', e => {
   updateExtentConfig();
 });
-
-
-
-
-
 
