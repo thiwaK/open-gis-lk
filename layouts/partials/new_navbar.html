@@ -1,22 +1,20 @@
 
 
-<nav id="navbar" class="sidebar d-flex flex-column flex-shrink-0 position-fixed">
+<nav id="navbar" class="sidebar d-flex flex-column flex-shrink-0 position-fixed border-1 border-right shadow-sm">
     <button class="toggle-btn" onclick="toggleNavbar()">
         <i class="bi bi-chevron-left"></i>
     </button>
 
-    <div class="p-4">
+    <div class="p-3 align-items-center">
         <h4 class="logo-text fw-bold mb-0">OpenGIS LK</h4>
-        {{/* <p class="text-muted small hide-on-collapse">Dashboard</p> */}}
+        <p class="text-muted small hide-on-collapse">The geospatial catalog of LK</p>
     </div>
 
     <div class="nav flex-column">
-        
-
         <section>
-            <h5 class="h6 mb-3 text-center">
+            <h6 class="text-left border-1 border-bottom border-top py-1 px-3">
                 <i class="bi bi-filter"></i> Topics
-            </h5>
+            </h6>
 
             <nav aria-label="Topics">
                 <ul id="topics-list" class="nav flex-column">
@@ -34,10 +32,12 @@
     </div>
 </nav>
 
-{{/*  <script>
+
+
+<script>
     const navbar = document.getElementById('navbar');
 
-    function adjustMapSize() {
+    {{/*  function adjustMapSize() {
 
         const mapDiv = document.getElementById('map');
 
@@ -46,7 +46,7 @@
         mapDiv.style.width = `calc(100% - ${navbarWidth}px)`;
 
         if (window.map) window.map.invalidateSize();
-    }
+    }  */}}
 
     function toggleNavbar() {
         document.querySelector('.sidebar').classList.toggle('collapsed');
@@ -61,9 +61,9 @@
 
 
 
-        setTimeout(adjustMapSize, 310); // Wait for CSS transition to finish
+        // setTimeout(adjustMapSize, 310); // Wait for CSS transition to finish
     }
 
-    window.addEventListener('load', adjustMapSize);
-    window.addEventListener('resize', adjustMapSize);
-</script>  */}}
+    {{/*  window.addEventListener('load', adjustMapSize);
+    window.addEventListener('resize', adjustMapSize);  */}}
+</script>

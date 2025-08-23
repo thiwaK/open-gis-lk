@@ -70,7 +70,7 @@
     width: 30px;
     height: 30px;
     border: none;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 0px 6px rgba(0, 0, 0, 0.15);
     z-index: 100;
     cursor: pointer;
     transition: transform 0.3s ease;
@@ -78,6 +78,7 @@
 
 .collapsed .toggle-btn {
     transform: rotate(180deg);
+    box-shadow: 0 -0px 6px rgba(0, 0, 0, 0.15);
 }
 
 .collapsed .hide-on-collapse {
