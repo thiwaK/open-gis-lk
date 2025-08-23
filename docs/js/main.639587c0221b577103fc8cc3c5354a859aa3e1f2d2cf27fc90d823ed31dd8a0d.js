@@ -18,9 +18,9 @@
         <a href="${h.url}"
           class="nav-link d-flex justify-content-between align-items-center ${_}">
           <span class="item-label">
-            <i class="${h.icon} me-2"></i>${h.name}
+            <i class="${h.icon} me-2"></i><span class="hide-on-collapse">${h.name}</span>
           </span>
-          <span class="badge bg-secondary">${h.count}</span>
+          <!--span class="badge bg-secondary">${h.count}</span-->
         </a>
       </li>
     `,r.innerHTML+=`
@@ -28,9 +28,9 @@
            id="${d}" role="tabpanel" aria-labelledby="${d}-tab">
         <div class="row g-3" id="dataset-list-${h.name.toLowerCase()}"></div>
       </div>
-    `}),s.datasets.forEach(h=>{h.tags.forEach(f=>{let d=document.getElementById(`dataset-list-${f.toLowerCase()}`);if(!d)return;let _=h.level.sort((P,b)=>b-P),g=_[0],E=Es[g]||`Level ${g}`,y=_.map(P=>`<li><a class="dropdown-item" href="#" data-level="${P}">${Es[P]||`Level ${P}`}</a></li>`).join(""),N=h.tags.map(P=>`<span class="badge bg-secondary">${P}</span>`).join("");d.innerHTML+=`
+    `}),s.datasets.forEach(h=>{h.tags.forEach(f=>{let d=document.getElementById(`dataset-list-${f.toLowerCase()}`);if(!d)return;let _=h.level.sort((P,b)=>b-P),g=_[0],E=Es[g]||"",y=_.map(P=>`<li><a class="dropdown-item" href="#" data-level="${P}">${Es[P]||`Level ${P}`}</a></li>`).join(""),N=h.tags.map(P=>`<span class="badge bg-secondary">${P}</span>`).join("");d.innerHTML+=`
         <div class="col-12 p-0">
-          <div class="form-check border p-3 pt-1 pb-1 mx-2 rounded h-100 border-primary">
+          <div class="form-check border p-3 pt-1 pb-1 mx-2 h-100 border-primary rounded-1">
             <input class="form-check-input" type="radio"
               name="dataset-${f.toLowerCase()}"
               id="${h.id}" value="${h.id}"
@@ -38,8 +38,12 @@
               productlevel="${h.level.join(",")}">
             
             <label class="form-check-label" for="${h.id}">
+              
+
               <strong>${h.name}</strong><br>
-              <div class="mt-2 small text-muted dataset-meta">
+              
+              
+              <div class="mt-2 mb-1 small text-muted dataset-meta">
                 <span class="" title="Source">
                   <i class="bi bi-globe"></i>
                   <a href="${h.sourceLink}" target="_blank" class="text-decoration-none">${h.source}</a>
@@ -59,18 +63,26 @@
                 </span>
                 
               </div>
+              
+              
               <small class="text-muted">${h.description}</small>
-              <div class="d-flex justify-content-start align-items-center mt-2">
+              
+              
+              <div class="d-flex justify-content-start align-items-center mt-3">
                 <!-- a href="#" title="Preview this dataset" class="btn btn-light btn-xs pb-0 pt-0 me-3">Preview</a -->
-                <span class="form-label mb-0 btn-xs" id="label-derive-${h.id}">Aggregation Level</span>
-                <div class="derivedLevel d-flex justify-content-start align-items-center">
-                  <a href="#" title="Aggregation level" class="btn btn-light btn-xs pb-0 pt-0 dropdown-toggle" id="derive-${h.id}" data-bs-toggle="dropdown" aria-expanded="false">
-                    ${E}
-                  </a>
-                  <ul class="dropdown-menu" aria-labelledby="derive-${h.id}">
-                    ${y}
-                  </ul>
+                
+                <div class="d-flex bg-body-secondary px-1 rounded-1" title="Aggregation level">
+                  <span class="form-label m-0 p-0 btn-xs text-muted mx-1" id="label-derive-${h.id}">Aggr</span>
+                  <div class="derivedLevel d-flex justify-content-start align-items-center mx-0">
+                    <a href="#" class="btn btn-xs pb-0 pt-0 dropdown-toggle" id="derive-${h.id}" data-bs-toggle="dropdown" aria-expanded="false">
+                      ${E}
+                    </a>
+                    <ul class="dropdown-menu border-secondary rounded-1" aria-labelledby="derive-${h.id}">
+                      ${y}
+                    </ul>
+                  </div>
                 </div>
+                
               </div>
             </label>
           </div>

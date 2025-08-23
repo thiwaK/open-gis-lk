@@ -207,9 +207,9 @@ async function populateProducts(){
         <a href="${category.url}"
           class="nav-link d-flex justify-content-between align-items-center ${activeClass}">
           <span class="item-label">
-            <i class="${category.icon} me-2"></i>${category.name}
+            <i class="${category.icon} me-2"></i><span class="hide-on-collapse">${category.name}</span>
           </span>
-          <span class="badge bg-secondary">${category.count}</span>
+          <!--span class="badge bg-secondary">${category.count}</span-->
         </a>
       </li>
     `;
@@ -232,12 +232,11 @@ async function populateProducts(){
       // Sort descending to get highest level first
       const sortedLevels = dataset.level.sort((a, b) => b - a); 
       const defaultLevel = sortedLevels[0]; // highest number
-      const defaultLabel = levelMap[defaultLevel] || `Level ${defaultLevel}`;
+      const defaultLabel = levelMap[defaultLevel] || ``;
       
       const dropdownItems = sortedLevels
-      .map(lvl => `<li><a class="dropdown-item" href="#" data-level="${lvl}">${levelMap[lvl] || `Level ${lvl}`}</a></li>`)
-      .join("");
-
+        .map(lvl => `<li><a class="dropdown-item" href="#" data-level="${lvl}">${levelMap[lvl] || `Level ${lvl}`}</a></li>`)
+        .join("");
 
       // Build tags string
       const tagsHtml = dataset.tags
@@ -246,7 +245,7 @@ async function populateProducts(){
 
       listContainer.innerHTML += `
         <div class="col-12 p-0">
-          <div class="form-check border p-3 pt-1 pb-1 mx-2 rounded h-100 border-primary">
+          <div class="form-check border p-3 pt-1 pb-1 mx-2 h-100 border-primary rounded-1">
             <input class="form-check-input" type="radio"
               name="dataset-${tag.toLowerCase()}"
               id="${dataset.id}" value="${dataset.id}"
@@ -254,8 +253,12 @@ async function populateProducts(){
               productlevel="${dataset.level.join(',')}">
             
             <label class="form-check-label" for="${dataset.id}">
+              
+
               <strong>${dataset.name}</strong><br>
-              <div class="mt-2 small text-muted dataset-meta">
+              
+              
+              <div class="mt-2 mb-1 small text-muted dataset-meta">
                 <span class="" title="Source">
                   <i class="bi bi-globe"></i>
                   <a href="${dataset.sourceLink}" target="_blank" class="text-decoration-none">${dataset.source}</a>
@@ -275,18 +278,26 @@ async function populateProducts(){
                 </span>
                 
               </div>
+              
+              
               <small class="text-muted">${dataset.description}</small>
-              <div class="d-flex justify-content-start align-items-center mt-2">
+              
+              
+              <div class="d-flex justify-content-start align-items-center mt-3">
                 <!-- a href="#" title="Preview this dataset" class="btn btn-light btn-xs pb-0 pt-0 me-3">Preview</a -->
-                <span class="form-label mb-0 btn-xs" id="label-derive-${dataset.id}">Aggregation Level</span>
-                <div class="derivedLevel d-flex justify-content-start align-items-center">
-                  <a href="#" title="Aggregation level" class="btn btn-light btn-xs pb-0 pt-0 dropdown-toggle" id="derive-${dataset.id}" data-bs-toggle="dropdown" aria-expanded="false">
-                    ${defaultLabel}
-                  </a>
-                  <ul class="dropdown-menu" aria-labelledby="derive-${dataset.id}">
-                    ${dropdownItems}
-                  </ul>
+                
+                <div class="d-flex bg-body-secondary px-1 rounded-1" title="Aggregation level">
+                  <span class="form-label m-0 p-0 btn-xs text-muted mx-1" id="label-derive-${dataset.id}">Aggr</span>
+                  <div class="derivedLevel d-flex justify-content-start align-items-center mx-0">
+                    <a href="#" class="btn btn-xs pb-0 pt-0 dropdown-toggle" id="derive-${dataset.id}" data-bs-toggle="dropdown" aria-expanded="false">
+                      ${defaultLabel}
+                    </a>
+                    <ul class="dropdown-menu border-secondary rounded-1" aria-labelledby="derive-${dataset.id}">
+                      ${dropdownItems}
+                    </ul>
+                  </div>
                 </div>
+                
               </div>
             </label>
           </div>
