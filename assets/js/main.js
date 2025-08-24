@@ -37,6 +37,10 @@ const tileSelectorDropdown = document.getElementById("tile-selector-dropdown");
 const productSelectorSave = document.getElementById("product-selecter-save");
 const productSelectorNext= document.getElementById("product-selecter-next");
 
+const tabList = document.getElementById("productTab");
+const tabContent = document.getElementById("productTabContent");
+const topicsList = document.querySelector("#topics-list"); // UL element
+
 
 // UI FUNCTIONS
 function getSelectedProduct() {
@@ -187,23 +191,16 @@ async function fetchData() {
 }
 
 async function populateCategories(){
-
-}
-
-async function populateProducts(){
-
+  
   const data = await fetchProducts();
-  const tabList = document.getElementById("productTab");
-  const tabContent = document.getElementById("productTabContent");
-  const topicsList = document.querySelector("#topics-list"); // UL element
-
+  
   // category tabs
   data.categories.forEach((category, index) => {
     const tabId = `tab-${category.name.toLowerCase()}`;
     const activeClass = index === 0 ? "active" : "";
 
     topicsList.innerHTML += `
-      <li class="nav-item">
+      <li class="nav-item" title="${category.name}">
         <a href="${category.url}"
           class="nav-link d-flex justify-content-between align-items-center ${activeClass}">
           <span class="item-label">
@@ -222,7 +219,12 @@ async function populateProducts(){
       </div>
     `;
   });
+}
 
+async function populateProducts(){
+
+  const data = await fetchProducts();
+  
   // dataset items
   data.datasets.forEach(dataset => {
     dataset.tags.forEach(tag => {
@@ -258,7 +260,7 @@ async function populateProducts(){
               <strong>${dataset.name}</strong><br>
               
               
-              <div class="mt-2 mb-1 small text-muted dataset-meta">
+              <div class="mt-1 mb-1 small text-muted dataset-meta">
                 <span class="" title="Source">
                   <i class="bi bi-globe"></i>
                   <a href="${dataset.sourceLink}" target="_blank" class="text-decoration-none">${dataset.source}</a>
@@ -578,6 +580,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // const gndArray = await fetchAdminLevelData(5);
   // populateDropdown("tile-selector-dropdown", gndArray);
 
+  await populateCategories();
   await populateProducts();
   await fetchAdminLevelData(4);
   await fetchAdminLevelData(3);
