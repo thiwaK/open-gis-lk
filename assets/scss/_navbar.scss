@@ -45,10 +45,6 @@
     font-size: 0.7rem;
 }
 
-.profile-section {
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
 .main-content {
     margin-left: var(--sidebar-width);
     background-color: #f8f9fa;
@@ -85,15 +81,10 @@
     opacity: 0;
     visibility: hidden;
     display: none;
+    transition: all 0.3s ease;
 }
 
 .collapsed .logo-text {
-    opacity: 0;
-    visibility: hidden;
-    display: none;
-}
-
-.collapsed .profile-info {
     opacity: 0;
     visibility: hidden;
     display: none;

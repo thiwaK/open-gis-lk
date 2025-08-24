@@ -30,14 +30,14 @@
       </div>
     `})}async function Ip(){(await ws()).datasets.forEach(i=>{i.tags.forEach(s=>{let l=document.getElementById(`dataset-list-${s.toLowerCase()}`);if(!l)return;let h=i.level.sort((y,w)=>w-y),f=h[0],d=bs[f]||"",m=h.map(y=>`<li><a class="dropdown-item" href="#" data-level="${y}">${bs[y]||`Level ${y}`}</a></li>`).join(""),g=i.tags.map(y=>`<span class="badge bg-secondary">${y}</span>`).join("");l.innerHTML+=`
         <div class="col-12 p-0">
-          <div class="form-check border p-3 pt-1 pb-1 mx-2 h-100 border-primary rounded-1">
+          <div class="form-check border p-3 pt-1 pb-1 mx-0 h-100 border-primary rounded-1 shadow-sm">
             <input class="form-check-input" type="radio"
               name="dataset-${s.toLowerCase()}"
               id="${i.id}" value="${i.id}"
               productaoitype="undefined"
               productlevel="${i.level.join(",")}">
             
-            <label class="form-check-label" for="${i.id}">
+            <label class="form-check-label p-1" for="${i.id}">
               
 
               <strong>${i.name}</strong><br>

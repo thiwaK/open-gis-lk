@@ -247,14 +247,14 @@ async function populateProducts(){
 
       listContainer.innerHTML += `
         <div class="col-12 p-0">
-          <div class="form-check border p-3 pt-1 pb-1 mx-2 h-100 border-primary rounded-1">
+          <div class="form-check border p-3 pt-1 pb-1 mx-0 h-100 border-primary rounded-1 shadow-sm">
             <input class="form-check-input" type="radio"
               name="dataset-${tag.toLowerCase()}"
               id="${dataset.id}" value="${dataset.id}"
               productaoitype="undefined"
               productlevel="${dataset.level.join(',')}">
             
-            <label class="form-check-label" for="${dataset.id}">
+            <label class="form-check-label p-1" for="${dataset.id}">
               
 
               <strong>${dataset.name}</strong><br>
