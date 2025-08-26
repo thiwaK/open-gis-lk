@@ -3,7 +3,7 @@ import "leaflet";
 
 
 
-window.map = L.map("dataset-map").setView([7.9, 80.7], 8);
+window.map = L.map("dataset-map").setView([7.9, 83.58], 8);
 L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: '<a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
 }).addTo(map);

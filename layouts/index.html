@@ -1,66 +1,147 @@
 {{ define "main" }}
 
 
-  <div class="row p-0 m-0 flex-nowrap vh-100">
-      <!-- Sidebar -->
-      <div class="col-md-3 col-lg-2 p-0">
-        {{ partial "new_navbar.html" . }}
-      </div>
+<div class="d-flex flex-grow-1 overflow-hidden">
 
-      <!-- Catalog (scrollable) -->
-      <div class="col-md-6 col-lg-6 p-3 d-flex flex-column">
-        <h4 class="text-center fw-bold mb-3">Product Catalogue</h4>
+  <!-- Sidebar -->
+  <nav id="navbar" class="sidebar border-1 border-right shadow-sm">
+    <button class="toggle-btn border-0" onclick="toggleNavbar()">
+      <i class="bi bi-chevron-left"></i>
+    </button>
 
-        <div id="productTabContent" class="tab-content mt-3 flex-grow-0"
-          style="align-items: stretch;align-items: stretch;">
-          <!-- dataset cards will render here -->
-        </div>
-      </div>
+    <div class="p-3 align-items-center">
+      <h4 class="logo-text fw-bold mb-0">OpenGIS LK</h4>
+      <p class="text-muted small hide-on-collapse">The geospatial catalog of LK</p>
+    </div>
 
-      <!-- Map -->
-      <div class="col-md-3 col-lg-4 p-0">
-        <div id="dataset-map" class="w-100 h-100 position-fixed top-0 w-100 h-100 d-flex">
-        </div>
-      </div>
-  </div>
+    <div class="nav flex-column">
+      <section>
+        <h6 class="text-left border-1 border-bottom border-top py-1 px-3">
+          <i class="bi bi-filter"></i><span class="hide-on-collapse mx-1">Topics</span>
+        </h6>
+
+        <nav aria-label="Topics">
+          <ul id="topics-list" class="nav flex-column">
+            <!-- JS will populate here -->
+          </ul>
+        </nav>
+      </section>
+    </div>
+
+    <!-- GitHub Footer -->
+    <div id="navbar-footer" class="mt-auto px-3 py-2 border-top small text-center">
+      <a href="https://github.com/thiwaK/open-gis-lk" target="_blank" class="text-decoration-none">
+        <i class="bi bi-github me-2"></i>View on GitHub
+      </a>
+    </div>
+
+  </nav>
+
+  <script>
+    const navbar = document.getElementById('navbar');
+
+    {
+      {/*  function adjustMapSize() {
+
+        const mapDiv = document.getElementById('map');
+
+        const navbarWidth = navbar.offsetWidth;
+        mapDiv.style.marginLeft = `${navbarWidth}px`;
+        mapDiv.style.width = `calc(100% - ${navbarWidth}px)`;
+
+        if (window.map) window.map.invalidateSize();
+    }  */}
+    }
+
+    function toggleNavbar() {
+      document.querySelector('.sidebar').classList.toggle('collapsed');
+      const link = document.querySelector('#navbar-footer a');
+      if (link) {
+        if (link.textContent.includes('View on GitHub')) {
+          link.innerHTML = '<i class="bi bi-github me-2"></i>';
+        } else {
+          link.innerHTML = '<i class="bi bi-github me-2"></i>View on GitHub';
+        }
+      }
 
 
-  <!-- Loading Overlay -->
-  <div id="loading-overlay" class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-dark bg-opacity-50" style="z-index: 10000; display: none;">
-    <div class="text-center text-white">
-      <div class="spinner-border text-light mb-3" role="status" style="width: 3rem; height: 3rem;">
-        <span class="visually-hidden">Loading...</span>
-      </div>
-      <div>Loading, please wait...</div>
+
+      // setTimeout(adjustMapSize, 310); // Wait for CSS transition to finish
+    }
+
+    {
+      {/*  window.addEventListener('load', adjustMapSize);
+    window.addEventListener('resize', adjustMapSize);  */}
+    }
+  </script>
+
+
+  <!-- Catalog (scrollable) -->
+  <div class="d-flex flex-grow-1 flex-column overflow-y-auto m-3 p-3">
+    <h4 class="text-center fw-bold mb-3">Product Catalogue</h4>
+
+    <div id="productTabContent" class="tab-content mt-3 flex-grow-0 align-items-stretch">
+      <!-- dataset cards will render here -->
     </div>
   </div>
 
-  <!-- webgl warn -->
-  <div id="webgl-warning" class="d-flex justify-content-center py-5 d-none">
-      <div class="card text-danger border-danger bg-danger-subtle text-danger-emphasis">
-          <div class="card-header align-content-between justify-content-center fs-5">
-            <i class="fa-solid fa-exclamation-triangle-fill"></i> Error
-          </div>
-          <div class="card-body">
-          <h5 class="card-title">WebGL is not supported or is disabled in your browser</h5>
-          <p class="card-text">Please enable it or switch to a compatible browser.</p>
-          {{/*  <a href="#" class="btn btn-danger bg-danger-emphasis">OK</a>  */}}
-          </div>
-      </div>
+
+  <!-- Map -->
+  <div class="d-flex flex-shrink-0 d-block">
+    <div id="dataset-map" class="w-100 h-100 position-fixed top-0 d-flex border-1 border-left shadow-sm">
+    </div>
   </div>
+</div>
 
-  <script>
-    const canvas = document.createElement("canvas");
-    const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-    {{/*  if (!gl) {
+
+<!-- Mobile Map Overlay -->
+<div id="mapOverlay" class="map-overlay">
+  <button class="close-btn btn btn-sm btn-light" onclick="hideMapOverlay()">✕</button>
+  <div id="dataset-map-mobile" class="w-100 h-100">
+    <!-- Mobile map -->
+  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay"
+  class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center bg-dark bg-opacity-50"
+  style="z-index: 10000; display: none;">
+  <div class="text-center text-white">
+    <div class="spinner-border text-light mb-3" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <div>Loading, please wait...</div>
+  </div>
+</div>
+
+<!-- webgl warn -->
+<div id="webgl-warning" class="d-flex justify-content-center py-5 d-none">
+  <div class="card text-danger border-danger bg-danger-subtle text-danger-emphasis">
+    <div class="card-header align-content-between justify-content-center fs-5">
+      <i class="fa-solid fa-exclamation-triangle-fill"></i> Error
+    </div>
+    <div class="card-body">
+      <h5 class="card-title">WebGL is not supported or is disabled in your browser</h5>
+      <p class="card-text">Please enable it or switch to a compatible browser.</p>
+      {{/* <a href="#" class="btn btn-danger bg-danger-emphasis">OK</a> */}}
+    </div>
+  </div>
+</div>
+
+<script>
+  const canvas = document.createElement("canvas");
+  const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+  {
+    {/*  if (!gl) {
       document.getElementById("webgl-warning").classList.remove("d-none");
-    }  */}}
-  </script>
+    }  */}
+  }
+</script>
 
-  <!-- sidebar -->
-  {{ partial "sidebar.html" . }}
+<!-- sidebar -->
+{{ partial "sidebar.html" . }}
 
-  <!-- scripts -->
-  {{ partial "scripts.html" . }}
-  
+<!-- scripts -->
+{{ partial "scripts.html" . }}
+
 {{ end }}
