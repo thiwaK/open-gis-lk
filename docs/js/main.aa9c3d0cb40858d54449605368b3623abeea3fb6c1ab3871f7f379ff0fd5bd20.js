@@ -18,7 +18,8 @@
         <a href="${i.url}"
           class="nav-link d-flex justify-content-between align-items-center ${h}">
           <span class="item-label">
-            <i class="${i.icon} me-2"></i><span class="hide-on-collapse">${i.name}</span>
+            <i class="${i.icon} me-2 d-inline-block"></i>
+            <span class="d-inline-block">${i.name}</span>
           </span>
           <!--span class="badge bg-secondary">${i.count}</span-->
         </a>
@@ -29,8 +30,8 @@
         <div class="row g-3" id="dataset-list-${i.name.toLowerCase()}"></div>
       </div>
     `})}async function Ip(){(await ws()).datasets.forEach(i=>{i.tags.forEach(s=>{let l=document.getElementById(`dataset-list-${s.toLowerCase()}`);if(!l)return;let h=i.level.sort((y,w)=>w-y),f=h[0],d=bs[f]||"",m=h.map(y=>`<li><a class="dropdown-item" href="#" data-level="${y}">${bs[y]||`Level ${y}`}</a></li>`).join(""),g=i.tags.map(y=>`<span class="badge bg-secondary">${y}</span>`).join("");l.innerHTML+=`
-        <div class="col-12 p-0">
-          <div class="form-check border p-3 pt-1 pb-1 mx-0 h-100 border-primary rounded-1 shadow-sm">
+        <div class="p-0">
+          <div class="form-check border p-3 pt-1 pb-1 mx-0 h-100 border-primary rounded-1 shadow-sm ">
             <input class="form-check-input" type="radio"
               name="dataset-${s.toLowerCase()}"
               id="${i.id}" value="${i.id}"

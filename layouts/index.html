@@ -1,37 +1,39 @@
 {{ define "main" }}
 
 
-<div class="d-flex flex-grow-1 overflow-hidden">
+<div class="d-flex flex-grow-1 overflow-hidden position-relative">
 
   <!-- Sidebar -->
-  <nav id="navbar" class="sidebar border-1 border-right shadow-sm">
+  <nav id="navbar" class="sidebar d-flex flex-column overflow-hidden flex-shrink-0 
+  border-1 border-right shadow-sm position-relative">
+    
     <button class="toggle-btn border-0" onclick="toggleNavbar()">
       <i class="bi bi-chevron-left"></i>
     </button>
 
-    <div class="p-3 align-items-center">
-      <h4 class="logo-text fw-bold mb-0">OpenGIS LK</h4>
-      <p class="text-muted small hide-on-collapse">The geospatial catalog of LK</p>
+    <div class="logo-text p-3 align-items-start top-0 overflow-hidden position-relative text-nowrap">
+      <h4 class="fw-bold mb-0">OpenGIS LK</h4>
+      <p class="text-muted small">The geospatial catalog of LK</p>
     </div>
 
-    <div class="nav flex-column">
-      <section>
-        <h6 class="text-left border-1 border-bottom border-top py-1 px-3">
-          <i class="bi bi-filter"></i><span class="hide-on-collapse mx-1">Topics</span>
-        </h6>
+    <section class="nav flex-column position-relative text-nowrap">
+      <h6 class="topic-label d-flex text-center border-1 border-bottom border-top py-1 px-3">
+        <i class="bi bi-filter d-inline-block"></i>
+        <span class="mx-2 d-inline-block">Topics</span>
+      </h6>
 
-        <nav aria-label="Topics">
-          <ul id="topics-list" class="nav flex-column">
-            <!-- JS will populate here -->
-          </ul>
-        </nav>
-      </section>
-    </div>
+      <nav aria-label="Topics">
+        <ul id="topics-list" class="nav flex-column">
+          <!-- JS will populate here -->
+        </ul>
+      </nav>
+    </section>
 
     <!-- GitHub Footer -->
-    <div id="navbar-footer" class="mt-auto px-3 py-2 border-top small text-center">
+    <div id="navbar-footer" class="mt-auto px-3 py-2 border-top small position-relative text-nowrap">
       <a href="https://github.com/thiwaK/open-gis-lk" target="_blank" class="text-decoration-none">
-        <i class="bi bi-github me-2"></i>View on GitHub
+        <i class="bi bi-github me-2"></i>
+        <span>View on GitHub</span>
       </a>
     </div>
 
@@ -55,17 +57,6 @@
 
     function toggleNavbar() {
       document.querySelector('.sidebar').classList.toggle('collapsed');
-      const link = document.querySelector('#navbar-footer a');
-      if (link) {
-        if (link.textContent.includes('View on GitHub')) {
-          link.innerHTML = '<i class="bi bi-github me-2"></i>';
-        } else {
-          link.innerHTML = '<i class="bi bi-github me-2"></i>View on GitHub';
-        }
-      }
-
-
-
       // setTimeout(adjustMapSize, 310); // Wait for CSS transition to finish
     }
 
@@ -75,7 +66,6 @@
     }
   </script>
 
-
   <!-- Catalog (scrollable) -->
   <div class="d-flex flex-grow-1 flex-column overflow-y-auto m-3 p-3">
     <h4 class="text-center fw-bold mb-3">Product Catalogue</h4>
@@ -84,7 +74,6 @@
       <!-- dataset cards will render here -->
     </div>
   </div>
-
 
   <!-- Map -->
   <div class="d-flex flex-shrink-0 d-block">

@@ -204,7 +204,8 @@ async function populateCategories(){
         <a href="${category.url}"
           class="nav-link d-flex justify-content-between align-items-center ${activeClass}">
           <span class="item-label">
-            <i class="${category.icon} me-2"></i><span class="hide-on-collapse">${category.name}</span>
+            <i class="${category.icon} me-2 d-inline-block"></i>
+            <span class="d-inline-block">${category.name}</span>
           </span>
           <!--span class="badge bg-secondary">${category.count}</span-->
         </a>
@@ -246,8 +247,8 @@ async function populateProducts(){
         .join("");
 
       listContainer.innerHTML += `
-        <div class="col-12 p-0">
-          <div class="form-check border p-3 pt-1 pb-1 mx-0 h-100 border-primary rounded-1 shadow-sm">
+        <div class="p-0">
+          <div class="form-check border p-3 pt-1 pb-1 mx-0 h-100 border-primary rounded-1 shadow-sm ">
             <input class="form-check-input" type="radio"
               name="dataset-${tag.toLowerCase()}"
               id="${dataset.id}" value="${dataset.id}"
