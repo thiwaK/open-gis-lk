@@ -30,42 +30,12 @@ const levelMap = {
 };
 
 // UI ELEMENTS
-const adminLvlSelector = document.getElementById("admin-level-selector");
-const extentSelectorSave = document.getElementById("extent-selecter-save");
-const extentSelectorNext = document.getElementById("extent-selecter-next");
-const tileSelectorDropdown = document.getElementById("tile-selector-dropdown");
-const productSelectorSave = document.getElementById("product-selecter-save");
-const productSelectorNext= document.getElementById("product-selecter-next");
-
-const tabList = document.getElementById("productTab");
+// const adminLvlSelector = document.getElementById("admin-level-selector");
 const tabContent = document.getElementById("productTabContent");
 const topicsList = document.querySelector("#topics-list"); // UL element
 
 
 // UI FUNCTIONS
-function getSelectedProduct() {
-  const activeTab = document.querySelector("#productTab .nav-link.active");
-  const selectedTabId = activeTab?.getAttribute("data-bs-target");
-
-  if (selectedTabId) {
-    const tabContent = document.querySelector(`${selectedTabId}`);
-    if (tabContent) {
-      const selectedInput = tabContent.querySelector(
-        'input[type="radio"]:checked',
-      );
-      if (selectedInput) {
-        const selectedValue = selectedInput.value;
-        const productAoiType = selectedInput.getAttribute("productaoitype");
-        let productlevel = selectedInput.getAttribute("productlevel");
-        productlevel = productlevel ? productlevel.trim().split(",").map(Number) : [];
-        productlevel = productlevel.sort((a, b) => b - a);
-        return [selectedValue, productAoiType, productlevel[0]];
-      }
-    }
-  }
-
-  return null;
-}
 
 function getSelectedExtentTab() {
   const activeTab = document.querySelector("#extentTab .nav-link.active");
@@ -287,12 +257,12 @@ async function populateProducts(){
               
               
               <div class="d-flex justify-content-start align-items-center mt-3">
-                <button onclick="previewOnMap()" title="Preview this dataset on map" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">Preview</button>
-                <button onclick="dlShapefile()" title="Download Shapefile" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">ShapeFile</button>
-                <button onclick="dlJson()" title="Download GeoJSON" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">GeoJSON</button>
-                <button onclick="dlWKT()" title="Download WKT" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">WKT</button>
-                <button onclick="dlWKB()" title="Download WKB" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">WKB</button>
-                <button onclick="dlPGSLQ()" title="Download PGSQL table" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">PGSQL</button>
+                <button onclick="previewOnMap(${dataset.id})" title="Preview this dataset on map" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">Preview</button>
+                <button onclick="dlShapefile(${dataset.id})" title="Download Shapefile" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">ShapeFile</button>
+                <button onclick="dlJson(${dataset.id})" title="Download GeoJSON" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">GeoJSON</button>
+                <button onclick="dlWKT(${dataset.id})" title="Download WKT" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">WKT</button>
+                <button onclick="dlWKB(${dataset.id})" title="Download WKB" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">WKB</button>
+                <button onclick="dlPGSLQ(${dataset.id})" title="Download PGSQL table" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">PGSQL</button>
 
                 <div class="d-flex btn btn-light rounded-1 btn-xs p-0 px-1 border-secondary" title="Aggregation level">
                   <span class="form-label m-0 p-0 text-muted" id="label-derive-${dataset.id}">Aggr</span>
@@ -330,27 +300,27 @@ async function populateProducts(){
 
 }
 
-function previewOnMap(){
+function previewOnMap(datasetID){
 
 }
 
-function dlShapefile(){
+function dlShapefile(datasetID){
 
 }
 
-function dlJson() {
+function dlJson(datasetID) {
 
 }
 
-function dlWKT(){
+function dlWKT(datasetID){
 
 }
 
-function dlWKB(){
+function dlWKB(datasetID){
 
 }
 
-function dlPGSLQ(){
+function dlPGSLQ(datasetID){
 
 }
 
@@ -463,112 +433,6 @@ function getDerivedLevel() {
 
 // EVENTS LISTENERS
 
-adminLvlSelector.addEventListener("change", async function () {
-  
-  let selectedValue = getAdminLevel();
-  if (["1", "2", "3", "4"].includes(selectedValue)) {
-    document.getElementById("admin-selector").classList.remove("d-none");
-    document.getElementById("admin-selector2").classList.add("d-none");
-    document.getElementById("admin-selector-label").classList.add("d-none");
-    document.getElementById("admin-selector-label2").classList.add("d-none");
-  }
-
-  if (selectedValue == "1") {
-    const data = await fetchAdminLevelData(1);
-    populateDropdown("admin-selector-dropdown", data);
-  } else if (selectedValue == "2") {
-    const data = await fetchAdminLevelData(2);
-    populateDropdown("admin-selector-dropdown", data);
-  } else if (selectedValue == "3") {
-    const data = await fetchAdminLevelData(3);
-    populateDropdown("admin-selector-dropdown", data);
-  } else if (selectedValue == "4") {
-    const dataDSD = await fetchAdminLevelData(3);
-    populateDropdown("admin-selector-dropdown", dataDSD);
-
-    document.getElementById("admin-selector-label").classList.remove("d-none");
-    document.getElementById("admin-selector-label").textContent = "DS Division";
-
-    document
-      .querySelectorAll('#admin-selector-dropdown input[type="checkbox"]')
-      .forEach((checkbox) => {
-        checkbox.addEventListener("change", async function () {
-          const checked = Array.from(
-            document.querySelectorAll(
-              '#admin-selector-dropdown input[type="checkbox"]:checked',
-            ),
-          ).map((cb) => cb.value);
-
-          if (checked.length > 0) {
-            document
-              .getElementById("admin-selector-label2")
-              .classList.remove("d-none");
-            document.getElementById("admin-selector-label2").textContent =
-              "GN Division";
-            document
-              .getElementById("admin-selector2")
-              .classList.remove("d-none");
-            document
-              .getElementById("admin-selector")
-              .classList.remove("d-none");
-
-            let data = await fetchAdminLevelData(4);
-            data = data?.filter(
-              (record) =>
-                record.code && checked.includes(String(record.dsd_code)),
-            );
-
-            populateDropdown("admin-selector-dropdown2", data);
-          } else {
-            document
-              .getElementById("admin-selector-label2")
-              .classList.add("d-none");
-            document.getElementById("admin-selector2").classList.add("d-none");
-          }
-        });
-      });
-  }
-
-  if (document.getElementById("admin-selector-dropdown-search")) {
-    document
-      .getElementById("admin-selector-dropdown-search")
-      .addEventListener("keyup", function () {
-        const filter = this.value.toLowerCase();
-        const dropdown = document.getElementById("admin-selector-dropdown");
-        const items = dropdown.querySelectorAll("li.dropdown-item");
-
-        items.forEach((item) => {
-          const label = item.querySelector("label.checkbox");
-          if (label.textContent.toLowerCase().includes(filter)) {
-            item.style.display = "";
-          } else {
-            item.style.display = "none";
-          }
-        });
-      });
-  }
-
-  if (document.getElementById("admin-selector-dropdown2-search")) {
-    document
-      .getElementById("admin-selector-dropdown2-search")
-      .addEventListener("keyup", function () {
-        const filter = this.value.toLowerCase();
-        const dropdown = document.getElementById("admin-selector-dropdown2");
-        const items = dropdown.querySelectorAll("li.dropdown-item");
-
-        items.forEach((item) => {
-          const label = item.querySelector("label.checkbox");
-          if (label.textContent.toLowerCase().includes(filter)) {
-            item.style.display = "";
-          } else {
-            item.style.display = "none";
-          }
-        });
-      });
-  }
-
-  
-});
 
 document.addEventListener("DOMContentLoaded", async () => {
   showLoading();
