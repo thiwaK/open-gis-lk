@@ -287,10 +287,15 @@ async function populateProducts(){
               
               
               <div class="d-flex justify-content-start align-items-center mt-3">
-                <!-- a href="#" title="Preview this dataset" class="btn btn-light btn-xs pb-0 pt-0 me-3">Preview</a -->
-                
-                <div class="d-flex bg-body-secondary px-1 rounded-1" title="Aggregation level">
-                  <span class="form-label m-0 p-0 btn-xs text-muted mx-1" id="label-derive-${dataset.id}">Aggr</span>
+                <button onclick="previewOnMap()" title="Preview this dataset on map" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">Preview</button>
+                <button onclick="dlShapefile()" title="Download Shapefile" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">ShapeFile</button>
+                <button onclick="dlJson()" title="Download GeoJSON" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">GeoJSON</button>
+                <button onclick="dlWKT()" title="Download WKT" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">WKT</button>
+                <button onclick="dlWKB()" title="Download WKB" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">WKB</button>
+                <button onclick="dlPGSLQ()" title="Download PGSQL table" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">PGSQL</button>
+
+                <div class="d-flex btn btn-light rounded-1 btn-xs p-0 px-1 border-secondary" title="Aggregation level">
+                  <span class="form-label m-0 p-0 text-muted" id="label-derive-${dataset.id}">Aggr</span>
                   <div class="derivedLevel d-flex justify-content-start align-items-center mx-0">
                     <a href="#" class="btn btn-xs pb-0 pt-0 dropdown-toggle" id="derive-${dataset.id}" data-bs-toggle="dropdown" aria-expanded="false">
                       ${defaultLabel}
@@ -324,6 +329,31 @@ async function populateProducts(){
   });
 
 }
+
+function previewOnMap(){
+
+}
+
+function dlShapefile(){
+
+}
+
+function dlJson() {
+
+}
+
+function dlWKT(){
+
+}
+
+function dlWKB(){
+
+}
+
+function dlPGSLQ(){
+  
+}
+
 
 function updateProductConfig(){
   

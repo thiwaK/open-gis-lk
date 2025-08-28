@@ -1,5 +1,5 @@
 :root {
-    --sidebar-width: 250px;
+    --sidebar-width: 220px;
     --sidebar-collapsed-width: 50px;
     --map-width-lg: 33%;
 
@@ -9,10 +9,9 @@
 
 .sidebar {
     // z-index: 100;
-    position: static;
     width: var(--sidebar-width);
     height: 100vh;
-    /*background: linear-gradient(135deg, #1a1c2e 0%, #16181f 100%);*/
+    // background: linear-gradient(135deg, #1a1c2e 0%, #16181f 100%);
 
     transition: transform var(--navbar-transition-duration);
     transition: all var(--navbar-transition-duration);
@@ -55,45 +54,70 @@
 }
 
 // item-label
+.item-label {
+    width: var(--sidebar-width);
+    max-width: var(--sidebar-width);
+
+    text-align: left;
+    transition: overflow var(--navbar-transition-duration);
+    transition: width var(--navbar-transition-duration);
+    transition: text-align calc(var(--navbar-transition-duration)/2) ease calc(var(--navbar-transition-duration)/2);
+}
+
+.collapsed .item-label {
+    text-align: center;
+    width: var(--sidebar-collapsed-width);
+}
+
 .item-label span {
     opacity: 1;
 
     transition: transform var(--navbar-transition-duration);
-    transition: all var(--navbar-transition-duration);
+    transition: opacity calc(var(--navbar-transition-duration)/2);
 }
 
 .collapsed .item-label span {
     opacity: 0;
 }
 
-.collapsed .item-label {
-    text-align: center;
-}
+
 
 //navbar-footer
 #navbar-footer{
+    width: var(--sidebar-width);
+    max-width: var(--sidebar-width);
+
+    transition: all var(--navbar-transition-duration);
+
     a span {
-        width: auto;
         opacity: 1;
         transition: transform var(--navbar-transition-duration);
-        transition: all var(--navbar-transition-duration);
+        transition: opacity calc(var(--navbar-transition-duration)/2);
     }
 }
 
 .collapsed #navbar-footer{
+    width: var(--sidebar-collapsed-width);
+    max-width: var(--sidebar-collapsed-width);
+
     a span {
         opacity: 0;
-        width: 0;
     }
 }
 
 
 // topic-label
 .topic-label {
+    width: var(--sidebar-width);
+    max-width: var(--sidebar-width);
+
     text-align: center;
+    transition: all var(--navbar-transition-duration);
 }
 
 .collapsed .topic-label {
+    width: var(--sidebar-collapsed-width);
+    max-width: var(--sidebar-collapsed-width);
     text-align: left;
 }
 
@@ -163,7 +187,7 @@
 
 .toggle-btn {
     position: fixed;
-    left: 235px;
+    left: calc(var(--sidebar-width) - 15px);
     top: 20px;
     background: white;
     border-radius: 50%;
@@ -189,4 +213,10 @@
     visibility: hidden;
     display: none;
     transition: all 0.3s ease;
+}
+
+// map
+
+.map-view{
+    min-width: 33%;
 }

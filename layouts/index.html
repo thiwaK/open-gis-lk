@@ -1,39 +1,39 @@
 {{ define "main" }}
 
 
-<div class="d-flex flex-grow-1 overflow-hidden position-relative">
+<div class="d-flex flex-grow-1 position-relative">
 
   <!-- Sidebar -->
-  <nav id="navbar" class="sidebar d-flex flex-column overflow-hidden flex-shrink-0 
-  border-1 border-right shadow-sm position-relative">
+  <nav id="navbar" class="sidebar d-flex flex-column flex-shrink-0 border-1 
+  border-right shadow-sm position-sticky top-0">
     
     <button class="toggle-btn border-0" onclick="toggleNavbar()">
       <i class="bi bi-chevron-left"></i>
     </button>
 
-    <div class="logo-text p-3 align-items-start top-0 overflow-hidden position-relative text-nowrap">
-      <h4 class="fw-bold mb-0">OpenGIS LK</h4>
-      <p class="text-muted small">The geospatial catalog of LK</p>
+    <div class="logo-text p-3 align-items-start overflow-hidden position-relative text-nowrap">
+      <h4 class="fw-bold mb-0">OpenGISLK</h4>
+      <p class="text-muted small fst-italic">The geospatial catalog</p>
     </div>
 
-    <section class="nav flex-column position-relative text-nowrap">
-      <h6 class="topic-label d-flex text-center border-1 border-bottom border-top py-1 px-3">
-        <i class="bi bi-filter d-inline-block"></i>
-        <span class="mx-2 d-inline-block">Topics</span>
-      </h6>
+    <section class="nav flex-column overflow-hidde text-nowrap position-relative">
+      <div class="topic-label h6 d-flex overflow-hidden text-center border-1 border-bottom border-top py-1 position-relative">
+        <i class="bi bi-filter d-inline-block px-3"></i>
+        <span class="d-inline-block">Topics</span>
+      </div>
 
       <nav aria-label="Topics">
-        <ul id="topics-list" class="nav flex-column">
+        <ul id="topics-list" class="nav flex-column overflow-hidden">
           <!-- JS will populate here -->
         </ul>
       </nav>
     </section>
 
     <!-- GitHub Footer -->
-    <div id="navbar-footer" class="mt-auto px-3 py-2 border-top small position-relative text-nowrap">
-      <a href="https://github.com/thiwaK/open-gis-lk" target="_blank" class="text-decoration-none">
+    <div id="navbar-footer" class="mt-auto px-3 py-2 border-top small position-relative text-nowrap position-sticky">
+      <a href="https://github.com/thiwaK/open-gis-lk" target="_blank" class="text-decoration-none overflow-hidden">
         <i class="bi bi-github me-2"></i>
-        <span>View on GitHub</span>
+        <span class="">View on GitHub</span>
       </a>
     </div>
 
@@ -76,15 +76,15 @@
   </div>
 
   <!-- Map -->
-  <div class="d-flex flex-shrink-0 d-block">
-    <div id="dataset-map" class="w-100 h-100 position-fixed top-0 d-flex border-1 border-left shadow-sm">
+  <div class="map-view d-flex flex-column flex-shrink-0 position-sticky h-100 d-lg-flex d-none">
+    <div id="dataset-map" class="w-100 h-100 position-fixed top-0 border-1 border-left shadow">
     </div>
   </div>
 </div>
 
 
 <!-- Mobile Map Overlay -->
-<div id="mapOverlay" class="map-overlay">
+<div id="mapOverlay" class="map-overlay d-none">
   <button class="close-btn btn btn-sm btn-light" onclick="hideMapOverlay()">✕</button>
   <div id="dataset-map-mobile" class="w-100 h-100">
     <!-- Mobile map -->
