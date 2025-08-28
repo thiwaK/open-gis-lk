@@ -31,8 +31,8 @@
       </div>
     `})}async function Ip(){(await ws()).datasets.forEach(i=>{i.tags.forEach(s=>{let l=document.getElementById(`dataset-list-${s.toLowerCase()}`);if(!l)return;let h=i.level.sort((y,w)=>w-y),f=h[0],d=Es[f]||"",m=h.map(y=>`<li><a class="dropdown-item" href="#" data-level="${y}">${Es[y]||`Level ${y}`}</a></li>`).join(""),g=i.tags.map(y=>`<span class="badge bg-secondary">${y}</span>`).join("");l.innerHTML+=`
         <div class="p-0">
-          <div class="form-check border p-3 pt-1 pb-1 mx-0 h-100 border-primary rounded-1 shadow-sm ">
-            <input class="form-check-input" type="radio"
+          <div class="form-check border p-3 pt-1 pb-1 mx-0 h-100 rounded-1 shadow-sm ">
+            <input class="form-check-input d-none" type="radio"
               name="dataset-${s.toLowerCase()}"
               id="${i.id}" value="${i.id}"
               productaoitype="undefined"

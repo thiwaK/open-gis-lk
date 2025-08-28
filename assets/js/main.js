@@ -248,8 +248,8 @@ async function populateProducts(){
 
       listContainer.innerHTML += `
         <div class="p-0">
-          <div class="form-check border p-3 pt-1 pb-1 mx-0 h-100 border-primary rounded-1 shadow-sm ">
-            <input class="form-check-input" type="radio"
+          <div class="form-check border p-3 pt-1 pb-1 mx-0 h-100 rounded-1 shadow-sm ">
+            <input class="form-check-input d-none" type="radio"
               name="dataset-${tag.toLowerCase()}"
               id="${dataset.id}" value="${dataset.id}"
               productaoitype="undefined"
@@ -351,7 +351,7 @@ function dlWKB(){
 }
 
 function dlPGSLQ(){
-  
+
 }
 
 
