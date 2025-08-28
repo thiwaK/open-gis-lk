@@ -462,35 +462,6 @@ function getDerivedLevel() {
 }
 
 // EVENTS LISTENERS
-extentSelectorSave.addEventListener("click", async function () {
-  closeSidebar();
-  updateExtentConfig();
-
-  if (fetchData()){
-    openSidebar(`Download`);
-  }
-});
-
-productSelectorSave.addEventListener("click", async function () {
-  closeSidebar();
-  updateProductConfig();
-});
-
-extentSelectorNext.addEventListener("click", async function () {
-  closeSidebar();
-  updateExtentConfig();
-
-  if (fetchData()){
-    openSidebar(`Download`);
-  }
-});
-
-productSelectorNext.addEventListener("click", async function () {
-  closeSidebar();
-  updateProductConfig();
-
-  openSidebar(`Extent`);
-});
 
 adminLvlSelector.addEventListener("change", async function () {
   
@@ -602,15 +573,6 @@ adminLvlSelector.addEventListener("change", async function () {
 document.addEventListener("DOMContentLoaded", async () => {
   showLoading();
 
-  // No tool tips
-  // const tooltipTriggerList = document.querySelectorAll('[title]');
-  // tooltipTriggerList.forEach(function (el) {
-  //     new bootstrap.Tooltip(el);
-  // });
-
-  // const gndArray = await fetchAdminLevelData(5);
-  // populateDropdown("tile-selector-dropdown", gndArray);
-
   await populateCategories();
   await populateProducts();
   await fetchAdminLevelData(4);
@@ -621,24 +583,4 @@ document.addEventListener("DOMContentLoaded", async () => {
   hideLoading();
 });
 
-// event delegation (works even if elements are dynamically loaded later)
-document.querySelector('#productTabContent').addEventListener('change', e => {
-  if (e.target.classList.contains('form-check-input')) {
-    // console.log('.form-check-input inside #productTabContent');
-
-    document.querySelectorAll('#productTabContent .form-check').forEach(fc => {
-      fc.classList.remove('border-primary');
-    });
-
-    const radio = e.target;
-    if (radio.checked) {
-      updateProductConfig();
-      radio.closest('.form-check').classList.add('border-primary');
-    }
-  }
-});
-
-document.querySelector('#extentTabContent').addEventListener('change', e => {
-  updateExtentConfig();
-});
 
