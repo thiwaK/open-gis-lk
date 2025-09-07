@@ -42,6 +42,8 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     {{ end }}
 
+    <link rel="stylesheet" href="/css/leaflet.draw.css"/>
+
     <!-- Custom head -->
     {{ block "extra_head" . }}{{ end }}
   </head>
@@ -62,8 +64,10 @@
     {{/*  Use CDN in prod env, otherwise local npm  */}}
     {{ if (not hugo.IsDevelopment) }}
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    {{/*  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>  */}}
     {{ else }}
     <script src="js/papaparse.min.js" defer></script>
+    {{/*  <script src="node_modules/leaflet-draw/dist/leaflet.draw.js"></script>  */}}
     {{ end }}
 
     {{/*  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/js/bootstrap-multiselect.js"></script>

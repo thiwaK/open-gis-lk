@@ -60,78 +60,12 @@ function hideLoading() {
   document.getElementById("loading-overlay").classList.add("d-none");
 }
 
-function populateDropdown(elementID, rows) {
-  // console.log(`updating ${elementID}`);
-  const select = document.getElementById(elementID);
-  select.innerHTML = "";
 
-  const li = document.createElement("li");
-  const input = document.createElement("input");
-  input.type = "text";
-  input.id = `${elementID}-search`;
-  input.className = "form-control";
-  input.placeholder = "Search...";
-
-  li.appendChild(input);
-  select.appendChild(li);
-
-  rows.forEach((row) => {
-    // console.log(row);
-    if (row.code === undefined) {
-      return;
-    }
-    const li = document.createElement("li");
-    li.className = "dropdown-item";
-
-    const label = document.createElement("label");
-    label.className = "checkbox";
-
-    const input = document.createElement("input");
-    input.type = "checkbox";
-    input.value = row.code;
-
-    const text = document.createTextNode(row.name_en);
-
-    label.appendChild(input);
-    label.appendChild(text);
-    li.appendChild(label);
-
-    select.appendChild(li); // Then add the new one(s)
-  });
-}
-
-// Geo + Attr data fetch
 async function fetchData() {
   showLoading();
 
-  /* 
-    - The extent user select is nothing but the boundary of
-      are that data will be fetched.
-    - Product level is the default level of admin polygon
-      that will be featched that with in the extent.
-    - If derived level is set, product will be aggregate to higher
-      level if it is avilable.
-
-    * product_id & product_level
-      used to identify individual attribute dataset and the the level
-      of that dataset needs to be fetched.
-
-    * extents & extent_level
-      responsible for fetching suitable polygon layer to visualize data fetched in.
-  */
-
   const derivedLevel = getDerivedLevel();
   window.AppConfig.derived_extent_level = Number(derivedLevel.lvl_number);
-
-  // does the user have selected both product and extent?
-  if (window.AppConfig.product_id === null || 
-    window.AppConfig.extents.length === 0
-  ) {
-    hideLoading();
-    alert("Please select a product and extent before fetching data.");
-    return false;
-  }
-
 
   try {
     
@@ -192,115 +126,146 @@ async function populateCategories(){
   });
 }
 
-async function populateProducts(){
-
+async function populateProducts() {
   const data = await fetchProducts();
-  
-  // dataset items
+  if (!data?.datasets) return;
+
+  const fragmentMap = {}; // store fragments per tag
+
+  // --- helpers ---
+  const renderTags = tags =>
+    tags.map(t => `<span class="badge bg-secondary">${t}</span>`).join("");
+
+  const renderLevels = levels =>
+    levels
+      .sort((a, b) => b - a)
+      .map(
+        lvl =>
+          `<li><a class="dropdown-item" href="#" data-level="${lvl}">
+            ${levelMap[lvl] || `Level ${lvl}`}
+          </a></li>`
+      )
+      .join("");
+
+  const renderDatasetCard = dataset => {
+    const sortedLevels = [...dataset.level].sort((a, b) => b - a);
+    const defaultLevel = sortedLevels[0];
+    const defaultLabel = levelMap[defaultLevel] || "";
+    const dropdownItems = renderLevels(sortedLevels);
+    const tagsHtml = renderTags(dataset.tags);
+
+    return `
+      <div class="p-0">
+        <div class="form-check border p-3 pt-1 pb-1 mx-0 h-100 rounded-1 shadow-sm">
+          <input class="form-check-input d-none" type="radio"
+            name="dataset-${dataset.tags[0].toLowerCase()}"
+            id="${dataset.id}" value="${dataset.id}"
+            productaoitype="undefined"
+            productlevel="${dataset.level.join(",")}">
+          
+          <label class="form-check-label p-1" for="${dataset.id}">
+            <strong>${dataset.name}</strong><br>
+            
+            <div class="mt-1 mb-1 small text-muted dataset-meta">
+              <span title="Source">
+                <i class="bi bi-globe"></i>
+                <a href="${dataset.sourceLink}" target="_blank" class="text-decoration-none">${dataset.source}</a>
+              </span>
+              <span class="ms-3" title="Date added">
+                <i class="bi bi-calendar2-event"></i> ${dataset.dateAdded}
+              </span>
+              <span class="ms-3" title="Dataset level">
+                <i class="bi bi-geo-alt"></i> ${defaultLabel}
+              </span>
+              <span class="ms-3" title="Tags">
+                <i class="bi bi-tags"></i>
+                ${tagsHtml}
+              </span>
+            </div>
+
+            <small class="text-muted">${dataset.description}</small>
+            
+            <div class="d-flex justify-content-start align-items-center mt-3">
+              <button data-action="preview" data-id="${dataset.id}" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">Preview</button>
+              <button data-action="shapefile" data-id="${dataset.id}" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">ShapeFile</button>
+              <button data-action="geojson" data-id="${dataset.id}" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">GeoJSON</button>
+              <button data-action="wkt" data-id="${dataset.id}" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">WKT</button>
+              <button data-action="wkb" data-id="${dataset.id}" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">WKB</button>
+              <button data-action="pgsql" data-id="${dataset.id}" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">PGSQL</button>
+
+              <div class="d-flex btn btn-light rounded-1 btn-xs p-0 px-1 border-secondary ms-2" title="Aggregation level">
+                <span class="form-label m-0 p-0 text-muted">Aggr</span>
+                <div class="derivedLevel d-flex align-items-center mx-0">
+                  <a href="#" class="btn btn-xs pb-0 pt-0 dropdown-toggle"
+                     id="derive-${dataset.id}" data-bs-toggle="dropdown" aria-expanded="false"
+                     data-selected-level="${defaultLevel}">
+                    ${defaultLabel}
+                  </a>
+                  <ul class="dropdown-menu border-secondary rounded-1" aria-labelledby="derive-${dataset.id}">
+                    ${dropdownItems}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </label>
+        </div>
+      </div>
+    `;
+  };
+
+  // --- build DOM ---
   data.datasets.forEach(dataset => {
     dataset.tags.forEach(tag => {
-      const listContainer = document.getElementById(`dataset-list-${tag.toLowerCase()}`);
-      if (!listContainer) return; // category may not exist in tabs
+      const tagId = `dataset-list-${tag.toLowerCase()}`;
+      const listContainer = document.getElementById(tagId);
+      if (!listContainer) return;
 
-      // Sort descending to get highest level first
-      const sortedLevels = dataset.level.sort((a, b) => b - a); 
-      const defaultLevel = sortedLevels[0]; // highest number
-      const defaultLabel = levelMap[defaultLevel] || ``;
-      
-      const dropdownItems = sortedLevels
-        .map(lvl => `<li><a class="dropdown-item" href="#" data-level="${lvl}">${levelMap[lvl] || `Level ${lvl}`}</a></li>`)
-        .join("");
+      if (!fragmentMap[tagId]) fragmentMap[tagId] = document.createDocumentFragment();
 
-      // Build tags string
-      const tagsHtml = dataset.tags
-        .map(t => `<span class="badge bg-secondary">${t}</span>`)
-        .join("");
-
-      listContainer.innerHTML += `
-        <div class="p-0">
-          <div class="form-check border p-3 pt-1 pb-1 mx-0 h-100 rounded-1 shadow-sm ">
-            <input class="form-check-input d-none" type="radio"
-              name="dataset-${tag.toLowerCase()}"
-              id="${dataset.id}" value="${dataset.id}"
-              productaoitype="undefined"
-              productlevel="${dataset.level.join(',')}">
-            
-            <label class="form-check-label p-1" for="${dataset.id}">
-              
-
-              <strong>${dataset.name}</strong><br>
-              
-              
-              <div class="mt-1 mb-1 small text-muted dataset-meta">
-                <span class="" title="Source">
-                  <i class="bi bi-globe"></i>
-                  <a href="${dataset.sourceLink}" target="_blank" class="text-decoration-none">${dataset.source}</a>
-                </span>
-                
-                <span class="ms-3" title="Date added">
-                  <i class="bi bi-calendar2-event"></i> ${dataset.dateAdded}
-                </span>
-
-                <span class="ms-3" title="Dataset level">
-                  <i class="bi bi-geo-alt"></i> ${defaultLabel}
-                </span>
-
-                <span class="ms-3" title="Tags">
-                  <i class="bi bi-tags"></i>
-                  ${tagsHtml}
-                </span>
-                
-              </div>
-              
-              
-              <small class="text-muted">${dataset.description}</small>
-              
-              
-              <div class="d-flex justify-content-start align-items-center mt-3">
-                <button onclick="previewOnMap(${dataset.id})" title="Preview this dataset on map" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">Preview</button>
-                <button onclick="dlShapefile(${dataset.id})" title="Download Shapefile" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">ShapeFile</button>
-                <button onclick="dlJson(${dataset.id})" title="Download GeoJSON" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">GeoJSON</button>
-                <button onclick="dlWKT(${dataset.id})" title="Download WKT" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">WKT</button>
-                <button onclick="dlWKB(${dataset.id})" title="Download WKB" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">WKB</button>
-                <button onclick="dlPGSLQ(${dataset.id})" title="Download PGSQL table" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">PGSQL</button>
-
-                <div class="d-flex btn btn-light rounded-1 btn-xs p-0 px-1 border-secondary" title="Aggregation level">
-                  <span class="form-label m-0 p-0 text-muted" id="label-derive-${dataset.id}">Aggr</span>
-                  <div class="derivedLevel d-flex justify-content-start align-items-center mx-0">
-                    <a href="#" class="btn btn-xs pb-0 pt-0 dropdown-toggle" id="derive-${dataset.id}" data-bs-toggle="dropdown" aria-expanded="false">
-                      ${defaultLabel}
-                    </a>
-                    <ul class="dropdown-menu border-secondary rounded-1" aria-labelledby="derive-${dataset.id}">
-                      ${dropdownItems}
-                    </ul>
-                  </div>
-                </div>
-                
-              </div>
-            </label>
-          </div>
-        </div>
-      `;
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = renderDatasetCard(dataset);
+      fragmentMap[tagId].appendChild(wrapper.firstElementChild);
     });
   });
 
-  // DERIVED LEVEL SELECTION
-  document.querySelectorAll('.derivedLevel').forEach(derivedLevelDiv => {
-    derivedLevelDiv.addEventListener('click', e => {
-      const item = e.target.closest('.dropdown-item');
-      if (!item) return;
+  // append in one pass
+  Object.entries(fragmentMap).forEach(([tagId, fragment]) => {
+    document.getElementById(tagId).appendChild(fragment);
+  });
 
+  // --- event delegation for buttons ---
+  document.body.addEventListener("click", e => {
+    const btn = e.target.closest("button[data-action]");
+    if (btn) {
+      const { action, id } = btn.dataset;
+      console.log("btn press", action);
+      switch (action) {
+        case "preview": previewOnMap(id); break;
+        case "shapefile": dlShapefile(id); break;
+        case "geojson": dlJson(id); break;
+        case "wkt": dlWKT(id); break;
+        case "wkb": dlWKB(id); break;
+        case "pgsql": dlPGSLQ(id); break;
+      }
+      return;
+    }
+
+    // dropdown item click
+    const item = e.target.closest(".dropdown-item");
+    if (item) {
       e.preventDefault();
-      const btn = derivedLevelDiv.querySelector(".dropdown-toggle");
+      const btn = item.closest(".derivedLevel").querySelector(".dropdown-toggle");
       btn.textContent = item.textContent;
       btn.dataset.selectedLevel = item.dataset.level;
-      btn.dataset.selectedName = item.textContent;
-    });
+    }
   });
-
 }
 
-function previewOnMap(datasetID){
+async function previewOnMap(datasetID){
+
+    const payload = {product_id: datasetID};
+    const spatialdata = await fetchSpatialData(payload);
+    updateMap(spatialdata);
 
 }
 
@@ -431,18 +396,15 @@ function getDerivedLevel() {
   };
 }
 
-// EVENTS LISTENERS
 
+
+// EVENTS LISTENERS
 
 document.addEventListener("DOMContentLoaded", async () => {
   showLoading();
 
   await populateCategories();
   await populateProducts();
-  await fetchAdminLevelData(4);
-  await fetchAdminLevelData(3);
-  await fetchAdminLevelData(2);
-  await fetchAdminLevelData(1);
 
   hideLoading();
 });

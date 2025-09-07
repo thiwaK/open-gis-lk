@@ -38,10 +38,7 @@ async function fetchAdminLevelData(admin_lvl) {
 
 async function fetchProducts() {
   const payload = {
-    product_id: "products",
-    product_level: 1,
-    extents: ["*"],
-    extent_level: 1
+    product_id: "products"
   };
 
   let data = await fetchAttr(payload);
