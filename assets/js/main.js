@@ -17,6 +17,7 @@ window.AppConfig = {
   extents: null,
   extent_level: null,
   derived_extent_level: null,
+  bbox: {}
 };
 
 // LEVEL MAPPING
@@ -94,36 +95,82 @@ async function fetchData() {
   return true;
 }
 
-async function populateCategories(){
-  
+async function populateCategories() {
   const data = await fetchProducts();
-  
-  // category tabs
+  if (!data?.categories) return;
+
+  const tabFragments = document.createDocumentFragment();
+  const contentFragments = document.createDocumentFragment();
+
+  // --- "All" category first ---
+  const allTabId = "tab-all";
+  const allTabItem = document.createElement("li");
+  allTabItem.className = "nav-item";
+  allTabItem.title = "All";
+  allTabItem.innerHTML = `
+    <a href="#${allTabId}"
+       class="nav-link d-flex justify-content-between align-items-center active"
+       id="${allTabId}-tab"
+       data-bs-toggle="tab"
+       data-bs-target="#${allTabId}"
+       role="tab"
+       aria-controls="${allTabId}"
+       aria-selected="true">
+      <span class="item-label">
+        <i class="bi bi-stack me-2 d-inline-block"></i>
+        <span class="d-inline-block">All</span>
+      </span>
+    </a>
+  `;
+  tabFragments.appendChild(allTabItem);
+
+  const allTabPane = document.createElement("div");
+  allTabPane.className = "tab-pane fade show active";
+  allTabPane.id = allTabId;
+  allTabPane.role = "tabpanel";
+  allTabPane.setAttribute("aria-labelledby", `${allTabId}-tab`);
+  allTabPane.innerHTML = `
+    <div class="row g-3" id="dataset-list-all"></div>
+  `;
+  contentFragments.appendChild(allTabPane);
+
+  // --- actual categories ---
   data.categories.forEach((category, index) => {
     const tabId = `tab-${category.name.toLowerCase()}`;
-    const activeClass = index === 0 ? "active" : "";
-
-    topicsList.innerHTML += `
-      <li class="nav-item" title="${category.name}">
-        <a href="${category.url}"
-          class="nav-link d-flex justify-content-between align-items-center ${activeClass}">
-          <span class="item-label">
-            <i class="${category.icon} me-2 d-inline-block"></i>
-            <span class="d-inline-block">${category.name}</span>
-          </span>
-          <!--span class="badge bg-secondary">${category.count}</span-->
-        </a>
-      </li>
+    const tabItem = document.createElement("li");
+    tabItem.className = "nav-item";
+    tabItem.title = category.name;
+    tabItem.innerHTML = `
+      <a href="#${tabId}"
+         class="nav-link d-flex justify-content-between align-items-center"
+         id="${tabId}-tab"
+         data-bs-toggle="tab"
+         data-bs-target="#${tabId}"
+         role="tab"
+         aria-controls="${tabId}"
+         aria-selected="false">
+        <span class="item-label">
+          <i class="${category.icon} me-2 d-inline-block"></i>
+          <span class="d-inline-block">${category.name}</span>
+        </span>
+      </a>
     `;
+    tabFragments.appendChild(tabItem);
 
-
-    tabContent.innerHTML += `
-      <div class="tab-pane fade ${index === 0 ? "show active" : ""}"
-           id="${tabId}" role="tabpanel" aria-labelledby="${tabId}-tab">
-        <div class="row g-3" id="dataset-list-${category.name.toLowerCase()}"></div>
-      </div>
+    const tabPane = document.createElement("div");
+    tabPane.className = "tab-pane fade";
+    tabPane.id = tabId;
+    tabPane.role = "tabpanel";
+    tabPane.setAttribute("aria-labelledby", `${tabId}-tab`);
+    tabPane.innerHTML = `
+      <div class="row g-3" id="dataset-list-${category.name.toLowerCase()}"></div>
     `;
+    contentFragments.appendChild(tabPane);
   });
+
+  // append in one go
+  topicsList.appendChild(tabFragments);
+  tabContent.appendChild(contentFragments);
 }
 
 async function populateProducts() {
@@ -140,14 +187,17 @@ async function populateProducts() {
     levels
       .sort((a, b) => b - a)
       .map(
-        lvl =>
-          `<li><a class="dropdown-item" href="#" data-level="${lvl}">
-            ${levelMap[lvl] || `Level ${lvl}`}
-          </a></li>`
+        lvl => `
+          <li>
+            <a class="dropdown-item" href="javascript:void(0)" data-level="${lvl}">
+              ${levelMap[lvl] || `Level ${lvl}`}
+            </a>
+          </li>`
       )
       .join("");
 
-  const renderDatasetCard = dataset => {
+  const datasetCardTemplate = dataset => {
+
     const sortedLevels = [...dataset.level].sort((a, b) => b - a);
     const defaultLevel = sortedLevels[0];
     const defaultLabel = levelMap[defaultLevel] || "";
@@ -169,7 +219,9 @@ async function populateProducts() {
             <div class="mt-1 mb-1 small text-muted dataset-meta">
               <span title="Source">
                 <i class="bi bi-globe"></i>
-                <a href="${dataset.sourceLink}" target="_blank" class="text-decoration-none">${dataset.source}</a>
+                <a href="${dataset.sourceLink}" target="_blank" class="text-decoration-none">
+                  ${dataset.source}
+                </a>
               </span>
               <span class="ms-3" title="Date added">
                 <i class="bi bi-calendar2-event"></i> ${dataset.dateAdded}
@@ -178,25 +230,28 @@ async function populateProducts() {
                 <i class="bi bi-geo-alt"></i> ${defaultLabel}
               </span>
               <span class="ms-3" title="Tags">
-                <i class="bi bi-tags"></i>
-                ${tagsHtml}
+                <i class="bi bi-tags"></i> ${tagsHtml}
               </span>
             </div>
 
             <small class="text-muted">${dataset.description}</small>
             
             <div class="d-flex justify-content-start align-items-center mt-3">
-              <button data-action="preview" data-id="${dataset.id}" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">Preview</button>
-              <button data-action="shapefile" data-id="${dataset.id}" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">ShapeFile</button>
-              <button data-action="geojson" data-id="${dataset.id}" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">GeoJSON</button>
-              <button data-action="wkt" data-id="${dataset.id}" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">WKT</button>
-              <button data-action="wkb" data-id="${dataset.id}" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">WKB</button>
-              <button data-action="pgsql" data-id="${dataset.id}" class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">PGSQL</button>
+              ${["preview", "shapefile", "geojson", "wkt", "wkb", "pgsql"]
+                .map(
+                  act => `
+                  <button data-action="${act}" data-id="${dataset.id}"
+                          class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">
+                    ${act.charAt(0).toUpperCase() + act.slice(1)}
+                  </button>`
+                )
+                .join("")}
 
-              <div class="d-flex btn btn-light rounded-1 btn-xs p-0 px-1 border-secondary ms-2" title="Aggregation level">
+              <div class="d-flex btn btn-light rounded-1 btn-xs p-0 px-1 border-secondary ms-2"
+                   title="Aggregation level">
                 <span class="form-label m-0 p-0 text-muted">Aggr</span>
                 <div class="derivedLevel d-flex align-items-center mx-0">
-                  <a href="#" class="btn btn-xs pb-0 pt-0 dropdown-toggle"
+                  <a href="javascript:void(0)" class="btn btn-xs pb-0 pt-0 dropdown-toggle"
                      id="derive-${dataset.id}" data-bs-toggle="dropdown" aria-expanded="false"
                      data-selected-level="${defaultLevel}">
                     ${defaultLabel}
@@ -215,51 +270,67 @@ async function populateProducts() {
 
   // --- build DOM ---
   data.datasets.forEach(dataset => {
+    // Add to "All" tab
+    const allList = document.getElementById("dataset-list-all");
+    if (allList) {
+      if (!fragmentMap["dataset-list-all"]) {
+        fragmentMap["dataset-list-all"] = document.createDocumentFragment();
+      }
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = datasetCardTemplate(dataset);
+      fragmentMap["dataset-list-all"].appendChild(wrapper.firstElementChild);
+    }
+
+    // Add to category-specific tabs
     dataset.tags.forEach(tag => {
       const tagId = `dataset-list-${tag.toLowerCase()}`;
       const listContainer = document.getElementById(tagId);
       if (!listContainer) return;
 
-      if (!fragmentMap[tagId]) fragmentMap[tagId] = document.createDocumentFragment();
-
+      if (!fragmentMap[tagId]) {
+        fragmentMap[tagId] = document.createDocumentFragment();
+      }
       const wrapper = document.createElement("div");
-      wrapper.innerHTML = renderDatasetCard(dataset);
+      wrapper.innerHTML = datasetCardTemplate(dataset);
       fragmentMap[tagId].appendChild(wrapper.firstElementChild);
     });
   });
 
   // append in one pass
-  Object.entries(fragmentMap).forEach(([tagId, fragment]) => {
+  for (const [tagId, fragment] of Object.entries(fragmentMap)) {
     document.getElementById(tagId).appendChild(fragment);
-  });
+  }
 
-  // --- event delegation for buttons ---
+  // --- event delegation ---
   document.body.addEventListener("click", e => {
-    const btn = e.target.closest("button[data-action]");
-    if (btn) {
-      const { action, id } = btn.dataset;
+    const button = e.target.closest("button[data-action]");
+    if (button) {
+      const { action, id } = button.dataset;
       console.log("btn press", action);
-      switch (action) {
-        case "preview": previewOnMap(id); break;
-        case "shapefile": dlShapefile(id); break;
-        case "geojson": dlJson(id); break;
-        case "wkt": dlWKT(id); break;
-        case "wkb": dlWKB(id); break;
-        case "pgsql": dlPGSLQ(id); break;
-      }
+      const actionMap = {
+        preview: previewOnMap,
+        shapefile: dlShapefile,
+        geojson: dlJson,
+        wkt: dlWKT,
+        wkb: dlWKB,
+        pgsql: dlPGSLQ,
+      };
+      actionMap[action]?.(id);
       return;
     }
 
-    // dropdown item click
-    const item = e.target.closest(".dropdown-item");
-    if (item) {
+    const dropdownItem = e.target.closest(".dropdown-item");
+    if (dropdownItem) {
       e.preventDefault();
-      const btn = item.closest(".derivedLevel").querySelector(".dropdown-toggle");
-      btn.textContent = item.textContent;
-      btn.dataset.selectedLevel = item.dataset.level;
+      const dropdownBtn = dropdownItem
+        .closest(".derivedLevel")
+        .querySelector(".dropdown-toggle");
+      dropdownBtn.textContent = dropdownItem.textContent;
+      dropdownBtn.dataset.selectedLevel = dropdownItem.dataset.level;
     }
   });
 }
+
 
 async function previewOnMap(datasetID){
 

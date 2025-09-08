@@ -107,6 +107,15 @@
 
 
 // topic-label
+.topics {
+    width: var(--sidebar-width);
+    transition: transform var(--navbar-transition-duration);
+    transition: all var(--navbar-transition-duration);
+}
+.collapsed .topics {
+    width: var(--sidebar-collapsed-width);
+}
+
 .topic-label {
     width: var(--sidebar-width);
     max-width: var(--sidebar-width);
@@ -215,8 +224,20 @@
     transition: all 0.3s ease;
 }
 
-// map
+/* highlight li when a.nav-link.active is inside */
+#topics-list .nav-link.active {
+  background-color: #f0f0f0;   /* background for active tab */
+  color: #000;                 /* text color */
+  border-top: #a0a3bd;
+  border-bottom: #a0a3bd;
+  
+}
 
+#topics-list .nav-link.active i {
+  color: #007bff;              /* icon color */
+}
+
+// map
 .map-view{
     min-width: 33%;
 }

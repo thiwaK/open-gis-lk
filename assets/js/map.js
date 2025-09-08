@@ -47,7 +47,8 @@ map.on(L.Draw.Event.CREATED, function (event) {
   drawnItems.addLayer(layer);
 
   // Get coordinates of the box
-  console.log("Rectangle coordinates:", latlngs);
+  // console.log("Rectangle coordinates:", getRect(latlngs));
+  window.AppConfig.bbox = getRect(latlngs);
 });
 
 // When a rectangle is edited
@@ -56,12 +57,35 @@ map.on(L.Draw.Event.EDITED, function (event) {
     var latlngs = layer.getLatLngs()[0];
     var area = rectangleArea(latlngs);
 
-    console.log("Edited rectangle coordinates:", latlngs);
+    // console.log("Edited rectangle coordinates:", getRect(latlngs));
+    window.AppConfig.bbox = getRect(latlngs);
+  });
+});
+
+// When a rectangle is deleted
+map.on(L.Draw.Event.DELETED, function (event) {
+  event.layers.eachLayer(function (layer) {
+    var latlngs = layer.getLatLngs()[0];
+
+    // console.log("Rectangle deleted");
+    window.AppConfig.bbox = {};
   });
 });
 
 map.addLayer(drawnItems);
 map.addControl(drawControl);
+
+function getRect(latlngs){
+  var xs = latlngs.map(pt => pt.lng);
+  var ys = latlngs.map(pt => pt.lat);
+
+  var xmin = Math.min(...xs);
+  var xmax = Math.max(...xs);
+  var ymin = Math.min(...ys);
+  var ymax = Math.max(...ys);
+
+  return {"xmin": xmin, "ymin": ymin, "xmax": xmax, "ymax": ymax};
+}
 
 function popupContent(feature, layer) {
   var bounds = layer.getBounds();
