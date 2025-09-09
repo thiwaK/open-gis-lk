@@ -74,11 +74,3 @@ params:
       enable: true
       showOnScrollUp: true
     enableSeparator: false
-
-  menus:
-    extents:
-      - Name: Admin Boundary
-        icon: bi-people-fill
-      
-      - Name: Tile Number
-        icon: bi-people-fill
