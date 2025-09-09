@@ -1,4 +1,5 @@
 import * as bootstrap from "bootstrap";
+
 // import './map';
 import {
   fetchSpatialData,
@@ -17,6 +18,7 @@ window.AppConfig = {
   extents: null,
   extent_level: null,
   derived_extent_level: null,
+  bbox: {}
 };
 
 // LEVEL MAPPING
@@ -30,38 +32,12 @@ const levelMap = {
 };
 
 // UI ELEMENTS
-const adminLvlSelector = document.getElementById("admin-level-selector");
-const extentSelectorSave = document.getElementById("extent-selecter-save");
-const extentSelectorNext = document.getElementById("extent-selecter-next");
-const tileSelectorDropdown = document.getElementById("tile-selector-dropdown");
-const productSelectorSave = document.getElementById("product-selecter-save");
-const productSelectorNext= document.getElementById("product-selecter-next");
+// const adminLvlSelector = document.getElementById("admin-level-selector");
+const tabContent = document.getElementById("productTabContent");
+const topicsList = document.querySelector("#topics-list"); // UL element
 
 
 // UI FUNCTIONS
-function getSelectedProduct() {
-  const activeTab = document.querySelector("#productTab .nav-link.active");
-  const selectedTabId = activeTab?.getAttribute("data-bs-target");
-
-  if (selectedTabId) {
-    const tabContent = document.querySelector(`${selectedTabId}`);
-    if (tabContent) {
-      const selectedInput = tabContent.querySelector(
-        'input[type="radio"]:checked',
-      );
-      if (selectedInput) {
-        const selectedValue = selectedInput.value;
-        const productAoiType = selectedInput.getAttribute("productaoitype");
-        let productlevel = selectedInput.getAttribute("productlevel");
-        productlevel = productlevel ? productlevel.trim().split(",").map(Number) : [];
-        productlevel = productlevel.sort((a, b) => b - a);
-        return [selectedValue, productAoiType, productlevel[0]];
-      }
-    }
-  }
-
-  return null;
-}
 
 function getSelectedExtentTab() {
   const activeTab = document.querySelector("#extentTab .nav-link.active");
@@ -86,224 +62,363 @@ function hideLoading() {
   document.getElementById("loading-overlay").classList.add("d-none");
 }
 
-function populateDropdown(elementID, rows) {
-  // console.log(`updating ${elementID}`);
-  const select = document.getElementById(elementID);
-  select.innerHTML = "";
 
-  const li = document.createElement("li");
-  const input = document.createElement("input");
-  input.type = "text";
-  input.id = `${elementID}-search`;
-  input.className = "form-control";
-  input.placeholder = "Search...";
-
-  li.appendChild(input);
-  select.appendChild(li);
-
-  rows.forEach((row) => {
-    // console.log(row);
-    if (row.code === undefined) {
-      return;
-    }
-    const li = document.createElement("li");
-    li.className = "dropdown-item";
-
-    const label = document.createElement("label");
-    label.className = "checkbox";
-
-    const input = document.createElement("input");
-    input.type = "checkbox";
-    input.value = row.code;
-
-    const text = document.createTextNode(row.name_en);
-
-    label.appendChild(input);
-    label.appendChild(text);
-    li.appendChild(label);
-
-    select.appendChild(li); // Then add the new one(s)
-  });
-}
-
-// Geo + Attr data fetch
-async function fetchData() {
+async function fetchData(datasetID, format="GeoJSON") {
   showLoading();
 
-  /* 
-    - The extent user select is nothing but the boundary of
-      are that data will be fetched.
-    - Product level is the default level of admin polygon
-      that will be featched that with in the extent.
-    - If derived level is set, product will be aggregate to higher
-      level if it is avilable.
-
-    * product_id & product_level
-      used to identify individual attribute dataset and the the level
-      of that dataset needs to be fetched.
-
-    * extents & extent_level
-      responsible for fetching suitable polygon layer to visualize data fetched in.
-  */
-
-  const derivedLevel = getDerivedLevel();
-  window.AppConfig.derived_extent_level = Number(derivedLevel.lvl_number);
-
-  // does the user have selected both product and extent?
-  if (window.AppConfig.product_id === null || 
-    window.AppConfig.extents.length === 0
-  ) {
-    hideLoading();
-    alert("Please select a product and extent before fetching data.");
-    return false;
-  }
-
-
+  // const derivedLevel = getDerivedLevel();
+  // window.AppConfig.derived_extent_level = Number(derivedLevel.lvl_number);
+  let spatialdata;
+  
   try {
     
-    let payload = {
-      product_id: window.AppConfig.product_id,
-      product_level: window.AppConfig.derived_extent_level || window.AppConfig.product_level,
-      extents: window.AppConfig.extents,
-      extent_level: window.AppConfig.extent_level, 
+    const payload = {
+      product_id: datasetID,
+      format: format
     };
 
-    // --- fetch spatial data ---//
-    const spatialdata = await fetchSpatialData(payload);
-    updateMap(spatialdata);
+    const bbox = window.AppConfig.bbox;
+    if (
+      bbox &&
+      bbox.xmin != null &&
+      bbox.ymin != null &&
+      bbox.xmax != null &&
+      bbox.ymax != null
+    ) {
+      payload.xmin = bbox.xmin;
+      payload.ymin = bbox.ymin;
+      payload.xmax = bbox.xmax;
+      payload.ymax = bbox.ymax;
+    }
 
-    // --- fetch attribute data ---//
-    const attributedata = await fetchAttributeData(payload);
-    const mergedData = spatialAttributeMerge(spatialdata, attributedata);
-    updateMap(mergedData);
+    spatialdata = await fetchSpatialData(payload);
 
   } catch (error) {
     console.log("Error fetching data:", error);
-    return false;
+    return null;
   }
 
   hideLoading();
-  return true;
+  return spatialdata;
 }
 
-async function populateProducts(){
-
+async function populateCategories() {
   const data = await fetchProducts();
-  const tabList = document.getElementById("productTab");
-  const tabContent = document.getElementById("productTabContent");
+  if (!data?.categories) return;
 
-  // category tabs
+  const tabFragments = document.createDocumentFragment();
+  const contentFragments = document.createDocumentFragment();
+
+  // --- "All" category first ---
+  const allTabId = "tab-all";
+  const allTabItem = document.createElement("li");
+  allTabItem.className = "nav-item";
+  allTabItem.title = "All";
+  allTabItem.innerHTML = `
+    <a href="#${allTabId}"
+       class="nav-link d-flex justify-content-between align-items-center active"
+       id="${allTabId}-tab"
+       data-bs-toggle="tab"
+       data-bs-target="#${allTabId}"
+       role="tab"
+       aria-controls="${allTabId}"
+       aria-selected="true">
+      <span class="item-label">
+        <i class="bi bi-stack me-2 d-inline-block"></i>
+        <span class="d-inline-block">All</span>
+      </span>
+    </a>
+  `;
+  tabFragments.appendChild(allTabItem);
+
+  const allTabPane = document.createElement("div");
+  allTabPane.className = "tab-pane fade show active";
+  allTabPane.id = allTabId;
+  allTabPane.role = "tabpanel";
+  allTabPane.setAttribute("aria-labelledby", `${allTabId}-tab`);
+  allTabPane.innerHTML = `
+    <div class="row g-3" id="dataset-list-all"></div>
+  `;
+  contentFragments.appendChild(allTabPane);
+
+  // --- actual categories ---
   data.categories.forEach((category, index) => {
     const tabId = `tab-${category.name.toLowerCase()}`;
-    const activeClass = index === 0 ? "active" : "";
-
-    tabList.innerHTML += `
-      <li class="nav-item" role="presentation">
-        <button class="nav-link ${activeClass}" id="${tabId}-tab"
-          data-bs-toggle="tab" data-bs-target="#${tabId}" type="button"
-          role="tab" aria-controls="${tabId}" aria-selected="${index === 0}">
-          <i class="${category.icon} me-2"></i>${category.name}
-        </button>
-      </li>
+    const tabItem = document.createElement("li");
+    tabItem.className = "nav-item";
+    tabItem.title = category.name;
+    tabItem.innerHTML = `
+      <a href="#${tabId}"
+         class="nav-link d-flex justify-content-between align-items-center"
+         id="${tabId}-tab"
+         data-bs-toggle="tab"
+         data-bs-target="#${tabId}"
+         role="tab"
+         aria-controls="${tabId}"
+         aria-selected="false">
+        <span class="item-label">
+          <i class="${category.icon} me-2 d-inline-block"></i>
+          <span class="d-inline-block">${category.name}</span>
+        </span>
+      </a>
     `;
+    tabFragments.appendChild(tabItem);
 
-    tabContent.innerHTML += `
-      <div class="tab-pane fade ${index === 0 ? "show active" : ""}"
-           id="${tabId}" role="tabpanel" aria-labelledby="${tabId}-tab">
-        <div class="row g-3" id="dataset-list-${category.name.toLowerCase()}"></div>
-      </div>
+    const tabPane = document.createElement("div");
+    tabPane.className = "tab-pane fade";
+    tabPane.id = tabId;
+    tabPane.role = "tabpanel";
+    tabPane.setAttribute("aria-labelledby", `${tabId}-tab`);
+    tabPane.innerHTML = `
+      <div class="row g-3" id="dataset-list-${category.name.toLowerCase()}"></div>
     `;
+    contentFragments.appendChild(tabPane);
   });
 
-  // dataset items
-  data.datasets.forEach(dataset => {
-    dataset.tags.forEach(tag => {
-      const listContainer = document.getElementById(`dataset-list-${tag.toLowerCase()}`);
-      if (!listContainer) return; // category may not exist in tabs
+  // append in one go
+  topicsList.appendChild(tabFragments);
+  tabContent.appendChild(contentFragments);
+}
 
-      // Sort descending to get highest level first
-      const sortedLevels = dataset.level.sort((a, b) => b - a); 
-      const defaultLevel = sortedLevels[0]; // highest number
-      const defaultLabel = levelMap[defaultLevel] || `Level ${defaultLevel}`;
-      
-      const dropdownItems = sortedLevels
-      .map(lvl => `<li><a class="dropdown-item" href="#" data-level="${lvl}">${levelMap[lvl] || `Level ${lvl}`}</a></li>`)
+async function populateProducts() {
+  const data = await fetchProducts();
+  if (!data?.datasets) return;
+
+  const fragmentMap = {}; // store fragments per tag
+
+  // --- helpers ---
+  const renderTags = tags =>
+    tags.map(t => `<span class="badge bg-secondary">${t}</span>`).join("");
+
+  const renderLevels = levels =>
+    levels
+      .sort((a, b) => b - a)
+      .map(
+        lvl => `
+          <li>
+            <a class="dropdown-item" href="javascript:void(0)" data-level="${lvl}">
+              ${levelMap[lvl] || `Level ${lvl}`}
+            </a>
+          </li>`
+      )
       .join("");
 
+  const datasetCardTemplate = dataset => {
 
-      // Build tags string
-      const tagsHtml = dataset.tags
-        .map(t => `<span class="badge bg-secondary">${t}</span>`)
-        .join("");
+    const sortedLevels = [...dataset.level].sort((a, b) => b - a);
+    const defaultLevel = sortedLevels[0];
+    const defaultLabel = levelMap[defaultLevel] || "";
+    const dropdownItems = renderLevels(sortedLevels);
+    const tagsHtml = renderTags(dataset.tags);
 
-      listContainer.innerHTML += `
-        <div class="col-12 p-0">
-          <div class="form-check border p-3 pt-1 pb-1 mx-2 rounded h-100 border-primary">
-            <input class="form-check-input" type="radio"
-              name="dataset-${tag.toLowerCase()}"
-              id="${dataset.id}" value="${dataset.id}"
-              productaoitype="undefined"
-              productlevel="${dataset.level.join(',')}">
+    return `
+      <div class="p-0">
+        <div class="form-check border p-3 pt-1 pb-1 mx-0 h-100 rounded-1 shadow-sm">
+          <input class="form-check-input d-none" type="radio"
+            name="dataset-${dataset.tags[0].toLowerCase()}"
+            id="${dataset.id}" value="${dataset.id}"
+            productaoitype="undefined"
+            productlevel="${dataset.level.join(",")}">
+          
+          <label class="form-check-label p-1" for="${dataset.id}">
+            <strong>${dataset.name}</strong><br>
             
-            <label class="form-check-label" for="${dataset.id}">
-              <strong>${dataset.name}</strong><br>
-              <div class="mt-2 small text-muted dataset-meta">
-                <span class="" title="Source">
-                  <i class="bi bi-globe"></i>
-                  <a href="${dataset.sourceLink}" target="_blank" class="text-decoration-none">${dataset.source}</a>
-                </span>
-                
-                <span class="ms-3" title="Date added">
-                  <i class="bi bi-calendar2-event"></i> ${dataset.dateAdded}
-                </span>
+            <div class="mt-1 mb-1 small text-muted dataset-meta">
+              <span title="Source">
+                <i class="bi bi-globe"></i>
+                <a href="${dataset.sourceLink}" target="_blank" class="text-decoration-none">
+                  ${dataset.source}
+                </a>
+              </span>
+              <span class="ms-3" title="Date added">
+                <i class="bi bi-calendar2-event"></i> ${dataset.dateAdded}
+              </span>
+              <span class="ms-3" title="Dataset level">
+                <i class="bi bi-geo-alt"></i> ${defaultLabel}
+              </span>
+              <span class="ms-3" title="Tags">
+                <i class="bi bi-tags"></i> ${tagsHtml}
+              </span>
+            </div>
 
-                <span class="ms-3" title="Dataset level">
-                  <i class="bi bi-geo-alt"></i> ${defaultLabel}
-                </span>
+            <small class="text-muted">${dataset.description}</small>
+            
+            <div class="d-flex justify-content-start align-items-center mt-3">
+              ${["Preview", "GeoJson", "ShapeFile", "GPKG", "SQLITE"]
+                .map(
+                  act => `
+                  <button data-action="${act}" data-id="${dataset.id}"
+                          class="btn btn-light border-secondary btn-xs pb-0 pt-0 me-3">
+                    ${act.charAt(0).toUpperCase() + act.slice(1)}
+                  </button>`
+                )
+                .join("")}
 
-                <span class="ms-3" title="Tags">
-                  <i class="bi bi-tags"></i>
-                  ${tagsHtml}
-                </span>
-                
-              </div>
-              <small class="text-muted">${dataset.description}</small>
-              <div class="d-flex justify-content-start align-items-center mt-2">
-                <!-- a href="#" title="Preview this dataset" class="btn btn-light btn-xs pb-0 pt-0 me-3">Preview</a -->
-                <span class="form-label mb-0 btn-xs" id="label-derive-${dataset.id}">Aggregation Level</span>
-                <div class="derivedLevel d-flex justify-content-start align-items-center">
-                  <a href="#" title="Aggregation level" class="btn btn-light btn-xs pb-0 pt-0 dropdown-toggle" id="derive-${dataset.id}" data-bs-toggle="dropdown" aria-expanded="false">
+              <div class="d-flex btn btn-light rounded-1 btn-xs p-0 px-1 border-secondary ms-2"
+                   title="Aggregation level">
+                <span class="form-label m-0 p-0 text-muted">Aggr</span>
+                <div class="derivedLevel d-flex align-items-center mx-0">
+                  <a href="javascript:void(0)" class="btn btn-xs pb-0 pt-0 dropdown-toggle"
+                     id="derive-${dataset.id}" data-bs-toggle="dropdown" aria-expanded="false"
+                     data-selected-level="${defaultLevel}">
                     ${defaultLabel}
                   </a>
-                  <ul class="dropdown-menu" aria-labelledby="derive-${dataset.id}">
+                  <ul class="dropdown-menu border-secondary rounded-1" aria-labelledby="derive-${dataset.id}">
                     ${dropdownItems}
                   </ul>
                 </div>
               </div>
-            </label>
-          </div>
+            </div>
+          </label>
         </div>
-      `;
+      </div>
+    `;
+  };
+
+  // --- build DOM ---
+  data.datasets.forEach(dataset => {
+    // Add to "All" tab
+    const allList = document.getElementById("dataset-list-all");
+    if (allList) {
+      if (!fragmentMap["dataset-list-all"]) {
+        fragmentMap["dataset-list-all"] = document.createDocumentFragment();
+      }
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = datasetCardTemplate(dataset);
+      fragmentMap["dataset-list-all"].appendChild(wrapper.firstElementChild);
+    }
+
+    // Add to category-specific tabs
+    dataset.tags.forEach(tag => {
+      const tagId = `dataset-list-${tag.toLowerCase()}`;
+      const listContainer = document.getElementById(tagId);
+      if (!listContainer) return;
+
+      if (!fragmentMap[tagId]) {
+        fragmentMap[tagId] = document.createDocumentFragment();
+      }
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = datasetCardTemplate(dataset);
+      fragmentMap[tagId].appendChild(wrapper.firstElementChild);
     });
   });
 
-  // DERIVED LEVEL SELECTION
-  document.querySelectorAll('.derivedLevel').forEach(derivedLevelDiv => {
-    derivedLevelDiv.addEventListener('click', e => {
-      const item = e.target.closest('.dropdown-item');
-      if (!item) return;
+  // append in one pass
+  for (const [tagId, fragment] of Object.entries(fragmentMap)) {
+    document.getElementById(tagId).appendChild(fragment);
+  }
 
+  // --- event delegation ---
+  document.body.addEventListener("click", e => {
+    const button = e.target.closest("button[data-action]");
+    if (button) {
+      const { action, id } = button.dataset;
+      console.log("btn press", action);
+      const actionMap = {
+        Preview: previewOnMap,
+        ShapeFile: dlShapefile,
+        GeoJson: dlJson,
+        GPKG: dlGPKG,
+        WKB: dlWKB,
+        PGSQL: dlPGSLQ,
+        SQLITE: dlSQLite,
+      };
+      actionMap[action]?.(id);
+      return;
+    }
+
+    const dropdownItem = e.target.closest(".dropdown-item");
+    if (dropdownItem) {
       e.preventDefault();
-      const btn = derivedLevelDiv.querySelector(".dropdown-toggle");
-      btn.textContent = item.textContent;
-      btn.dataset.selectedLevel = item.dataset.level;
-      btn.dataset.selectedName = item.textContent;
-    });
+      const dropdownBtn = dropdownItem
+        .closest(".derivedLevel")
+        .querySelector(".dropdown-toggle");
+      dropdownBtn.textContent = dropdownItem.textContent;
+      dropdownBtn.dataset.selectedLevel = dropdownItem.dataset.level;
+    }
   });
-
 }
 
+
+async function previewOnMap(datasetID){
+    const spatialdata = await fetchData(datasetID);
+    updateMap(spatialdata);
+}
+
+async function dlShapefile(datasetID){
+  const spatialdata = await fetchData(datasetID, "ShapeFile");
+  saveFile(spatialdata, "data.zip");
+}
+
+async function dlJson(datasetID) {
+  const spatialdata = await fetchData(datasetID);
+  saveFile(spatialdata, "data.geojson");
+}
+
+async function dlWKT(datasetID){
+  const spatialdata = await fetchData(datasetID, "WKT");
+  saveFile(spatialdata, "data.wkt");
+}
+
+async function dlWKB(datasetID){
+  const spatialdata = await fetchData(datasetID, "WKB");
+  saveFile(spatialdata, "data.wkb");
+}
+
+async function dlPGSLQ(datasetID){
+  const spatialdata = await fetchData(datasetID, "SQL");
+  saveFile(spatialdata, "data.sql");
+}
+
+async function dlSQLite(datasetID){
+  const spatialdata = await fetchData(datasetID, "SQLITE");
+  saveFile(spatialdata, "data.sqlite");
+}
+
+
+async function dlGPKG(datasetID){
+  const spatialdata = await fetchData(datasetID, "GPKG");
+  saveFile(spatialdata, "data.gpkg");
+}
+
+function saveFile(file_data, file_name) {
+  let blob;
+
+  if (file_data instanceof Blob) {
+    blob = file_data;
+
+  } else if (file_data instanceof ArrayBuffer) {
+    blob = new Blob([file_data]);
+
+  } else if (file_data instanceof Uint8Array) {
+    blob = new Blob([file_data.buffer]);
+
+  } else if (typeof file_data === "string") {
+    blob = new Blob([file_data], { type: "text/plain;charset=utf-8" });
+
+  } else {
+    throw new Error("Unsupported file_data type");
+  }
+
+  // Create download link
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = file_name;
+
+  // Trigger and cleanup
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+
+
+
+
 function updateProductConfig(){
+  
   const prod = getSelectedProduct();
   window.AppConfig.product_id = prod[0];
   window.AppConfig.product_type = prod[1];
@@ -408,188 +523,17 @@ function getDerivedLevel() {
   };
 }
 
+
+
 // EVENTS LISTENERS
-extentSelectorSave.addEventListener("click", async function () {
-  closeSidebar();
-  updateExtentConfig();
-
-  if (fetchData()){
-    openSidebar(`Download`);
-  }
-});
-
-productSelectorSave.addEventListener("click", async function () {
-  closeSidebar();
-  updateProductConfig();
-});
-
-extentSelectorNext.addEventListener("click", async function () {
-  closeSidebar();
-  updateExtentConfig();
-
-  if (fetchData()){
-    openSidebar(`Download`);
-  }
-});
-
-productSelectorNext.addEventListener("click", async function () {
-  closeSidebar();
-  updateProductConfig();
-
-  openSidebar(`Extent`);
-});
-
-adminLvlSelector.addEventListener("change", async function () {
-  
-  let selectedValue = getAdminLevel();
-  if (["1", "2", "3", "4"].includes(selectedValue)) {
-    document.getElementById("admin-selector").classList.remove("d-none");
-    document.getElementById("admin-selector2").classList.add("d-none");
-    document.getElementById("admin-selector-label").classList.add("d-none");
-    document.getElementById("admin-selector-label2").classList.add("d-none");
-  }
-
-  if (selectedValue == "1") {
-    const data = await fetchAdminLevelData(1);
-    populateDropdown("admin-selector-dropdown", data);
-  } else if (selectedValue == "2") {
-    const data = await fetchAdminLevelData(2);
-    populateDropdown("admin-selector-dropdown", data);
-  } else if (selectedValue == "3") {
-    const data = await fetchAdminLevelData(3);
-    populateDropdown("admin-selector-dropdown", data);
-  } else if (selectedValue == "4") {
-    const dataDSD = await fetchAdminLevelData(3);
-    populateDropdown("admin-selector-dropdown", dataDSD);
-
-    document.getElementById("admin-selector-label").classList.remove("d-none");
-    document.getElementById("admin-selector-label").textContent = "DS Division";
-
-    document
-      .querySelectorAll('#admin-selector-dropdown input[type="checkbox"]')
-      .forEach((checkbox) => {
-        checkbox.addEventListener("change", async function () {
-          const checked = Array.from(
-            document.querySelectorAll(
-              '#admin-selector-dropdown input[type="checkbox"]:checked',
-            ),
-          ).map((cb) => cb.value);
-
-          if (checked.length > 0) {
-            document
-              .getElementById("admin-selector-label2")
-              .classList.remove("d-none");
-            document.getElementById("admin-selector-label2").textContent =
-              "GN Division";
-            document
-              .getElementById("admin-selector2")
-              .classList.remove("d-none");
-            document
-              .getElementById("admin-selector")
-              .classList.remove("d-none");
-
-            let data = await fetchAdminLevelData(4);
-            data = data?.filter(
-              (record) =>
-                record.code && checked.includes(String(record.dsd_code)),
-            );
-
-            populateDropdown("admin-selector-dropdown2", data);
-          } else {
-            document
-              .getElementById("admin-selector-label2")
-              .classList.add("d-none");
-            document.getElementById("admin-selector2").classList.add("d-none");
-          }
-        });
-      });
-  }
-
-  if (document.getElementById("admin-selector-dropdown-search")) {
-    document
-      .getElementById("admin-selector-dropdown-search")
-      .addEventListener("keyup", function () {
-        const filter = this.value.toLowerCase();
-        const dropdown = document.getElementById("admin-selector-dropdown");
-        const items = dropdown.querySelectorAll("li.dropdown-item");
-
-        items.forEach((item) => {
-          const label = item.querySelector("label.checkbox");
-          if (label.textContent.toLowerCase().includes(filter)) {
-            item.style.display = "";
-          } else {
-            item.style.display = "none";
-          }
-        });
-      });
-  }
-
-  if (document.getElementById("admin-selector-dropdown2-search")) {
-    document
-      .getElementById("admin-selector-dropdown2-search")
-      .addEventListener("keyup", function () {
-        const filter = this.value.toLowerCase();
-        const dropdown = document.getElementById("admin-selector-dropdown2");
-        const items = dropdown.querySelectorAll("li.dropdown-item");
-
-        items.forEach((item) => {
-          const label = item.querySelector("label.checkbox");
-          if (label.textContent.toLowerCase().includes(filter)) {
-            item.style.display = "";
-          } else {
-            item.style.display = "none";
-          }
-        });
-      });
-  }
-
-  
-});
 
 document.addEventListener("DOMContentLoaded", async () => {
   showLoading();
 
-  // No tool tips
-  // const tooltipTriggerList = document.querySelectorAll('[title]');
-  // tooltipTriggerList.forEach(function (el) {
-  //     new bootstrap.Tooltip(el);
-  // });
-
-  // const gndArray = await fetchAdminLevelData(5);
-  // populateDropdown("tile-selector-dropdown", gndArray);
-
+  await populateCategories();
   await populateProducts();
-  await fetchAdminLevelData(4);
-  await fetchAdminLevelData(3);
-  await fetchAdminLevelData(2);
-  await fetchAdminLevelData(1);
 
   hideLoading();
 });
-
-// event delegation (works even if elements are dynamically loaded later)
-document.querySelector('#productTabContent').addEventListener('change', e => {
-  if (e.target.classList.contains('form-check-input')) {
-    // console.log('.form-check-input inside #productTabContent');
-
-    document.querySelectorAll('#productTabContent .form-check').forEach(fc => {
-      fc.classList.remove('border-primary');
-    });
-
-    const radio = e.target;
-    if (radio.checked) {
-      updateProductConfig();
-      radio.closest('.form-check').classList.add('border-primary');
-    }
-  }
-});
-
-document.querySelector('#extentTabContent').addEventListener('change', e => {
-  updateExtentConfig();
-});
-
-
-
-
 
 

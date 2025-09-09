@@ -32,7 +32,8 @@ function isValidGeoJSON(geojson) {
     return true;
 }
 
-async function fetchNow(url) {
+
+async function fetchNow(url, format) {
 
     // console.log("fetchNow", url.toString());
     const cached = await getCache(url.toString());
@@ -43,14 +44,32 @@ async function fetchNow(url) {
     return new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhr.open("GET", url, true);
-        xhr.setRequestHeader("Accept", "application/json");
+
+        switch (format.toUpperCase()) {
+            case "GEOJSON":
+            case "JSON":
+            case "WKT":
+            case "PGSQL":
+                xhr.responseType = "text";        // text-based
+                break;
+
+            case "WKB":
+            case "GPKG":
+            case "SHAPEFILE":
+            case "SQLITE":
+                xhr.responseType = "arraybuffer"; // binary data
+                break;
+
+            default:
+                xhr.responseType = "text";        // fallback
+        }
 
         xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
-
-                    setCache(url.toString(), xhr.responseText);
-                    resolve(xhr.responseText);
+                    const responseData = xhr.response;
+                    setCache(url.toString(), responseData);
+                    resolve(responseData);
                 } else {
                     reject(xhr.status);
                 }
@@ -113,13 +132,18 @@ async function fetchAdmin(payload){
         url.searchParams.append(key, value);
     });
 
-    let response = await fetchNow(url);
-    
-    if (!isValidJSON(response)){
-        console.log("invalidJSON");
-        return;
+    let response = await fetchNow(url, payload.format);
+    console.log(payload.format.toUpperCase());
+    if (payload.format.toUpperCase() == "JSON"){
+        if (!isValidJSON(response)){
+            console.log("invalidJSON");
+            return;
+        }
+
+        response = JSON.parse(response);
     }
-    response = JSON.parse(response);
+    
+    
 
     // if (!isValidGeoJSON(response)) {
     //     console.log("invalidGeoJSON");

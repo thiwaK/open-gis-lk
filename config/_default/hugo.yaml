@@ -1,5 +1,5 @@
 publishDir: "docs"
-enableRobotsTXT: true
+enableRobotsTXT: false
 
 baseURL: ""
 languageCode: "en-us"
@@ -40,6 +40,10 @@ module:
       target: "static/js/papaparse.min.js"
     - source: "node_modules/leaflet/dist/leaflet.css"
       target: "static/css/leaflet.css"
+    - source: "node_modules/leaflet-draw/dist/leaflet.draw.css"
+      target: "static/css/leaflet.draw.css"
+    - source: "node_modules/leaflet-draw/dist/images"
+      target: "static/css/images"
 
 languages:
   si:
@@ -73,7 +77,7 @@ languages:
 params:
   
   dataURL: "http://localhost:8000/getData"
-  attributeDataURL: "http://localhost:8000/getAttributeData"
+  attributeDataURL: "http://localhost:8000/getData"
 
   description: "An open-source platform for geospatial data in Sri Lanka."
 
@@ -98,43 +102,8 @@ params:
       showOnScrollUp : true
     enableSeparator: false
 
-  menus:
-    extents:
-      - Name: Admin Boundary
-        icon: bi-people-fill
-      
-      - Name: Tile Number
-        icon: bi-people-fill
- 
-
-
-
-# Menus:
-#   main:
-#     - identifier: blog
-#       name: Blog
-#       title: Blog posts
-#       url: /blogs
-#       weight: 1
-#     - identifier: gallery
-#       name: Gallery
-#       title: Blog posts
-#       url: /gallery
-#       weight: 2
-    #Dropdown menu
-    # - identifier: dropdown
-    #   title: Example dropdown menu
-    #   name: Dropdown
-    #   weight: 3
-    # - identifier: dropdown1
-    #   title: example dropdown 1
-    #   name: example 1
-    #   url: /#
-    #   parent: dropdown
-    #   weight: 1
-    # - identifier: dropdown2
-    #   title: example dropdown 2
-    #   name: example 2
-    #   url: /#
-    #   parent: dropdown
-    #   weight: 2
+server:
+  headers:
+  - for: "/**"
+    values:
+      Access-Control-Allow-Origin: "*"

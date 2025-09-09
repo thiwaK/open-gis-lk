@@ -39,12 +39,10 @@ async function fetchAdminLevelData(admin_lvl) {
 async function fetchProducts() {
   const payload = {
     product_id: "products",
-    product_level: 1,
-    extents: ["*"],
-    extent_level: 1
+    format: "json"
   };
 
-  let data = await fetchAttr(payload);
+  let data = await fetchAdmin(payload);
   if (!data) {
     console.error("Invalid product data received");
     return [];

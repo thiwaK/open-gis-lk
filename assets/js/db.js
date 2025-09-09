@@ -56,6 +56,9 @@ async function getCache(key) {
         return null;
     }
 
+    // this is only for dev
+    return null;
+
     return new Promise((resolve, reject) => {
         const getRequest = store.get(key);
         const expTime = 7 * 24 * 60 * 60 * 1000; // 1 week
