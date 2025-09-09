@@ -38,7 +38,8 @@ async function fetchAdminLevelData(admin_lvl) {
 
 async function fetchProducts() {
   const payload = {
-    product_id: "products"
+    product_id: "products",
+    format: "json"
   };
 
   let data = await fetchAdmin(payload);

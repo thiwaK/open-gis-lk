@@ -1,4 +1,5 @@
 import * as bootstrap from "bootstrap";
+
 // import './map';
 import {
   fetchSpatialData,
@@ -62,37 +63,43 @@ function hideLoading() {
 }
 
 
-async function fetchData() {
+async function fetchData(datasetID, format="GeoJSON") {
   showLoading();
 
-  const derivedLevel = getDerivedLevel();
-  window.AppConfig.derived_extent_level = Number(derivedLevel.lvl_number);
-
+  // const derivedLevel = getDerivedLevel();
+  // window.AppConfig.derived_extent_level = Number(derivedLevel.lvl_number);
+  let spatialdata;
+  
   try {
     
-    let payload = {
-      product_id: window.AppConfig.product_id,
-      product_level: window.AppConfig.derived_extent_level || window.AppConfig.product_level,
-      extents: window.AppConfig.extents,
-      extent_level: window.AppConfig.extent_level, 
+    const payload = {
+      product_id: datasetID,
+      format: format
     };
 
-    // --- fetch spatial data ---//
-    const spatialdata = await fetchSpatialData(payload);
-    updateMap(spatialdata);
+    const bbox = window.AppConfig.bbox;
+    if (
+      bbox &&
+      bbox.xmin != null &&
+      bbox.ymin != null &&
+      bbox.xmax != null &&
+      bbox.ymax != null
+    ) {
+      payload.xmin = bbox.xmin;
+      payload.ymin = bbox.ymin;
+      payload.xmax = bbox.xmax;
+      payload.ymax = bbox.ymax;
+    }
 
-    // --- fetch attribute data ---//
-    const attributedata = await fetchAttributeData(payload);
-    const mergedData = spatialAttributeMerge(spatialdata, attributedata);
-    updateMap(mergedData);
+    spatialdata = await fetchSpatialData(payload);
 
   } catch (error) {
     console.log("Error fetching data:", error);
-    return false;
+    return null;
   }
 
   hideLoading();
-  return true;
+  return spatialdata;
 }
 
 async function populateCategories() {
@@ -237,7 +244,7 @@ async function populateProducts() {
             <small class="text-muted">${dataset.description}</small>
             
             <div class="d-flex justify-content-start align-items-center mt-3">
-              ${["preview", "shapefile", "geojson", "wkt", "wkb", "pgsql"]
+              ${["Preview", "GeoJson", "ShapeFile", "GPKG", "SQLITE"]
                 .map(
                   act => `
                   <button data-action="${act}" data-id="${dataset.id}"
@@ -308,12 +315,13 @@ async function populateProducts() {
       const { action, id } = button.dataset;
       console.log("btn press", action);
       const actionMap = {
-        preview: previewOnMap,
-        shapefile: dlShapefile,
-        geojson: dlJson,
-        wkt: dlWKT,
-        wkb: dlWKB,
-        pgsql: dlPGSLQ,
+        Preview: previewOnMap,
+        ShapeFile: dlShapefile,
+        GeoJson: dlJson,
+        GPKG: dlGPKG,
+        WKB: dlWKB,
+        PGSQL: dlPGSLQ,
+        SQLITE: dlSQLite,
       };
       actionMap[action]?.(id);
       return;
@@ -333,32 +341,80 @@ async function populateProducts() {
 
 
 async function previewOnMap(datasetID){
-
-    const payload = {product_id: datasetID};
-    const spatialdata = await fetchSpatialData(payload);
+    const spatialdata = await fetchData(datasetID);
     updateMap(spatialdata);
-
 }
 
-function dlShapefile(datasetID){
-
+async function dlShapefile(datasetID){
+  const spatialdata = await fetchData(datasetID, "ShapeFile");
+  saveFile(spatialdata, "data.zip");
 }
 
-function dlJson(datasetID) {
-
+async function dlJson(datasetID) {
+  const spatialdata = await fetchData(datasetID);
+  saveFile(spatialdata, "data.geojson");
 }
 
-function dlWKT(datasetID){
-
+async function dlWKT(datasetID){
+  const spatialdata = await fetchData(datasetID, "WKT");
+  saveFile(spatialdata, "data.wkt");
 }
 
-function dlWKB(datasetID){
-
+async function dlWKB(datasetID){
+  const spatialdata = await fetchData(datasetID, "WKB");
+  saveFile(spatialdata, "data.wkb");
 }
 
-function dlPGSLQ(datasetID){
-
+async function dlPGSLQ(datasetID){
+  const spatialdata = await fetchData(datasetID, "SQL");
+  saveFile(spatialdata, "data.sql");
 }
+
+async function dlSQLite(datasetID){
+  const spatialdata = await fetchData(datasetID, "SQLITE");
+  saveFile(spatialdata, "data.sqlite");
+}
+
+
+async function dlGPKG(datasetID){
+  const spatialdata = await fetchData(datasetID, "GPKG");
+  saveFile(spatialdata, "data.gpkg");
+}
+
+function saveFile(file_data, file_name) {
+  let blob;
+
+  if (file_data instanceof Blob) {
+    blob = file_data;
+
+  } else if (file_data instanceof ArrayBuffer) {
+    blob = new Blob([file_data]);
+
+  } else if (file_data instanceof Uint8Array) {
+    blob = new Blob([file_data.buffer]);
+
+  } else if (typeof file_data === "string") {
+    blob = new Blob([file_data], { type: "text/plain;charset=utf-8" });
+
+  } else {
+    throw new Error("Unsupported file_data type");
+  }
+
+  // Create download link
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = file_name;
+
+  // Trigger and cleanup
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+
+
 
 
 function updateProductConfig(){

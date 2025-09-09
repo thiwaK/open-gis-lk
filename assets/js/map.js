@@ -84,14 +84,14 @@ function getRect(latlngs){
   var ymin = Math.min(...ys);
   var ymax = Math.max(...ys);
 
+  // console.log({"xmin": xmin, "ymin": ymin, "xmax": xmax, "ymax": ymax});
   return {"xmin": xmin, "ymin": ymin, "xmax": xmax, "ymax": ymax};
 }
 
 function popupContent(feature, layer) {
-  var bounds = layer.getBounds();
   let popup = new L.Popup();
 
-  // Build Bootstrap card content
+  // --- Properties & display name ---
   const props = feature.properties || {};
   const name =
     props.name_en ||
@@ -101,8 +101,8 @@ function popupContent(feature, layer) {
     props.prov_n ||
     "No name";
 
-  let rows = "";
-  const skipKeys = [
+  // --- Skip certain keys from popup table ---
+  const skipKeys = new Set([
     "name_en",
     "gnd_n",
     "dsd_n",
@@ -122,38 +122,45 @@ function popupContent(feature, layer) {
     "dsd_code",
     "gnd_code",
     "prov_code",
-  ];
+  ]);
 
-  for (const key in props) {
-    if (props.hasOwnProperty(key) && !skipKeys.includes(key)) {
+  // --- Build attribute rows ---
+  let rows = "";
+  for (const [key, value] of Object.entries(props)) {
+    if (!skipKeys.has(key)) {
       rows += `
         <tr>
-            <th style="text-align:left; padding-right: 10px;">${key}</th>
-            <td>${props[key]}</td>
+          <th style="text-align:left; padding-right: 10px;">${key}</th>
+          <td>${value}</td>
         </tr>`;
     }
   }
 
-  const popupContent = `
-        <div class="card border-0" style="width: 18rem;">
-            <div class="card-body">
-                <h5 class="card-title">${name}</h5>
-                ${
-                  rows
-                    ? `<table class="table table-sm">
-                    <tbody>
-                        ${rows}
-                    </tbody>
-                </table>`
-                    : "<p>No additional attributes</p>"
-                }
-            </div>
-        </div>
-    `;
+  // --- Detect if this is a point ---
+  const isPoint = typeof layer.getLatLng === "function";
 
-  popup.setLatLng(bounds.getCenter());
-  popup.setContent(popupContent);
+  // --- Popup HTML ---
+  const popupHtml = `
+    <div class="card border-0" style="width: 18rem;">
+      <div class="card-body">
+        ${!isPoint ? `<h5 class="card-title">${name}</h5>` : ""}
+        ${
+          rows
+            ? `<table class="table table-sm"><tbody>${rows}</tbody></table>`
+            : "<p>No additional attributes</p>"
+        }
+      </div>
+    </div>
+  `;
 
+  // --- Set popup position ---
+  if (isPoint) {
+    popup.setLatLng(layer.getLatLng());
+  } else if (typeof layer.getBounds === "function") {
+    popup.setLatLng(layer.getBounds().getCenter());
+  }
+
+  popup.setContent(popupHtml);
   return popup;
 }
 
@@ -162,23 +169,45 @@ function updateMap(poly, attr = null) {
     window.map.removeLayer(window.currentGeoLayer);
   }
 
+  const svgIcon = L.divIcon({
+    className: "custom-marker", // optional CSS class
+    html: `
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="8" fill="blue" stroke="black" stroke-width="2" />
+      </svg>
+    `,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12], // center the icon
+  });
+
   window.currentGeoLayer = new L.GeoJSON(poly, {
-    style: {
-      color: "blue",
-      fillColor: "lightblue",
-      fillOpacity: 0.5,
-      weight: 2,
+    style: function (feature) {
+      if (feature.geometry.type !== "Point") {
+        return {
+          color: "blue",
+          fillColor: "lightblue",
+          fillOpacity: 0.5,
+          weight: 2,
+        };
+      }
     },
+
+    // For points, use a custom marker
+    pointToLayer: function (feature, latlng) {
+      return L.marker(latlng, { icon: svgIcon });
+    },
+
+    // Attach popups for all features
     onEachFeature: function (feature, layer) {
       layer.on("click", function (e) {
-        popup = popupContent(feature, layer);
+        const popup = popupContent(feature, layer);
         window.map.openPopup(popup);
       });
     },
   });
 
   window.map.addLayer(window.currentGeoLayer);
-  window.map.fitBounds(window.currentGeoLayer.getBounds());
+  // window.map.fitBounds(window.currentGeoLayer.getBounds());
 }
 
 function rectangleArea(latlngs) {
